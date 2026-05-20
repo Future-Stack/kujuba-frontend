@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Sora:wght@100..800&display=swap');
+
+
+
 @import "tailwindcss";
 
 :root {
@@ -24,3 +28,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.font-sora {
+  font-family: 'Sora', sans-serif;
+}
+
+.font-roboto {
+  font-family: 'Roboto', sans-serif;
+}
+@theme {
+  --color-buttonColor: #926690;
+  --color-primaryColor: #5E65FF; 
+  --color-secondaryColor: #C9A96E;
+  --color-borderColor: #EDE4D9;
+}
+
