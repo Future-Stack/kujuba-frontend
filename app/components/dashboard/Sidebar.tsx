@@ -26,14 +26,14 @@ const Sidebar: React.FC = () => {
   const menuItems: MenuItem[] = [
     { name: 'Dashboard',     icon: (isActive) => <DashboardIcon isActive={isActive} />,     path: '/dashboard' },
     { name: 'Users',         icon: (isActive) => <UsersIcon isActive={isActive} />,         path: '/dashboard/users' },
-    { name: 'Inspectors',    icon: (isActive) => <InspectorIcon isActive={isActive} />,     path: '/inspectors' },
-    { name: 'Inspections',   icon: (isActive) => <InspectionIcon isActive={isActive} />,    path: '/inspections' },
-    { name: 'Payments',      icon: (isActive) => <PaymentsIcon isActive={isActive} />,      path: '/payments' },
-    { name: 'Reports',       icon: (isActive) => <ReportsIcon isActive={isActive} />,       path: '/reports' },
-    { name: 'Reviews',       icon: (isActive) => <ReviewsIcon isActive={isActive} />,       path: '/reviews' },
-    { name: 'Notifications', icon: (isActive) => <NotificationsIcon isActive={isActive} />, path: '/notifications' },
-    { name: 'FAQ & Support', icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/support' },
-    { name: 'Settings',      icon: (isActive) => <SettingsIcon isActive={isActive} />,      path: '/settings' },
+    { name: 'Inspectors',    icon: (isActive) => <InspectorIcon isActive={isActive} />,     path: '/dashboard/inspectors' },
+    { name: 'Inspections',   icon: (isActive) => <InspectionIcon isActive={isActive} />,    path: '/dashboard/inspections' },
+    { name: 'Payments',      icon: (isActive) => <PaymentsIcon isActive={isActive} />,      path: '/dashboard/payments' },
+    { name: 'Reports',       icon: (isActive) => <ReportsIcon isActive={isActive} />,       path: '/dashboard/reports' },
+    { name: 'Reviews',       icon: (isActive) => <ReviewsIcon isActive={isActive} />,       path: '/dashboard/reviews' },
+    { name: 'Notifications', icon: (isActive) => <NotificationsIcon isActive={isActive} />, path: '/dashboard/notifications' },
+    { name: 'FAQ & Support', icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/dashboard/support' },
+    { name: 'Settings',      icon: (isActive) => <SettingsIcon isActive={isActive} />,      path: '/dashboard/settings' },
   ];
 
 
