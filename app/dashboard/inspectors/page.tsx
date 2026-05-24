@@ -1,4 +1,5 @@
 import InspectorsCard from "@/app/components/dashboard/inspectors/InspectorCard";
+import InspectorGrid from "@/app/components/dashboard/inspectors/InspectorGrid";
 
 
 export default function inspectors() {
@@ -10,7 +11,7 @@ export default function inspectors() {
       <InspectorsCard/>
       </div>
       <div>
-       
+       <InspectorGrid/>
       </div>
     </div>
   );

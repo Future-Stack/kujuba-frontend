@@ -145,7 +145,7 @@ export default function UserGridDashboard() {
               className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative overflow-hidden"
             >
               <div>
-                {/* টপ প্রোফাইল সেকশন */}
+               
                 <div className="flex items-center gap-3 mb-5">
                   <div className="relative w-11 h-11 shrink-0">
                     {user.avatarUrl ? (
