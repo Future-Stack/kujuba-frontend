@@ -7,7 +7,7 @@ const stats = [
   {
     value: '653',
     label: 'Total Inspectors',
-    change: '-2%',
+    change: '-2% than last month',
     isPositive: false,
     valueColor: 'text-secondaryColor',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -19,7 +19,7 @@ const stats = [
   {
     value: '120',
     label: 'Active Inspections',
-    change: '+6% ',
+    change: '+6% than last month',
     isPositive: true,
     valueColor: 'text-secondaryColor',
     icon: (
@@ -43,7 +43,7 @@ const stats = [
   {
     value: '625',
     label: 'Pending Approval',
-    change: '+1%',
+    change: '+1% than last month',
     isPositive: true,
     valueColor: 'text-[#F59E0B]',
     labelColor: 'text-[#F59E0B]',
