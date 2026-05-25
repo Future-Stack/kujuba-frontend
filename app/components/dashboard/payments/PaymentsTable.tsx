@@ -111,7 +111,7 @@ export default function PaymentsTable() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-4xl">
-          {/* সার্চ বক্স ইনপুট */}
+         
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -123,7 +123,7 @@ export default function PaymentsTable() {
             />
           </div>
 
-          {/* ডাইনামিক ফিল্টার ট্যাবস */}
+        
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             <button
               onClick={() => setActiveFilter("All")}
@@ -181,7 +181,9 @@ export default function PaymentsTable() {
 
       {filteredTransactions.length > 0 ? (
         <>
-          <div className="hidden md:block w-full border border-gray-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
+             <div className="w-full overflow-x-auto no-scrollbar">
+
+         <div className="min-w-[1200px] border border-gray-100 rounded-2xl overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.02)]">
             <table className="w-full text-left border-collapse bg-white">
               <thead>
                 <tr className="bg-[#F5F6FA] border-b border-gray-100 text-[13px] font-semibold text-gray-900 leading-5">
@@ -211,7 +213,7 @@ export default function PaymentsTable() {
                         <span className="absolute bottom-0 right-1 w-2.5 h-2.5 bg-[#10B981] border-2 border-white rounded-full" />
                       </div>
                       <div>
-                        <span className="font-medium text-sm leading-5 text-gray-900 block leading-tight">{row.user.name}</span>
+                        <span className="font-medium text-sm leading-5 text-gray-900 block ">{row.user.name}</span>
                         <span className="text-gray-600 text-[13px] mt-1 block font-normal leading-4">{row.user.location}</span>
                       </div>
                     </td>
@@ -222,7 +224,7 @@ export default function PaymentsTable() {
                     <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.amount}</td>
                     <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.createdDate}</td>
                     <td className="py-3.5 px-4">
-                      <span className={`inline-block px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                      <span className={`inline-block px-3 py-1.5 rounded text-[10px] font-bold   ${
                         row.status === "Complete" ? "bg-[#E9F9F2] text-[#01B664]" : 
                         row.status === "Pending" ? "bg-[#FAE7E7] text-[#DC3545]" : "bg-[#FFF1F1] text-[#FA6161]"
                       }`}>
@@ -239,67 +241,9 @@ export default function PaymentsTable() {
               </tbody>
             </table>
           </div>
-
+          
        
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
-            {filteredTransactions.map((row) => (
-              <div key={row.id} className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm space-y-3.5 relative">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-50">
-                      {row.user.avatar ? (
-                        <Image src={row.user.avatar} alt={row.user.name} fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="w-full h-full bg-[#EBF0FF] text-[#4353FF] flex items-center justify-center font-bold text-xs">
-                          {row.user.initials}
-                        </div>
-                      )}
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] border-2 border-white rounded-full" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-sm">{row.user.name}</h4>
-                      <span className="text-gray-400 text-xs font-medium">{row.user.location}</span>
-                    </div>
-                  </div>
-                  <button className="text-gray-400 p-1">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-y-2.5 gap-x-2 text-[12px] pt-1 border-t border-gray-50">
-                  <div>
-                    <span className="text-gray-400 block font-semibold mb-0.5">Transaction ID</span>
-                    <span className="text-gray-700 font-bold">{row.transactionId}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block font-semibold mb-0.5">Amount</span>
-                    <span className="text-gray-900 font-extrabold">{row.amount}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-400 block font-semibold mb-0.5">Payment Type</span>
-                    <span className="text-gray-800 font-bold">{row.paymentType}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block font-semibold mb-0.5">Inspector Email</span>
-                    <span className="text-gray-600 font-medium truncate block max-w-[150px]">{row.inspectorEmail}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block font-semibold mb-0.5">Created Date</span>
-                    <span className="text-gray-600 font-bold">{row.createdDate}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50/70 text-xs">
-                  <span className="text-gray-500 font-semibold">{row.phone}</span>
-                  <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                    row.status === "Complete" ? "bg-[#E6F9F0] text-[#10B981]" : 
-                    row.status === "Pending" ? "bg-[#FFF9E6] text-[#F59E0B]" : "bg-[#FFF1F1] text-[#FA6161]"
-                  }`}>
-                    {row.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+          
           </div>
         </>
       ) : (

@@ -5,7 +5,7 @@ const stats = [
   {
     value: '1.28M',
     label: 'Total Revenue',
-    change: '+4%',
+    change: '+4% than last month',
     isPositive: true,
     valueColor: 'text-primaryColor',
     icon: (
@@ -18,7 +18,7 @@ const stats = [
   {
     value: '$48.02K',
     label: 'Completd Payouts',
-    change: '+.02%',
+    change: '+.02% than last month',
     isPositive: true,
     valueColor: 'text-primaryColor',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -52,7 +52,7 @@ const stats = [
     {
     value: '9825',
     label: 'Total Refunded',
-    change: '+4%',
+    change: '+4% than last month',
     isPositive: true,
     valueColor: 'text-[#EF4444]',
     labelColor: 'text-[#EF4444]',

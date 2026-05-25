@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface StatCardProps {
-  value: string;
+  value: React.ReactNode;
   label: string;
   change?: string;
   isPositive?: boolean;
@@ -97,7 +97,7 @@ const StatCard: React.FC<StatCardProps> = ({
           </span>
           <span className={`text-lg md:text-xl font-bold  font-roboto ${labelColor}`}>{label}</span>
           <span className={`text-sm md:text-base font-semibold mt-1 ${resolvedChangeColor} `}>
-            {change} than last month
+            {change} 
           </span>
         </div>
 
