@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 // Defining the user structure for strict typing
 interface User {
@@ -28,9 +29,11 @@ export default function UserTable() {
       {/* Table Header Section */}
       <div className="flex items-center justify-between mb-6 px-2">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">User</h2>
-        <button className="bg-black hover:bg-gray-800 text-white text-sm font-semibold py-2 px-5 rounded-xl transition-all duration-200">
+        <Link href="/dashboard/users">
+        <button className="bg-black hover:bg-gray-800 text-white text-sm font-semibold py-2 px-5 rounded-xl transition-all cursor-pointer duration-200">
           View All
         </button>
+        </Link>
       </div>
 
       {/* Responsive Wrapper for handling small viewport horizontal overflow */}

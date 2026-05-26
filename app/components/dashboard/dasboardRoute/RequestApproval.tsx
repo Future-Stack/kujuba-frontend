@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Check, X } from "lucide-react";
+import Link from "next/link";
+
 
 interface ApprovalRequest {
   id: string;
@@ -18,7 +20,9 @@ const requests: ApprovalRequest[] = [
   { id: "4", name: "Thomas Walsh", tags: ["Roof Inspection", "Combined"], avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" },
 ];
 
+
 export default function RequestApproval() {
+
   return (
     <div className="w-full bg-white rounded-[28px] border border-gray-100 font-roboto  shadow-sm flex flex-col justify-between ">
       <div>
@@ -64,9 +68,11 @@ export default function RequestApproval() {
       </div>
 
        <div className="px-4 md:px-6 pb-4">
+        <Link href="/dashboard/inspectors?tab=pending">
         <button className="w-full mt-6 border-2 border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
         View All
       </button>
+      </Link>
   </div>
 
     </div>

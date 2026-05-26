@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Inspector {
   id: string;
@@ -57,10 +58,13 @@ export default function TopInspector() {
       </div>
 
       {/* View All Action Button */}
+       
   <div className="px-4 md:px-6 pb-4">
-        <button className="w-full mt-6 border-2 border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
+    <Link href="/dashboard/users">
+        <button className="w-full mt-6 border-2 border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-3 px-4 cursor-pointer rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
         View All
       </button>
+      </Link>
   </div>
     </div>
   );
