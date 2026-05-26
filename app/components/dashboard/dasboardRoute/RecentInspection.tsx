@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 interface InspectionItem {
@@ -60,10 +61,13 @@ export default function RecentInspection() {
       </div>
 
       {/* Primary Action Button */}
+     
         <div className="px-4 md:px-6 pb-4">
+           <Link href="/dashboard/inspections">
         <button className="w-full mt-6 border-2 border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
         View All
       </button>
+      </Link>
       </div>
     </div>
   );
