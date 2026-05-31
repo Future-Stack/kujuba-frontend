@@ -262,7 +262,7 @@ export default function InspectionBoardLayout() {
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
 
             {/* SORT */}
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-xl px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer"
@@ -292,7 +292,7 @@ export default function InspectionBoardLayout() {
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* EXPORT */}
             <button className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-md shadow-blue-100 transition-all">
