@@ -1,4 +1,4 @@
-
+"use client";
 import StatCard from '../../reusabledCard/StateCard';
 
 const stats = [

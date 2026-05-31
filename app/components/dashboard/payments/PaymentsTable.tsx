@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
-import { Search, ArrowUpDown, Download, MoreVertical } from "lucide-react";
+import { Search, ArrowUpDown, Download, MoreVertical, Eye } from "lucide-react";
 
 type TransactionStatus = "Complete" | "Pending" | "Canceled";
 
@@ -162,10 +162,10 @@ export default function PaymentsTable() {
 
     
         <div className="flex items-center gap-2.5 self-end lg:self-auto">
-          <button className="flex items-center gap-1.5 bg-slate-50 border border-gray-100 text-gray-700 text-xs font-bold px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors">
+          {/* <button className="flex items-center gap-1.5 bg-slate-50 border border-gray-100 text-gray-700 text-xs font-bold px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors">
             <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
             Sort By
-          </button>
+          </button> */}
           
           <button 
             onClick={handleExportData}
@@ -232,9 +232,15 @@ export default function PaymentsTable() {
                       </span>
                     </td>
                     <td className="py-3.5 px-5 text-center">
-                      <button className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
-                        <MoreVertical className="w-4 h-4 mx-auto" />
-                      </button>
+                         <div className="flex items-center justify-center gap-1">
+                        <button className="p-2 text-[#5C6470] hover:text-primaryColor bg-[#F8F8F8] hover:bg-blue-50 rounded-sm cursor-pointer transition-colors border border-gray-100">
+                          <Download className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-[#5C6470] hover:text-primaryColor bg-[#F8F8F8] hover:bg-blue-50 rounded-sm cursor-pointer  transition-colors border border-gray-100">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                       
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -10,7 +10,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
     <header className="h-20 bg-white flex items-center justify-between px-4 md:px-8 font-sans w-full sticky top-0 z-30">
       
       {/* Left Area: Mobile Burger Menu & Search Bar */}
-      <div className="flex items-center space-x-4 flex-1 max-w-xl">
+      <div className="flex items-center space-x-4 flex-1">
         {/* Mobile Hamburger Menu (Hidden on Desktop) */}
         <button
           onClick={onMenuToggle}
@@ -22,7 +22,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         </button>
 
         {/* Search Input Box */}
-        <div className="relative w-full hidden sm:block">
+        <div className="relative w-full max-w-5xl  hidden lg:block">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
             <Search/>
           </span>
@@ -37,21 +37,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
       {/* Right Area: Actions, Badges & Profile */}
       <div className="flex items-center space-x-3 md:space-x-5">
         
-        {/* Message Alert Icon */}
-        <button className="relative  flex items-center justify-center text transition-colors cursor-pointer">
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" fill="none">
-  <path d="M2.2373 10.2492L4.6663 11.7064V8.30554L2.2373 10.2492Z" fill="#5C6470"/>
-  <path d="M1.16699 12.3271V23.3334C1.169 23.8531 1.28866 24.3657 1.51699 24.8326L9.20183 17.1501L1.16699 12.3271Z" fill="#5C6470"/>
-  <path d="M26.4836 24.8326C26.712 24.3657 26.8316 23.8531 26.8336 23.3334V12.3271L18.7988 17.1501L26.4836 24.8326Z" fill="#5C6470"/>
-  <path d="M23.333 8.30554V11.7064L25.762 10.2492L23.333 8.30554Z" fill="#5C6470"/>
-  <path d="M21.0492 13.0772C21.024 12.998 21.0076 12.9162 21.0002 12.8334V7.00004C21.0002 6.69062 20.8773 6.39388 20.6585 6.17508C20.4397 5.95629 20.1429 5.83337 19.8335 5.83337H8.16684C7.85742 5.83337 7.56067 5.95629 7.34188 6.17508C7.12309 6.39388 7.00017 6.69062 7.00017 7.00004V12.8334C6.99274 12.9162 6.97631 12.998 6.95117 13.0772L14.0002 17.3064L21.0492 13.0772Z" fill="#5C6470"/>
-  <path d="M17.3262 3.5L14.7292 1.42217C14.5222 1.2565 14.2651 1.16623 14 1.16623C13.7349 1.16623 13.4777 1.2565 13.2708 1.42217L10.6738 3.5H17.3262Z" fill="#5C6470"/>
-  <path d="M16.7363 18.3855L14.6013 19.6688C14.4198 19.7778 14.2122 19.8354 14.0005 19.8354C13.7888 19.8354 13.5811 19.7778 13.3996 19.6688L11.2646 18.3855L3.16797 26.4833C3.63487 26.7116 4.1474 26.8313 4.66714 26.8333H23.3338C23.8535 26.8313 24.3661 26.7116 24.833 26.4833L16.7363 18.3855Z" fill="#5C6470"/>
-</svg>
-          <span className="absolute -top-2 -right-2 bg-primaryColor text-white font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center border-2 border-white">
-            6
-          </span>
-        </button>
+
 
         {/* Notification Alert Icon */}
         <button className="relative  flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
@@ -71,7 +57,8 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         <div className="flex items-center space-x-3 cursor-pointer group">
           <div className="relative w-10 h-10 rounded-full bg-slate-200 overflow-hidden border border-slate-100 flex-shrink-0">
             {/* Fallback Initial / Avatar */}
-            <span className="w-full h-full flex items-center justify-center font-bold text-slate-500 bg-slate-100">C</span>
+            <img src="/placeholder.svg" alt="" />
+            {/* <span className="w-full h-full flex items-center justify-center font-bold text-slate-500 bg-slate-100">C</span> */}
           </div>
           <div className="hidden lg:block text-left leading-tight">
             <h4 className="text-base font-semibold text-[#000000] group-hover:text-indigo-600 transition-colors">
