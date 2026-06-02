@@ -16,10 +16,10 @@ const data = [
 
 export default function InspectionStatistics() {
   return (
-    <div className="w-full  p-4 md:p-6 bg-white rounded-[28px] border border-gray-100 shadow-sm  select-none">
+    <div className="w-full  p-4 md:px-5 md:py-4 bg-white rounded-[20px] border border-gray-100 hover:shadow-sm  select-none">
       
       {/* Card Header */}
-      <div className="border-b border-gray-100 pb-5 mb-6 px-1">
+      <div className="border-b border-gray-100 pb-5 mb-6 ">
         <h3 className="text-base md:text-lg font-bold text-gray-900  leading-5.5 m px-1 ">Inspection Statistics</h3>
       </div>
 
@@ -40,13 +40,13 @@ export default function InspectionStatistics() {
       </div>
 
       {/* Chart Wrapper - Responsive viewport scaling with horizontal drag safety on tiny screens */}
-      <div className="w-full h-[280px] md:h-[300px] overflow-x-auto overflow-y-hidden -ml-4 pr-2">
+      <div className="w-full h-[280px] md:h-[300px] overflow-x-auto overflow-y-hidden -ml-1 pr-1">
         <div className="min-w-[550px] h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
               margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-              barGap={6} // Gap distance separating parallel vertical categories inside a single group
+              barGap={12} // Gap distance separating parallel vertical categories inside a single group
             >
               {/* Desaturated dotted gridlines */}
               <CartesianGrid vertical={false} stroke="#e5e7eb" strokeDasharray="3 3" />
@@ -55,15 +55,18 @@ export default function InspectionStatistics() {
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false}
-                tick={{ fill: "#4b5563", fontSize: 13, fontWeight: 500 }}
+                tick={{ fill: "#5F5F5F", fontSize: 14, fontWeight: 400 }}
+                interval={0} 
+                tickMargin={12} 
               />
               
               <YAxis 
                 axisLine={false} 
                 tickLine={false}
-                tick={{ fill: "#9ca3af", fontSize: 13, fontWeight: 500 }}
+                tick={{ fill: "#5F5F5F", fontSize: 14, fontWeight: 400 }}
                 domain={[0, 100]}
                 ticks={[0, 20, 40, 60, 80, 100]}
+                tickMargin={12}
               />
 
               <Tooltip
@@ -95,7 +98,7 @@ export default function InspectionStatistics() {
                 name="Active"
                 fill="#3550DC" 
                 maxBarSize={12}
-                radius={[10, 10, 10, 10]} // Gives the bar the exact visual pill-shape structure
+                radius={[10, 10, 0, 0 ]} // Gives the bar the exact visual pill-shape structure
               />
 
               {/* In-Progress Bar Series (Warm Orange) */}
@@ -104,7 +107,7 @@ export default function InspectionStatistics() {
                 name="Inprogress"
                 fill="#FE9738" 
                 maxBarSize={12}
-                radius={[10, 10, 10, 10]}
+                radius={[10, 10,  0, 0 ]}
               />
 
               {/* Completed Bar Series (Emerald Green with conditional color logic override for May 14th) */}
@@ -113,7 +116,7 @@ export default function InspectionStatistics() {
                 name="Completed"
                 fill="#01B664" 
                 maxBarSize={12}
-                radius={[10, 10, 10, 10]}
+                radius={[10, 10,  0, 0 ]}
               >
                 {data.map((entry, index) => (
                   <rect

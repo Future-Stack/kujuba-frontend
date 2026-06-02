@@ -7,7 +7,7 @@ interface HeaderProps {
 
 const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   return (
-    <header className="h-20 bg-white flex items-center justify-between px-4 md:px-8 font-sans w-full sticky top-0 z-30">
+    <header className="h-20 -white flex items-center justify-between px-4 md:px-8 font-sans w-full sticky top-0 z-30">
       
       {/* Left Area: Mobile Burger Menu & Search Bar */}
       <div className="flex items-center space-x-4 flex-1">

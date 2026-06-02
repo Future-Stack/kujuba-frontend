@@ -35,79 +35,70 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
   return (
     // Backdrop
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 "
       onClick={onClose}
     >
       {/* Modal box */}
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6"
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-5"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
+             {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+          className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 transition-colors  cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Avatar + name */}
-        <div className="flex flex-col items-center mb-5">
-          <div className="relative w-16 h-16 mb-3">
-            {user.avatarUrl ? (
-              <div className="w-full h-full rounded-full overflow-hidden border-2 border-gray-100">
-                <Image
-                  src={user.avatarUrl}
-                  alt={user.name}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full bg-purple-50 text-purple-600 rounded-full flex items-center justify-center font-bold text-sm border-2 border-purple-100">
-                {initials}
-              </div>
-            )}
-            <span className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-[#09BD3C] border-2 border-white" />
-          </div>
-          <h3 className="font-semibold text-gray-900 text-base leading-6">{user.name}</h3>
-          <p className="text-gray-500 text-sm">{user.role}</p>
+        <div className=" flex flex-col bg-[#F5F6FA] rounded-sm p-3 mt-3 items-center mb-5">
+     
+     <div className="relative w-16 h-16 rounded-full overflow-hidden mb-3">
+  {user.avatarUrl ? (
+    <Image
+      src={user.avatarUrl}
+      alt={user.name}
+      fill
+      className="object-cover"
+      unoptimized
+    />
+  ) : (
+    <div className="w-full h-full bg-purple-50 text-purple-600 rounded-full flex items-center justify-center font-bold text-sm border-2 border-purple-100">
+      {initials}
+    </div>
+  )}
+
+  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#09BD3C] border-2 border-white shadow-sm" />
+</div>
+          <h3 className="font-normal text-gray-900 text-sm font-roboto mb-1 leading-5">{user.name}</h3>
+          <p className="text-gray-600 font-normal text-sm font-roboto leading-5">{user.role}</p>
         </div>
 
         {/* Info rows */}
         <div className="space-y-3 mb-5">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500 font-normal">Status</span>
-            <span className={`font-medium ${suspended ? "text-red-500" : "text-green-500"}`}>
+            <span className="text-gray-900 font-roboto leading-5 text-sm font-normal">Status</span>
+            <span className={`ffont-roboto leading-5 text-sm font-normal ${suspended ? "text-red-500" : "text-[#65A30D]"}`}>
               {suspended ? "Suspended" : "Active"}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500 font-normal flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              Joining Date
-            </span>
-            <span className="text-gray-800 font-medium">{user.joiningDate ?? "—"}</span>
+            <span className="text-gray-900 font-roboto leading-5 text-sm font-normal">Joining Date</span>
+            <span className="text-gray-600 font-roboto leading-5 text-sm font-normal">{user.joiningDate ?? "—"}</span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500 font-normal flex items-center gap-1.5">
-              <ClipboardList className="w-4 h-4 text-gray-400" />
-              Total Inspection
-            </span>
-            <span className="text-gray-800 font-medium">
+            <span className="text-gray-900 font-roboto leading-5 text-sm font-normal">Total Inspection</span>
+            <span className="text-gray-600 font-roboto leading-5 text-sm font-normal">
               {String(user.inspectionsCount).padStart(2, "0")}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500 font-normal flex items-center gap-1.5">
-              <XCircle className="w-4 h-4 text-gray-400" />
-              Total Canceled Inspection
-            </span>
-            <span className="text-gray-800 font-medium">
+            <span className="text-gray-900 font-roboto leading-5 text-sm font-normal">Total Canceled Inspection</span>
+            <span className="text-gray-600 font-roboto leading-5 text-sm font-normal">
               {String(user.cancelledInspections ?? 0).padStart(2, "0")}
             </span>
           </div>
@@ -118,14 +109,16 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
 
         {/* Contact */}
         <div className="space-y-2 mb-5">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Mail className="w-4 h-4 text-gray-400 shrink-0" />
+          <div className="flex items-center gap-2 text-gray-600 font-roboto leading-5 text-sm font-normal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M2 4.66671C2 4.31309 2.14048 3.97395 2.39052 3.7239C2.64057 3.47385 2.97971 3.33337 3.33333 3.33337H12.6667C13.0203 3.33337 13.3594 3.47385 13.6095 3.7239C13.8595 3.97395 14 4.31309 14 4.66671M2 4.66671V11.3334C2 11.687 2.14048 12.0261 2.39052 12.2762C2.64057 12.5262 2.97971 12.6667 3.33333 12.6667H12.6667C13.0203 12.6667 13.3594 12.5262 13.6095 12.2762C13.8595 12.0261 14 11.687 14 11.3334V4.66671M2 4.66671L8 8.66671L14 4.66671" stroke="#1A1A1A" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
             <span className="truncate">{user.email}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M7.33333 2.66667H8.66667M8 11.3333V11.34M4 3.33333C4 2.97971 4.14048 2.64057 4.39052 2.39052C4.64057 2.14048 4.97971 2 5.33333 2H10.6667C11.0203 2 11.3594 2.14048 11.6095 2.39052C11.8595 2.64057 12 2.97971 12 3.33333V12.6667C12 13.0203 11.8595 13.3594 11.6095 13.6095C11.3594 13.8595 11.0203 14 10.6667 14H5.33333C4.97971 14 4.64057 13.8595 4.39052 13.6095C4.14048 13.3594 4 13.0203 4 12.6667V3.33333Z" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div className="flex items-center gap-2 text-gray-600 font-roboto leading-5 text-sm font-normal">
+         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M7.33333 2.66667H8.66667M8 11.3333V11.34M4 3.33333C4 2.97971 4.14048 2.64057 4.39052 2.39052C4.64057 2.14048 4.97971 2 5.33333 2H10.6667C11.0203 2 11.3594 2.14048 11.6095 2.39052C11.8595 2.64057 12 2.97971 12 3.33333V12.6667C12 13.0203 11.8595 13.3594 11.6095 13.6095C11.3594 13.8595 11.0203 14 10.6667 14H5.33333C4.97971 14 4.64057 13.8595 4.39052 13.6095C4.14048 13.3594 4 13.0203 4 12.6667V3.33333Z" stroke="#1A1A1A" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
             <span>{user.phone}</span>
           </div>
         </div>
@@ -133,19 +126,21 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
         {/* Suspend / Unsuspend button */}
         <button
           onClick={() => setSuspended((s) => !s)}
-          className={`w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+          className={`w-full py-2.5 rounded-sm text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
             suspended
-              ? "bg-green-50 text-green-600 hover:bg-green-100 border border-green-200"
-              : "bg-red-50 text-red-500 hover:bg-red-100 border border-red-200"
+              ? "bg-green-500 text-white hover:bg-green-100 hover:text-green-700"
+              : "bg-red-500 text-white hover:bg-red-600 "
           }`}
         >
           {suspended ? (
             <>✓ Unsuspend</>
           ) : (
             <>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-              </svg>
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M7.99967 14.6667C11.6816 14.6667 14.6663 11.6819 14.6663 8.00004C14.6663 4.31814 11.6816 1.33337 7.99967 1.33337C4.31778 1.33337 1.33301 4.31814 1.33301 8.00004C1.33301 11.6819 4.31778 14.6667 7.99967 14.6667Z" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6.00195 9.76599L9.99819 6.23406" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6.23438 6.00183L9.76631 9.99807" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
               Suspend
             </>
           )}

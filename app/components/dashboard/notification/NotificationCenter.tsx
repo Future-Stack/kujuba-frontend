@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 type NotificationType =
@@ -113,6 +114,9 @@ export default function NotificationCenter() {
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; message?: string }>({});
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
+
+const [openRecipient, setOpenRecipient] = useState(false);
 
   function validate() {
     const e: { title?: string; message?: string } = {};
@@ -177,51 +181,81 @@ export default function NotificationCenter() {
 
           {/* LEFT: Compose Panel */}
           <div className="w-full lg:w-80 xl:w-96 shrink-0">
-            <div className="bg-white rounded-2xl  border border-gray-200 shadow-sm p-6">
+            <div className="bg-white rounded-[5px]  border border-gray-100 hover:shadow-sm p-6">
               <h2 className="text-xl md:text-2xl leading-7 font-bold text-gray-900 mb-6">Compose Notification</h2>
 
               <div className="space-y-4">
                 {/* Notification Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-900 leading-5 mb-1.5">Notification Type</label>
-                  <div className="relative">
-                    <select
-                      value={notifType}
-                      onChange={(e) => setNotifType(e.target.value as NotificationType)}
-                      className="w-full appearance-none rounded-lg border border-gray-100 bg-white px-3 py-2.5 text-sm text-gray-900 pr-9 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition cursor-pointer"
-                    >
-                      {NOTIFICATION_TYPES.map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
-                        <path d="M6 9l6 6 6-6"/>
-                      </svg>
-                    </div>
-                  </div>
+               <div className="relative">
+  <button
+    onClick={() => setIsTypeOpen(!isTypeOpen)}
+    className="w-full flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 cursor-pointer " 
+  >
+    <span>{notifType}</span>
+    <ChevronDown className="w-4 h-4" />
+  </button>
+
+  {isTypeOpen && (
+    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 text-gray-900 rounded-lg cursor-pointer shadow-lg z-50">
+      {NOTIFICATION_TYPES.map((type) => (
+        <button
+          key={type}
+          onClick={() => {
+            setNotifType(type);
+            setIsTypeOpen(false);
+          }}
+          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+        >
+          {type}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
                 </div>
 
                 {/* Send To */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-900 leading-5 mb-1.5">Send To</label>
-                  <div className="relative">
-                    <select
-                      value={sendTo}
-                      onChange={(e) => setSendTo(e.target.value as Recipient)}
-                      className="w-full appearance-none rounded-lg border border-gray-100 bg-white px-3 py-2.5 text-sm text-gray-900 pr-9 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition cursor-pointer"
-                    >
-                      {RECIPIENTS.map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
-                        <path d="M6 9l6 6 6-6"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+  <label className="block text-sm font-medium text-gray-900 leading-5 mb-1.5">
+    Send To
+  </label>
+
+  <div className="relative">
+    <button
+      type="button"
+      onClick={() => setOpenRecipient(!openRecipient)}
+      className="w-full flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2.5 cursor-pointer text-sm text-gray-900"
+    >
+      <span>{sendTo}</span>
+
+      <ChevronDown
+        className={`w-4 h-4 transition-transform ${
+          openRecipient ? "rotate-180" : ""
+        }`}
+      />
+    </button>
+
+    {openRecipient && (
+      <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 text-gray-900  rounded-lg shadow-lg z-50 overflow-hidden">
+        {RECIPIENTS.map((recipient) => (
+          <button
+            key={recipient}
+            type="button"
+            onClick={() => {
+              setSendTo(recipient);
+              setOpenRecipient(false);
+            }}
+            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer transition-colors"
+          >
+            {recipient}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
 
                 {/* Title */}
                 <div>
@@ -283,7 +317,7 @@ export default function NotificationCenter() {
 
           {/* RIGHT: Sent Notifications */}
           <div className="flex-1 min-w-0">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-md  border border-gray-200 hover:shadow-sm">
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-[#111827] font-sora leading-5">Sent Notifications</h2>
                 <span className="text-xs text-gray-400 font-medium">{notifications.length} total</span>

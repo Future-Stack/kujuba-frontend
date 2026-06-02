@@ -24,13 +24,13 @@ const users: User[] = [
 
 export default function UserTable() {
   return (
-    <div className="w-full  p-4 md:p-6 bg-white rounded-[24px] border border-gray-100 shadow-sm font-roboto">
+    <div className="w-full  p-4 md:p-6 bg-white rounded-[16px] border border-gray-100 hover:shadow-sm font-roboto">
       
       {/* Table Header Section */}
-      <div className="flex items-center justify-between mb-6 px-2">
+      <div className="flex items-center justify-between mb-6 ">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">User</h2>
         <Link href="/dashboard/users">
-        <button className="bg-black hover:bg-gray-800 text-white text-sm font-semibold py-2 px-5 rounded-xl transition-all cursor-pointer duration-200">
+        <button className="bg-black hover:bg-gray-800 text-white text-sm font-semibold py-2 px-5 rounded-sm transition-all cursor-pointer duration-200">
           View All
         </button>
         </Link>

@@ -91,6 +91,8 @@ export default function InspectorGrid() {
     { name: "Rejected",       count: counts.Rejected,          badge: "bg-red-400 text-white" },
   ];
 
+
+  
   const filteredAndSortedInspectors = useMemo(() => {
     let result = [...inspectors];
     if (activeTab !== "All") result = result.filter((i) => i.status === activeTab);
@@ -106,9 +108,46 @@ export default function InspectorGrid() {
     return result;
   }, [inspectors, activeTab, searchQuery, sortOrder]); // ✅ depends on inspectors state
 
+
+  const handleExport = () => {
+  const headers = [
+    "Name",
+    "Role",
+    "Inspection Type",
+    "Email",
+    "Phone",
+    "Status",
+    "Created At",
+  ];
+
+  const rows = filteredAndSortedInspectors.map((inspector) => [
+    inspector.name,
+    inspector.role,
+    inspector.inspectionType,
+    inspector.email,
+    inspector.phone,
+    inspector.status,
+    new Date(inspector.createdAt).toLocaleDateString(),
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map((v) => `"${v ?? ""}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "inspectors-data.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
   return (
     <div className="w-full bg-[#f8fafc]/40 min-h-screen font-roboto my-6 md:my-12 antialiased">
-      <div className="border rounded-2xl border-gray-100 shadow-sm px-4 py-6">
+      <div className="border rounded-sm border-gray-100  px-4 py-6">
         <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between mb-8 bg-white">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center flex-1">
             {/* Search */}
@@ -149,7 +188,7 @@ export default function InspectorGrid() {
             <div className="relative">
               <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-xl px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
+                className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-sm px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M11.667 8.75002L9.91699 10.5L8.16699 8.75002M9.91699 10.5V3.50002M2.91699 3.20835C2.91699 3.131 2.94772 3.05681 3.00242 3.00211C3.05712 2.94742 3.1313 2.91669 3.20866 2.91669H5.54199C5.61935 2.91669 5.69353 2.94742 5.74823 3.00211C5.80293 3.05681 5.83366 3.131 5.83366 3.20835V5.54169C5.83366 5.61904 5.80293 5.69323 5.74823 5.74793C5.69353 5.80263 5.61935 5.83335 5.54199 5.83335H3.20866C3.1313 5.83335 3.05712 5.80263 3.00242 5.74793C2.94772 5.69323 2.91699 5.61904 2.91699 5.54169V3.20835ZM2.91699 8.45835C2.91699 8.381 2.94772 8.30681 3.00242 8.25211C3.05712 8.19742 3.1313 8.16669 3.20866 8.16669H5.54199C5.61935 8.16669 5.69353 8.19742 5.74823 8.25211C5.80293 8.30681 5.83366 8.381 5.83366 8.45835V10.7917C5.83366 10.869 5.80293 10.9432 5.74823 10.9979C5.69353 11.0526 5.61935 11.0834 5.54199 11.0834H3.20866C3.1313 11.0834 3.05712 11.0526 3.00242 10.9979C2.94772 10.9432 2.91699 10.869 2.91699 10.7917V8.45835Z" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
@@ -164,9 +203,9 @@ export default function InspectorGrid() {
                 </div>
               )}
             </div>
-            <button className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
+            <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-sm shadow-md shadow-blue-100 transition-all cursor-pointer active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
-              <span>Export User Data</span>
+              <span>Export Inspector Data</span>
             </button>
           </div>
         </div>
@@ -175,7 +214,7 @@ export default function InspectorGrid() {
         {filteredAndSortedInspectors.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {filteredAndSortedInspectors.map((inspector) => (
-              <div key={inspector.id} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+              <div key={inspector.id} className="bg-white rounded-sm border border-gray-100 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
                 <div>
                   <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
                     <div className="relative w-11 h-11 shrink-0">
@@ -215,28 +254,65 @@ export default function InspectorGrid() {
                 <div className="pt-2">
                   {inspector.status === "Pending Review" ? (
                     <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => handleOpenModal(inspector)}
-                        className="w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-1 transition-colors"
-                      >
-                        View Details
-                      </button>
+                  <button
+  onClick={() => handleOpenModal(inspector)}
+  className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-2 rounded-sm flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+>
+  <span className="transition-all duration-300 group-hover:translate-x-[-2px]">
+    View Details
+  </span>
+
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
+    className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]"
+  >
+    <path
+      d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+</button>
                       {/* ✅ Grid Approve button — works without opening modal */}
                       <button
                         onClick={(e) => handleGridApprove(e, inspector)}
-                        className="bg-primaryColor text-white hover:bg-blue-600 font-medium text-xs py-2 rounded-xl transition-colors cursor-pointer text-center shadow-sm"
+                        className="bg-primaryColor text-white hover:bg-blue-600 font-medium text-xs py-2 rounded-sm transition-colors cursor-pointer text-center shadow-sm"
                       >
                         Approve
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => handleOpenModal(inspector)}
-                      className="w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-1 transition-colors"
-                    >
-                      <span>View Details</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 stroke-[2.5]" />
-                    </button>
+                   <button
+  onClick={() => handleOpenModal(inspector)}
+  className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+>
+  <span className="transition-all duration-300 group-hover:translate-x-[-2px]">
+    View Details
+  </span>
+
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
+    className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]"
+  >
+    <path
+      d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+</button>
                   )}
                 </div>
               </div>

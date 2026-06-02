@@ -21,10 +21,10 @@ const inspectors: Inspector[] = [
 
 export default function TopInspector() {
   return (
-    <div className="w-full bg-white rounded-[28px] border border-gray-100 shadow-sm flex flex-col font-roboto justify-between">
+    <div className="w-full bg-white rounded-[20px] border border-gray-100 hover:shadow-sm flex flex-col font-roboto justify-between">
       <div>
         {/* Card Header */}
-        <h3 className="text-base md:text-lg font-bold text-gray-900  p-5 md:p-6 leading-5.5 m px-1 border-b border-gray-100 pb-4">Top Inspector</h3>
+        <h3 className="text-base md:text-lg font-bold text-gray-900  px-5 py-4 leading-5.5 m px-1 border-b border-gray-100 pb-4">Top Inspector</h3>
 
         {/* List Body */}
         <div className="space-y-5  px-4  pt-4">
@@ -61,7 +61,7 @@ export default function TopInspector() {
        
   <div className="px-4 md:px-6 pb-4">
     <Link href="/dashboard/users">
-        <button className="w-full mt-6 border-2 border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-3 px-4 cursor-pointer rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
+        <button className="w-full mt-6 border border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-2 px-5 cursor-pointer rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
         View All
       </button>
       </Link>

@@ -131,7 +131,7 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
           {/* Header */}
           <div className="flex items-center gap-4 mb-6 border-b border-[#F3F4F6] pb-6">
             <div className="relative w-14 h-14 shrink-0">
-              <div className="w-full h-full rounded-full border border-gray-100">
+              <div className="relative w-full h-full rounded-full overflow-hidden border border-gray-100">
                 <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
               </div>
             </div>
@@ -182,15 +182,15 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
           <div className="mb-5">
             <p className="text-xs font-semibold text-[#6B7280] uppercase font-roboto leading-4 mb-2">Performance</p>
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-[#ECFDF5] rounded-xl py-3 text-center ">
+              <div className="bg-[#ECFDF5] rounded-md py-3 text-center ">
                 <p className="text-xl font-bold font-sora leading-7 text-[#047857]">{detail.completedCount}</p>
                 <p className="text-xs text-[#047857] mt-0.5">Completed</p>
               </div>
-              <div className="bg-[#FEF2F2] rounded-xl py-3 text-center ">
+              <div className="bg-[#FEF2F2] rounded-md py-3 text-center ">
                 <p className="text-xl font-bold font-sora leading-7 text-[#DC2626]">{detail.cancelledCount}</p>
                 <p className="text-xs text-[#EF4444] mt-0.5">Cancelled</p>
               </div>
-              <div className="bg-[#5E65FF1A] rounded-xl py-3 text-center ">
+              <div className="bg-[#5E65FF1A] rounded-md py-3 text-center ">
                 <p className="text-xl font-bold font-sora leading-7 text-[#5E65FF]">{detail.totalEarnings}</p>
                 <p className="text-xs text-[#5E65FF] mt-0.5">Total Earnings</p>
               </div>
@@ -201,10 +201,10 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
           <div className="mb-6">
             <p className="text-xs font-semibold text-[#6B7280] uppercase font-roboto leading-4  mb-2">Documents</p>
             <div className="flex gap-2">
-              <button className="border border-[#E5E7EB] text-gray-700 hover:bg-gray-50 text-sm font-normal leading-4 font-roboto px-4 py-2 rounded-xl transition-colors">
+              <button className="border border-[#E5E7EB] text-gray-700 hover:bg-gray-50 text-sm font-normal leading-4 font-roboto px-4 py-2 rounded-md transition-colors">
                 View License
               </button>
-              <button className="border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-normal leading-4 font-roboto px-4 py-2 rounded-xl transition-colors">
+              <button className="border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-normal leading-4 font-roboto px-4 py-2 rounded-md transition-colors">
                 View Insurance
               </button>
             </div>
@@ -214,7 +214,7 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <button
               onClick={onClose}
-              className="border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-normal cursor-pointer leading-4 font-roboto px-4 py-2 rounded-xl transition-colors"
+              className="border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-normal cursor-pointer leading-4 font-roboto px-4 py-2 rounded-[8px] transition-colors"
             >
               Close
             </button>
@@ -224,7 +224,7 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
               {inspector.status === "Active" && (
                 <button
                   onClick={handleSuspend}
-                  className="border border-red-200 text-red-500 hover:bg-red-50 text-sm font-medium px-5 py-2.5 cursor-pointer rounded-xl transition-colors"
+                  className="border border-red-200 text-red-500 hover:bg-red-50 text-sm font-medium px-5 py-2.5 cursor-pointer rounded-md transition-colors"
                 >
                   Suspend
                 </button>
@@ -235,13 +235,13 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
                 <>
                   <button
                     onClick={handleSuspend}
-                    className="border border-[#FECACA] text-[#DC2626] hover:bg-red-50 text-sm font-semibold leaidng-5 cursor-pointer px-5 py-2.5 rounded-xl transition-colors"
+                    className="border border-[#FECACA] text-[#DC2626] hover:bg-red-50 text-sm font-semibold leaidng-5 cursor-pointer px-5 py-2.5 rounded-md transition-colors"
                   >
                     Suspend
                   </button>
                   <button
                     onClick={handleReActivate}
-                    className="bg-[#5E65FF] hover:bg-blue-700 text-white text-sm font-semibold cursor-pointer leading-5 px-5 py-2.5 rounded-xl cursor-pointer transition-colors shadow-sm"
+                    className="bg-[#5E65FF] hover:bg-blue-700 text-white text-sm font-semibold cursor-pointer leading-5 px-5 py-2.5 rounded-md cursor-pointer transition-colors shadow-sm"
                   >
                     Re-Activate
                   </button>
@@ -253,13 +253,13 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
                 <>
                   <button
                     onClick={handleReject}
-                    className="border border-red-200 text-red-500 hover:bg-red-50 text-sm font-medium px-5 py-2.5 cursor-pointer rounded-xl transition-colors"
+                    className="border border-red-200 text-red-500 hover:bg-red-50 text-sm font-medium px-5 py-2.5 cursor-pointer rounded-md transition-colors"
                   >
                     Reject
                   </button>
                   <button
                     onClick={handleApprove}
-                    className="bg-[#2563eb] hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 cursor-pointer rounded-xl transition-colors shadow-sm"
+                    className="bg-[#2563eb] hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 cursor-pointer rounded-md transition-colors shadow-sm"
                   >
                     Approve
                   </button>
@@ -270,7 +270,7 @@ export default function InspectorDetailModal({ inspector, onClose, onStatusChang
               {inspector.status === "Rejected" && (
                 <button
                   onClick={handleReActivate}
-                  className="bg-[#5E65FF] hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 cursor-pointer rounded-xl transition-colors shadow-sm"
+                  className="bg-[#5E65FF] hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 cursor-pointer rounded-md transition-colors shadow-sm"
                 >
                   Re-Activate
                 </button>

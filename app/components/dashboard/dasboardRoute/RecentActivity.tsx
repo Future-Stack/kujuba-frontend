@@ -88,10 +88,10 @@ const activities: ActivityItem[] = [
 
 export default function RecentActivity() {
   return (
-    <div className="w-full  bg-white rounded-[28px] border border-gray-100 shadow-sm font-roboto select-none">
+    <div className="w-full  bg-white rounded-[20px] border border-gray-100 hover:shadow-sm font-roboto select-none">
       
       {/* Card Header */}
-      <h3 className="text-base md:text-lg font-bold text-gray-900  p-5 md:p-6 leading-5.5 m px-1 border-b border-gray-100 pb-4">Recent Activity</h3>
+      <h3 className="text-base md:text-lg font-bold text-gray-900  px-5 py-4 leading-5.5  border-b border-gray-100 pb-4">Recent Activity</h3>
 
       {/* Timeline List Container */}
       <div className="relative pl-1 px-5 md:px-6 py-4">
