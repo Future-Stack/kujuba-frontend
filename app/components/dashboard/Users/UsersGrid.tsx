@@ -46,9 +46,48 @@ export default function UserGridDashboard() {
     return result;
   }, [searchQuery, sortOrder]);
 
+
+  const handleExport = () => {
+  const headers = [
+    "Name",
+    "Email",
+    "Phone",
+    "Location",
+    "Role",
+    "Status",
+    "Inspections",
+    "Joining Date",
+  ];
+
+  const rows = filteredAndSortedUsers.map((user) => [
+    user.name,
+    user.email,
+    user.phone,
+    user.location,
+    user.role,
+    user.status,
+    user.inspectionsCount,
+    user.joiningDate,
+  ]);
+
+  const csvContent =
+    [headers, ...rows]
+      .map((e) => e.map((v) => `"${v ?? ""}"`).join(","))
+      .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "users-data.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
   return (
     <div className="w-full min-h-screen font-roboto mt-4 antialiased selection:bg-blue-500 selection:text-white">
-      <div className="border rounded-2xl border-gray-100 shadow-sm px-4 py-6">
+      <div className="border rounded-sm border-[#E8E8E8]  p-5">
 
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between mb-8 bg-white p-4 rounded-2xl">
@@ -59,7 +98,7 @@ export default function UserGridDashboard() {
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/60 border border-gray-100 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400 font-medium"
+              className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/60 border border-gray-100 rounded-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400 font-medium"
             />
           </div>
 
@@ -67,7 +106,7 @@ export default function UserGridDashboard() {
             <div className="relative">
               <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-xl px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
+                className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-sm px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
               >
                 <ArrowUpDown className="w-4 h-4 text-gray-400" />
                 <span>Sort By : {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
@@ -81,7 +120,7 @@ export default function UserGridDashboard() {
               )}
             </div>
 
-            <button className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
+            <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 curosr-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
               <span>Export User Data</span>
             </button>
@@ -96,7 +135,7 @@ export default function UserGridDashboard() {
               return (
                 <div
                   key={user.id}
-                  className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-white rounded-[5px] border border-gray-100 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative overflow-hidden"
                 >
                   <div>
                     <div className="flex items-center gap-3 mb-5">
@@ -126,7 +165,9 @@ export default function UserGridDashboard() {
                         <span className="truncate">{user.location}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 font-normal leading-5">
-                        <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M2 4.66671C2 4.31309 2.14048 3.97395 2.39052 3.7239C2.64057 3.47385 2.97971 3.33337 3.33333 3.33337H12.6667C13.0203 3.33337 13.3594 3.47385 13.6095 3.7239C13.8595 3.97395 14 4.31309 14 4.66671M2 4.66671V11.3334C2 11.687 2.14048 12.0261 2.39052 12.2762C2.64057 12.5262 2.97971 12.6667 3.33333 12.6667H12.6667C13.0203 12.6667 13.3594 12.5262 13.6095 12.2762C13.8595 12.0261 14 11.687 14 11.3334V4.66671M2 4.66671L8 8.66671L14 4.66671" stroke="#1A1A1A" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                         <span className="truncate">{user.email}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 font-normal leading-5">
@@ -147,11 +188,13 @@ export default function UserGridDashboard() {
                     </div>
 
                     <button
-                      onClick={() => setSelectedUser(user)} // ✅
-                      className="w-full border border-gray-200 text-gray-900 hover:bg-blue-600 hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-1 transition-colors"
+                      onClick={() => setSelectedUser(user)} 
+                      className="w-full border border-gray-200 text-gray-900 hover:bg-blue-600 hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-1 transition-colors"
                     >
                       <span>View Details</span>
-                      <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+  <path d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                     </button>
                   </div>
                 </div>

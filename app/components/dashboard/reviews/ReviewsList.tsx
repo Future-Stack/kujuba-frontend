@@ -122,7 +122,7 @@ const REVIEWS: Review[] = [
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 const Avatar: React.FC<{ initials: string }> = ({ initials }) => (
-  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0 overflow-hidden">
+  <div className="w-10 h-10 rounded-md bg-orange-100 flex items-center justify-center shrink-0 overflow-hidden">
     <span className="text-sm font-semibold text-orange-500">{initials}</span>
   </div>
 );
@@ -141,8 +141,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onFlag, onDismissFlag, 
 
   return (
     <div
-      className={`relative bg-white rounded-2xl p-5 flex flex-col gap-3 border transition-shadow hover:shadow-md ${
-        isFlagged ? 'border-red-300 bg-red-200 shadow-sm shadow-red-100' : 'border-slate-100 shadow-sm'
+      className={`relative  rounded-2xl p-5 flex flex-col gap-3 border hover:shadow-sm ${
+        isFlagged ? 'border-red-300 bg-[#FFF8F8]  shadow-red-100' : 'border-[#F1F1F1] '
       }`}
     >
       {/* Header */}

@@ -24,10 +24,10 @@ const requests: ApprovalRequest[] = [
 export default function RequestApproval() {
 
   return (
-    <div className="w-full bg-white rounded-[28px] border border-gray-100 font-roboto  shadow-sm flex flex-col justify-between ">
+    <div className="w-full bg-white rounded-[20px] border border-gray-100 hover:shadow-sm flex flex-col font-roboto justify-between">
       <div>
         {/* Card Header */}
-        <h3 className="text-base md:text-lg font-bold text-gray-900  p-5 md:p-6 leading-5.5 m px-1 border-b border-gray-100 pb-4">Request Approval</h3>
+        <h3 className="text-base md:text-lg font-bold text-gray-900  px-5 py-4 leading-5.5 m px-1 border-b border-gray-100 pb-4">Request Approval</h3>
 
         {/* List Body */}
         <div className="space-y-6 px-5 md:px-6 pt-4">
@@ -55,11 +55,15 @@ export default function RequestApproval() {
               <div className="flex items-center gap-2 shrink-0">
                 {/* Accept Button */}
                 <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#e8fbf0] hover:bg-[#d1f7e0] text-[#09BD3C] flex items-center justify-center transition-colors">
-                  <Check className="w-4 h-4 md:w-5 md:h-5 stroke-[3]" />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M3.3335 7.99996L6.66683 11.3333L13.3335 4.66663" stroke="#01B664" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                 </button>
                 {/* Decline Button */}
                 <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#fde8e8] hover:bg-[#fbd2d2] text-[#dc2626] flex items-center justify-center transition-colors">
-                  <X className="w-4 h-4 md:w-5 md:h-5 stroke-[3]" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M12 4L4 12M4 4L12 12" stroke="#DC3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
                 </button>
               </div>
             </div>
@@ -69,7 +73,7 @@ export default function RequestApproval() {
 
        <div className="px-4 md:px-6 pb-4">
         <Link href="/dashboard/inspectors?tab=pending">
-        <button className="w-full mt-6 border-2 border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer tracking-wide">
+        <button className="w-full mt-6 border border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-2 px-5 rounded-[12px] transition-all duration-200 cursor-pointer tracking-wide">
         View All
       </button>
       </Link>

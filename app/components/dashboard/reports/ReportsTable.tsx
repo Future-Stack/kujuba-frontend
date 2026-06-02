@@ -170,7 +170,7 @@ export default function ReportsTable() {
         <>
         <div className="w-full overflow-x-auto no-scrollbar">
 
-         <div className="min-w-[1200px] border border-gray-100 rounded-2xl overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.02)]">
+         <div className="min-w-[1200px] border border-gray-100 rounded-2xl overflow-hidden ">
     
             <table className="w-full text-left border-collapse bg-white">
               <thead>

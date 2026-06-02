@@ -107,11 +107,11 @@ export default function InspectionGaugeWithCalendar() {
   };
 
   return (
-    <div className="w-full  mx-auto  bg-white rounded-[32px] border border-gray-100 font-roboto shadow-sm select-none relative">
+    <div className="w-full  mx-auto  bg-white rounded-[20px] border border-gray-100 font-roboto hover:shadow-sm select-none relative">
       
       {/* Container Header */}
       <div className="">
-        <h3 className="text-base md:text-lg font-bold text-gray-900  p-5 md:p-6 leading-5.5 m px-1 border-b border-gray-100 pb-4 ">Inspection Statistics</h3>
+        <h3 className="text-base md:text-lg font-bold text-gray-900  px-5 py-4 leading-5.5  border-b border-gray-100 pb-4 ">Inspection Statistics</h3>
         
         {/* Toggle Trigger Selector Button */}
         <button 
@@ -137,8 +137,8 @@ export default function InspectionGaugeWithCalendar() {
         cy="60%"
         startAngle={190}
         endAngle={-10}
-        innerRadius="72%"
-        outerRadius="95%"
+        innerRadius="60%"
+        outerRadius="75%"
         stroke="none"
         paddingAngle={3}
         cornerRadius={0}
@@ -161,7 +161,7 @@ export default function InspectionGaugeWithCalendar() {
   </div>
 </div>
 
-      {/* --- METRIC BREAKDOWN TABLE ROWS --- */}
+     
       <div className=" rounded-2xl border border-gray-100 mx-4 mb-4 bg-white divide-y divide-gray-100">
         {inspectionData.map((item, idx) => (
           <div key={idx} className="flex items-center justify-between p-3.5 text-sm font-normal leading-4">
@@ -174,7 +174,7 @@ export default function InspectionGaugeWithCalendar() {
         ))}
       </div>
 
-      {/* --- HIGH FIDELITY INTERACTIVE CALENDAR MODAL POPUP --- */}
+     
       {isCalendarOpen && (
         <div 
           ref={modalRef} 
