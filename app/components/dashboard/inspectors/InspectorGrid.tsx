@@ -256,7 +256,7 @@ export default function InspectorGrid() {
                     <div className="grid grid-cols-2 gap-2">
                   <button
   onClick={() => handleOpenModal(inspector)}
-  className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-2 rounded-sm flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+  className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-1 rounded-sm flex items-center justify-center gap-1 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
 >
   <span className="transition-all duration-300 group-hover:translate-x-[-2px]">
     View Details
