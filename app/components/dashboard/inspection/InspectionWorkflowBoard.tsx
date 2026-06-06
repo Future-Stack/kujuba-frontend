@@ -7,6 +7,7 @@ import {
   Eye,
   Search,
 } from "lucide-react";
+import InspectionDetailsModal from "./InspectionDetailsModal";
 
 type InspectorStatus =
   | "Active"
@@ -176,6 +177,19 @@ export default function InspectionBoardLayout() {
 
   // Board state
   const [boardData, setBoardData] = useState<Record<string, ColumnType>>(initialBoardData);
+   // ── Modal state ──
+  const [selectedCard, setSelectedCard]       = useState<CardItem | null>(null);
+  const [selectedColumnTitle, setSelectedColumnTitle] = useState<string>("");
+ 
+  const handleOpenModal = (card: CardItem, columnTitle: string) => {
+    setSelectedCard(card);
+    setSelectedColumnTitle(columnTitle);
+  };
+ 
+  const handleCloseModal = () => {
+    setSelectedCard(null);
+    setSelectedColumnTitle("");
+  };
 
   // Assign inspector logic
   const handleAssignInspector = (columnKey: string, cardId: string, inspectorId: string) => {
@@ -365,7 +379,7 @@ export default function InspectionBoardLayout() {
                           </span>
                         )}
                       </div>
-                      <button className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-blue-500 hover:bg-blue-100 transition-colors cursor-pointer">
+                      <button onClick={() => handleOpenModal(card, column.title)}  className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-blue-500 hover:bg-blue-100 transition-colors cursor-pointer">
                         <Eye className="w-3.5 h-3.5 stroke-[2.2]" />
                       </button>
                     </div>
@@ -475,6 +489,13 @@ export default function InspectionBoardLayout() {
             </div>
           ))}
         </div>
+            {selectedCard && (
+        <InspectionDetailsModal
+          card={selectedCard}
+          columnTitle={selectedColumnTitle}
+          onClose={handleCloseModal}
+        />
+      )}
       </div>
     </div>
   );

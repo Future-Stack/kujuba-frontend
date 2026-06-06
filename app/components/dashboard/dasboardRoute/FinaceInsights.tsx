@@ -333,7 +333,7 @@ export default function FinanceInsights() {
             className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
           >
             {getIcon(viewType === "monthly")}
-            <span className={viewType === "monthly" ? "text-[#09BD3C]" : "text-gray-400"}>
+            <span className={viewType === "monthly" ? "text-[#717579]" : "text-gray-400"}>
               Monthly
             </span>
           </button>
@@ -343,7 +343,7 @@ export default function FinanceInsights() {
             className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
           >
             {getIcon(viewType === "weekly")}
-            <span className={viewType === "weekly" ? "text-[#09BD3C]" : "text-gray-400"}>
+            <span className={viewType === "weekly" ? "text-[#717579]" : "text-gray-400"}>
               Weekly
             </span>
           </button>
