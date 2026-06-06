@@ -23,6 +23,9 @@ import {
   DollarSign,
   AlertOctagon,
 } from "lucide-react";
+import InspectionPayment from "./PaymentInfo";
+import InspectionReportMedia from "./InspectionReportMedia";
+import ActivityTimeline from "./ActivityTimeLine";
 
 interface Inspector {
   id: string;
@@ -116,7 +119,7 @@ const InspectionDetailsModal: React.FC<Props> = ({ card, columnTitle, onClose })
       className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-xl   w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl   w-full max-w-6xl max-h-[90vh] overflow-y-auto">
 
         {/* ── TOP HEADER ── */}
         <div className=" px-8 py-6 pb-6 border-b border-gray-100">
@@ -288,68 +291,39 @@ const InspectionDetailsModal: React.FC<Props> = ({ card, columnTitle, onClose })
           </div>
 
           {/* Inspection Details */}
-          <div className="border border-gray-100 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                <FileText className="w-3.5 h-3.5 text-blue-500" />
-              </div>
-              <span className="text-sm font-semibold text-gray-800">Inspection Details</span>
-            </div>
-            <div className="space-y-0.5">
-              <InfoRow icon={<Tag className="w-4 h-4 text-gray-400" />} label="Type" value={details.inspectionDetails.type} />
-            </div>
-            <div className="mt-3 pt-3 border-t border-gray-50">
-              <p className="text-xs text-gray-400 mb-1">Notes</p>
-              <p className="text-sm text-gray-600 leading-relaxed">{details.inspectionDetails.notes}</p>
-            </div>
-          </div>
+         <InspectionPayment/>
+         <InspectionReportMedia/>
+         <ActivityTimeline/>
 
-          {/* Status Steps */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: "User Payment", value: card.payment },
-              { label: "Inspection Report", value: card.report },
-              { label: "Ins. Payment", value: card.insPay },
-            ].map((step) => (
-              <div key={step.label} className="text-center">
-                <p className={`text-xs mb-1 ${step.value === "line" ? "text-gray-300" : "text-gray-500 font-medium"}`}>
-                  {step.label}
-                </p>
-                <p className="text-sm font-bold text-gray-800 min-h-[20px]">
-                  {step.value === "line" ? "" : step.value}
-                </p>
-                <div className={`h-[2px] mt-1.5 rounded-full ${step.value === "line" ? "bg-gray-150 bg-gray-200" : "bg-[#A3E635]"}`} />
-              </div>
-            ))}
-          </div>
+        
         </div>
 
         {/* ── ACTION FOOTER ── */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center gap-2 flex-wrap">
-          <button className="flex items-center gap-1.5 bg-[#4353FF] hover:bg-[#3444ee] text-white text-xs font-semibold px-3.5 py-2.5 rounded-lg transition-colors cursor-pointer">
+          <button className="flex items-center gap-1.5 bg-[#4353FF] hover:bg-[#3444ee] text-white text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg transition-colors cursor-pointer">
             <UserCog className="w-3.5 h-3.5" />
             Assign/Reassign Inspector
           </button>
-          <button className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-xs font-semibold px-3.5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+          <button className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
             <Download className="w-3.5 h-3.5" />
             Download Report
           </button>
-          <button className="flex items-center gap-1.5 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3.5 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer">
+          <button className="flex items-center gap-1.5 border border-emerald-200 text-emerald-700 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer">
             <CheckCircle className="w-3.5 h-3.5" />
             Mark as Completed
           </button>
-          <button className="flex items-center gap-1.5 border border-orange-200 text-orange-600 text-xs font-semibold px-3.5 py-2.5 rounded-lg hover:bg-orange-50 transition-colors cursor-pointer">
+          <button className="flex items-center gap-1.5 border border-orange-200 text-orange-600 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-orange-50 transition-colors cursor-pointer">
             <DollarSign className="w-3.5 h-3.5" />
             Refund Payment
           </button>
-          <button className="flex items-center gap-1.5 border border-red-200 text-red-500 text-xs font-semibold px-3.5 py-2.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
+          <button className="flex items-center gap-1.5 border border-red-200 text-red-500 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
             <AlertOctagon className="w-3.5 h-3.5" />
             Suspend Inspector
           </button>
 
           <button
             onClick={onClose}
-            className="ml-auto flex items-center gap-1.5 border border-gray-200 text-gray-600 text-xs font-semibold px-3.5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+            className="ml-auto flex items-center gap-1.5 border border-gray-200 text-gray-600 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
             Close
