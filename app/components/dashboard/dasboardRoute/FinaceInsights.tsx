@@ -348,9 +348,9 @@ export default function FinanceInsights() {
             </span>
           </button>
 
-          <button className="text-gray-900 cursor-pointer transition-colors ml-1">
+          {/* <button className="text-gray-900 cursor-pointer transition-colors ml-1">
             <MoreVertical className="w-5 h-5" />
-          </button>
+          </button> */}
         </div>
       </div>
 

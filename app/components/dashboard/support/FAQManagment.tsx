@@ -63,14 +63,14 @@ export default function FAQManagement() {
   };
 
   return (
-    <main className="min-h-screen  py-8 ">
+    <main className="min-h-screen  py-6 ">
       <div className="">
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1d23] tracking-tight">FAQ Manager</h1>
           <p className="text-sm text-[#6b7280] mt-1">
             {faqs.length} {faqs.length === 1 ? "question" : "questions"} published
           </p>
-        </div>
+        </div> */}
 
        
 
