@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-[420px]">
         {/* Logo */}
         <div className="flex justify-center mb-10">
             <LogoIcon/>
