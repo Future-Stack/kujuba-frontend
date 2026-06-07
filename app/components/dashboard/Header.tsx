@@ -15,9 +15,84 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
 
+  const searchRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-const router = useRouter();
+  const router = useRouter();
+
+  const searchItems = [
+    {
+      label: "Dashboard Overview",
+      description: "Main dashboard content, sections, and statistics",
+      path: "/dashboard",
+      keywords: ["dashboard", "overview", "content", "title", "section", "button text", "settings name"],
+    },
+    {
+      label: "User Management",
+      description: "Manage users, statuses, inspections, and payments",
+      path: "/dashboard/users",
+      keywords: ["users", "user management", "manage users", "profile", "status", "payments", "inspections", "content"],
+    },
+    {
+      label: "Inspector Management",
+      description: "Inspectors, approval workflow, and inspector details",
+      path: "/dashboard/inspectors",
+      keywords: ["inspectors", "inspector", "inspection team", "approval", "pending review", "active", "rejected"],
+    },
+    {
+      label: "Inspection Management",
+      description: "Manage inspections, workflow board, and reports",
+      path: "/dashboard/inspections",
+      keywords: ["inspections", "inspection management", "workflow", "report", "board", "pending inspections", "completed inspections"],
+    },
+    {
+      label: "Payments & Revenue",
+      description: "Transaction history, invoices, and refunds",
+      path: "/dashboard/payments",
+      keywords: ["payments", "revenue", "transactions", "refund", "billing", "invoices"],
+    },
+    {
+      label: "Reports Management",
+      description: "View, download, and archive inspection reports",
+      path: "/dashboard/reports",
+      keywords: ["reports", "report", "archive", "download", "inspection reports"],
+    },
+    {
+      label: "Reviews & Ratings",
+      description: "Customer feedback and ratings overview",
+      path: "/dashboard/reviews",
+      keywords: ["reviews", "ratings", "feedback", "customer reviews"],
+    },
+    {
+      label: "Notifications Center",
+      description: "Alerts, messages, and notification settings",
+      path: "/dashboard/notifications",
+      keywords: ["notifications", "alerts", "messages", "notification"],
+    },
+    {
+      label: "FAQ & Support",
+      description: "FAQ management and user support requests",
+      path: "/dashboard/support",
+      keywords: ["support", "faq", "help", "support requests", "faq management"],
+    },
+    {
+      label: "Settings & Pricing",
+      description: "Platform settings, pricing, and configuration",
+      path: "/dashboard/settings",
+      keywords: ["settings", "pricing", "platform settings", "configuration", "settings name", "section name"],
+    },
+  ];
+
+  const filteredSearchItems = searchItems.filter((item) => {
+    const query = searchQuery.trim().toLowerCase();
+    return (
+      item.label.toLowerCase().includes(query) ||
+      item.keywords.some((keyword) => keyword.toLowerCase().includes(query))
+    );
+  });
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -25,6 +100,13 @@ const router = useRouter();
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false);
+      }
+
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchSuggestions(false);
       }
     };
 
@@ -58,7 +140,7 @@ const router = useRouter();
             </svg>
           </button>
 
-          <div className="relative w-full max-w-5xl hidden lg:block">
+          <div ref={searchRef} className="relative w-full max-w-5xl hidden lg:block">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
               <Search />
             </span>
@@ -66,8 +148,53 @@ const router = useRouter();
             <input
               type="text"
               placeholder="Search here..."
+              value={searchQuery}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setShowSearchSuggestions(true);
+              }}
+              onFocus={() => setShowSearchSuggestions(true)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  if (filteredSearchItems.length > 0) {
+                    router.push(filteredSearchItems[0].path);
+                    setShowSearchSuggestions(false);
+                  }
+                }
+              }}
               className="w-full bg-[#F8FAFC] border border-slate-100 rounded-full py-3.5 pl-10 pr-4 text-lg md:text-xl text-slate-600 placeholder-slate-400 focus:outline-none focus:border-indigo-200 focus:bg-white transition-all"
             />
+
+            {showSearchSuggestions && searchQuery.trim().length > 0 && (
+              <div className="absolute left-0 right-0 mt-2 rounded-2xl border border-slate-200 bg-white text-gray-800 shadow-lg z-40">
+                {filteredSearchItems.length > 0 ? (
+                  filteredSearchItems.map((item) => (
+                    <button
+                      key={item.path}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery(item.label);
+                        setShowSearchSuggestions(false);
+                        router.push(item.path);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="font-semibold">{item.label}</div>
+                      {item.description && (
+                        <div className="text-xs text-slate-500 mt-1">
+                          {item.description}
+                        </div>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-slate-500">
+                    No matching results.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
