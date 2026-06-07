@@ -24,7 +24,7 @@ const inspections: InspectionItem[] = [
 
 export default function RecentInspection() {
   return (
-    <div className="w-full bg-white rounded-[20px] border border-gray-100 font-roboto  hover:shadow-sm flex flex-col justify-between min-h-[520px]">
+    <div className="w-full bg-white rounded-[20px] border border-gray-200 font-roboto  hover:shadow-sm flex flex-col justify-between min-h-[520px]">
       <div>
         <h3 className="text-base md:text-lg font-bold text-gray-900  px-5 py-4 leading-5.5  border-b border-gray-100 pb-4">Recent Inspection</h3>
 

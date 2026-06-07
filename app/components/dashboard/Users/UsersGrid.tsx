@@ -135,7 +135,7 @@ export default function UserGridDashboard() {
               return (
                 <div
                   key={user.id}
-                  className="bg-white rounded-[5px] border border-gray-100 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-white rounded-[5px] border border-gray-200 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative overflow-hidden"
                 >
                   <div>
                     <div className="flex items-center gap-3 mb-5">

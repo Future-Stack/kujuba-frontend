@@ -16,7 +16,7 @@ const data = [
 
 export default function InspectionStatistics() {
   return (
-    <div className="w-full  p-4 md:px-5 md:py-4 bg-white rounded-[20px] border border-gray-100 hover:shadow-sm  select-none">
+    <div className="w-full  p-4 md:px-5 md:py-4 bg-white rounded-[20px] border border-gray-200 hover:shadow-sm  select-none">
       
       {/* Card Header */}
       <div className="border-b border-gray-100 pb-5 mb-6 ">

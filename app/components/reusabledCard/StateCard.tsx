@@ -158,7 +158,7 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const resolvedChangeColor = changeColor ?? (isPositive ? 'text-green-500' : 'text-red-500');
   return (
-     <div className="relative overflow-hidden bg-white rounded-[20px] py-6  px-[30px] flex-1 min-w-[200px] hover:shadow-md py-8 border border-[#F4F4F4]">
+     <div className="relative overflow-hidden bg-white rounded-[20px] py-6  px-[30px] flex-1 min-w-[200px] hover:shadow-md py-8 border border-200">
 
       {/* Layered blob background */}
       <BlobBackground />

@@ -107,7 +107,7 @@ export default function InspectionGaugeWithCalendar() {
   };
 
   return (
-    <div className="w-full  mx-auto  bg-white rounded-[20px] border border-gray-100 font-roboto hover:shadow-sm select-none relative">
+    <div className="w-full  mx-auto  bg-white rounded-[20px] border border-gray-200 font-roboto hover:shadow-sm select-none relative">
       
       {/* Container Header */}
       <div className="">
