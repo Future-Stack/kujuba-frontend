@@ -67,17 +67,17 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
               className="px-5 py-4 border-b last:border-b-0 hover:bg-gray-50 transition cursor-pointer"
             >
               <div className="flex items-start gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#164DB2] mt-1.5 flex-shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-primaryColor mt-1.5 flex-shrink-0" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-semibold text-sm text-[#171C35]">
+                    <h3 className="font-medium text-sm font-sora text-[#171C35] leading-5">
                       {item.title}
                     </h3>
                     <span className="text-xs text-gray-400 flex-shrink-0">
                       {item.time}
                     </span>
                   </div>
-                  <p className="text-sm text-[#667085] mt-0.5">
+                  <p className="text-sm text-[#667085] font-normal font-roboto leading-4 mt-0.5">
                     {item.message}
                   </p>
                 </div>
