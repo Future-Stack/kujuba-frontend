@@ -364,7 +364,7 @@ export default function InspectionBoardLayout() {
                   <div
                     key={card.id}
                     className={`bg-white rounded-xl border p-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:shadow-md ${
-                      card.urgent ? "border-red-300 ring-1 ring-red-400/5" : "border-gray-100"
+                      card.urgent ? "border-red-300 ring-1 ring-red-400/5" : "border-gray-200"
                     }`}
                   >
                     {/* CARD HEADER */}

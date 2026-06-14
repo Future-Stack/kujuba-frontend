@@ -319,7 +319,7 @@ export default function FinanceInsights() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
 
   return (
-    <div className="w-full p-4 md:p-6 bg-white rounded-[20px] border border-gray-100 hover:shadow-sm select-none">
+    <div className="w-full p-4 md:p-6 bg-white rounded-[20px] border border-gray-200 hover:shadow-sm select-none">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

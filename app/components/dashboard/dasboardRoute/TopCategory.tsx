@@ -23,7 +23,7 @@ const categories: CategoryItem[] = [
 
 export default function TopCategory() {
   return (
-    <div className="w-full bg-white rounded-[20px] border border-gray-100  hover:shadow-sm font-roboto flex flex-col justify-between ">
+    <div className="w-full bg-white rounded-[20px] border border-gray-200  hover:shadow-sm font-roboto flex flex-col justify-between ">
       <div>
         <h3 className="text-base md:text-lg font-bold text-gray-900  py-4 px-5 leading-5.5   border-b border-gray-100 pb-4">Top Category</h3>
 

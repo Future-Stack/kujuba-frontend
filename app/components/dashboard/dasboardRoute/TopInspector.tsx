@@ -21,7 +21,7 @@ const inspectors: Inspector[] = [
 
 export default function TopInspector() {
   return (
-    <div className="w-full bg-white rounded-[20px] border border-gray-100 hover:shadow-sm flex flex-col font-roboto justify-between">
+    <div className="w-full bg-white rounded-[20px] border border-gray-200 hover:shadow-sm flex flex-col font-roboto justify-between">
       <div>
         {/* Card Header */}
         <h3 className="text-base md:text-lg font-bold text-gray-900  px-5 py-4 leading-5.5 m px-1 border-b border-gray-100 pb-4">Top Inspector</h3>

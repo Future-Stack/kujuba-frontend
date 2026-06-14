@@ -37,7 +37,7 @@ export default function UserTable() {
       </div>
 
       {/* Responsive Wrapper for handling small viewport horizontal overflow */}
-      <div className="overflow-x-auto rounded-2xl border border-gray-100/80 bg-[#F5F6FA]">
+      <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-[#F5F6FA]">
         <table className="w-full text-left border-collapse min-w-[600px]">
           
           {/* Column Names */}
@@ -52,7 +52,7 @@ export default function UserTable() {
           {/* Table Content Data Rows */}
           <tbody className="bg-white">
             {users.map((user) => (
-              <tr key={user.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+              <tr key={user.id} className="border-b border-gray-100  hover:bg-gray-50/50 transition-colors">
                 
                 {/* Column: Name with Profile Badge */}
                 <td className="py-4 px-6">

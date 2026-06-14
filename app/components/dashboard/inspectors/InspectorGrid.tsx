@@ -214,7 +214,7 @@ export default function InspectorGrid() {
         {filteredAndSortedInspectors.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {filteredAndSortedInspectors.map((inspector) => (
-              <div key={inspector.id} className="bg-white rounded-sm border border-gray-100 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+              <div key={inspector.id} className="bg-white rounded-sm border border-gray-200 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
                 <div>
                   <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
                     <div className="relative w-11 h-11 shrink-0">

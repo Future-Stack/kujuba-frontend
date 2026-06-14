@@ -14,18 +14,26 @@ import { NotificationsIcon } from '../icon/NotificationIcons';
 import { SupportIcon } from '../icon/SupportIcon';
 import { SettingsIcon } from '../icon/SettingsIcon';
 
+import { FaFolder } from 'react-icons/fa';
+
 interface MenuItem {
   name: string;
   icon: (isActive: boolean) => React.ReactElement;
   path: string;
 }
 
+const FolderIcon = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <FaFolder color={isActive ? "#4F46E5" : "#9CA3AF"} />
+  );
+};
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
 
   const menuItems: MenuItem[] = [
     { name: 'Dashboard',     icon: (isActive) => <DashboardIcon isActive={isActive} />,     path: '/dashboard' },
     { name: 'Users',         icon: (isActive) => <UsersIcon isActive={isActive} />,         path: '/dashboard/users' },
+   { name: 'Inspection Type', icon: (isActive) => <FolderIcon isActive={isActive} />, path: '/dashboard/inspection_type' },
     { name: 'Inspectors',    icon: (isActive) => <InspectorIcon isActive={isActive} />,     path: '/dashboard/inspectors' },
     { name: 'Inspections',   icon: (isActive) => <InspectionIcon isActive={isActive} />,    path: '/dashboard/inspections' },
     { name: 'Payments',      icon: (isActive) => <PaymentsIcon isActive={isActive} />,      path: '/dashboard/payments' },
