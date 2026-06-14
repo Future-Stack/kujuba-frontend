@@ -1,21 +1,56 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail,} from "lucide-react";
 import AuthLayout from "./AuthLayout";
 import LogoIcon from "../icon/LogoIcon";
+import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/app/redux/api/authApi";
+import { toast } from "react-toastify";
 
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
+  const router = useRouter();
+  const [login, { isLoading }] = useLoginMutation();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // handle login
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const res = await login({
+      email: form.email,
+      password: form.password,
+    }).unwrap();
+
+    if (res.success) {
+      localStorage.setItem("access_token", res.access_token);
+
+      if (res.user.user_type === "admin") {
+        toast.success("Login successful");
+
+        router.push("/dashboard");
+      } else {
+        toast.error("You are not authorized as admin");
+      }
+    } else {
+      toast.error(res.message || "Login failed");
+    }
+
+  } catch (error: any) {
+    console.log("LOGIN ERROR:", error);
+
+    toast.error(
+      error?.data?.message ||
+      error?.error ||
+      "Invalid email or password"
+    );
+  }
+};
 
   return (
     <AuthLayout>
@@ -87,16 +122,17 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Submit */}
-            <Link href="/dashboard">
-             <button
-              type="submit"
-              className="w-full bg-primaryColor hover:bg-[#4a4dd4] active:scale-[0.98] text-white text-sm font-semibold
-                py-2.5 rounded-lg transition-all duration-150 cursor-pointer mt-4"
-            >
-              Sign In
-            </button>
-            </Link>
+          
+          {/* Submit */}
+<button
+  type="submit"
+  disabled={isLoading}
+  className="w-full bg-primaryColor hover:bg-[#4a4dd4] active:scale-[0.98] text-white text-sm font-semibold
+    py-2.5 rounded-lg transition-all duration-150 cursor-pointer mt-4 disabled:opacity-60"
+>
+  {isLoading ? "Signing in..." : "Sign In"}
+</button>
+            
 
 
             {/* Divider */}
