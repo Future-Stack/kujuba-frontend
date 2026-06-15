@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -16,16 +17,11 @@ import {
   Eraser,
   FileText,
 } from "lucide-react";
+import { Page, useCreatePageMutation, useDeletePageMutation, useGetPagesQuery, useUpdatePageMutation } from "@/app/redux/features/pagesApi";
+import { toast } from "react-toastify";
+
 
 type PageStatus = "Active" | "Inactive";
-
-type DynamicPage = {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  status: PageStatus;
-};
 
 const slugify = (title: string) =>
   "/page/" +
@@ -35,28 +31,31 @@ const slugify = (title: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-const initialPages: DynamicPage[] = [
-  {
-    id: "1",
-    title: "Terms & condition",
-    slug: "/page/terms-condition",
-    content: "<p>Write your terms &amp; conditions here...</p>",
-    status: "Active",
-  },
-];
+// Backend can send status as 1/0 or "Active"/"Inactive" - normalize it for the UI
+const getStatusLabel = (status: Page["status"]): PageStatus =>
+  status === 1 || status === "1" || status === "Active" ? "Active" : "Inactive";
 
 export default function DynamicPages() {
-  const [pages, setPages] = useState<DynamicPage[]>(initialPages);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<DynamicPage | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
 
   const [formTitle, setFormTitle] = useState("");
   const [formStatus, setFormStatus] = useState<PageStatus>("Active");
   const [formContent, setFormContent] = useState("");
-
+const [openStatus, setOpenStatus] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+
+  const { data, isLoading } = useGetPagesQuery();
+  const [createPage] = useCreatePageMutation();
+  const [updatePage] = useUpdatePageMutation();
+  const [deletePage] = useDeletePageMutation();
+
+  const pages: Page[] = Array.isArray(data?.data)
+    ? data.data
+    : data?.data
+    ? [data.data]
+    : [];
 
   // Load content into the editor whenever the modal opens / target changes
   useEffect(() => {
@@ -74,10 +73,10 @@ export default function DynamicPages() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (page: DynamicPage) => {
+  const openEditModal = (page: Page) => {
     setEditingId(page.id);
     setFormTitle(page.title);
-    setFormStatus(page.status);
+    setFormStatus(getStatusLabel(page.status));
     setFormContent(page.content);
     setIsModalOpen(true);
   };
@@ -104,38 +103,45 @@ export default function DynamicPages() {
     if (url) exec("insertImage", url);
   };
 
-  const handleSave = () => {
-    const title = formTitle.trim();
-    if (!title) return;
+const handleSave = async () => {
+  const title = formTitle.trim();
+  if (!title) {
+    toast.error("Title is required");
+    return;
+  }
 
-    if (editingId) {
-      setPages((prev) =>
-        prev.map((p) =>
-          p.id === editingId
-            ? { ...p, title, slug: slugify(title), content: formContent, status: formStatus }
-            : p
-        )
-      );
-    } else {
-      setPages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          title,
-          slug: slugify(title),
-          content: formContent,
-          status: formStatus,
-        },
-      ]);
-    }
+  const payload = {
+    title,
+    slug: slugify(title),
+    content: formContent,
+    status: formStatus === "Active" ? 1 : 0,
+  };
+
+  try {
+    const res =
+      editingId !== null
+        ? await updatePage({ id: editingId, body: payload }).unwrap()
+        : await createPage(payload).unwrap();
+
+    toast.success(res?.message || "Saved successfully");
     setIsModalOpen(false);
-  };
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Something went wrong");
+  }
+};
 
-  const confirmDelete = () => {
-    if (!deleteTarget) return;
-    setPages((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+const confirmDelete = async () => {
+  if (!deleteTarget) return;
+
+  try {
+    const res = await deletePage(deleteTarget.id).unwrap();
+
+    toast.success(res?.message || "Deleted successfully");
     setDeleteTarget(null);
-  };
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Delete failed");
+  }
+};
 
   return (
     <div>
@@ -167,56 +173,91 @@ export default function DynamicPages() {
               <th className="px-5 py-4 font-medium text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {pages.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-5 py-14 text-center">
-                  <FileText className="mx-auto mb-3 text-[#B5BCC8]" size={32} />
-                  <p className="text-[#B5BCC8] font-roboto">No pages yet. Create your first one.</p>
-                </td>
-              </tr>
-            ) : (
-              pages.map((page) => (
-                <tr key={page.id} className="border-t border-[#E7E8FF]">
-                  <td className="px-5 py-4 font-sora font-semibold text-[#000000] text-sm md:text-base">
-                    {page.title}
-                  </td>
-                  <td className="px-5 py-4 font-mono text-xs md:text-sm text-[#5B5EF4]">
-                    {page.slug}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold font-roboto ${
-                        page.status === "Active"
-                          ? "bg-green-50 text-green-600"
-                          : "bg-gray-100 text-gray-400"
-                      }`}
-                    >
-                      {page.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => openEditModal(page)}
-                        title="Edit page"
-                        className="p-2 rounded-lg border border-[#E7E8FF] text-[#5B5EF4] hover:bg-[#E7E8FF] transition-colors cursor-pointer"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(page)}
-                        title="Delete page"
-                        className="p-2 rounded-lg border border-[#E7E8FF] text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
+         <tbody>
+  {isLoading ? (
+    [...Array(5)].map((_, i) => (
+      <tr key={i} className="border-t border-[#E7E8FF] animate-pulse">
+        {/* Title */}
+        <td className="px-5 py-4">
+          <div className="h-4 w-32 bg-gray-200 rounded"></div>
+        </td>
+
+        {/* Slug */}
+        <td className="px-5 py-4">
+          <div className="h-4 w-40 bg-gray-200 rounded"></div>
+        </td>
+
+        {/* Status */}
+        <td className="px-5 py-4">
+          <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+        </td>
+
+        {/* Actions */}
+        <td className="px-5 py-4 text-right">
+          <div className="flex justify-end gap-2">
+            <div className="h-8 w-8 bg-gray-200 rounded-lg"></div>
+            <div className="h-8 w-8 bg-gray-200 rounded-lg"></div>
+          </div>
+        </td>
+      </tr>
+    ))
+  ) : pages.length === 0 ? (
+    <tr>
+      <td colSpan={4} className="px-5 py-14 text-center">
+        <FileText className="mx-auto mb-3 text-[#B5BCC8]" size={32} />
+        <p className="text-[#B5BCC8] font-roboto">
+          No pages yet. Create your first one.
+        </p>
+      </td>
+    </tr>
+  ) : (
+    pages.map((page) => {
+      const statusLabel = getStatusLabel(page.status);
+
+      return (
+        <tr key={page.id} className="border-t border-[#E7E8FF]">
+          <td className="px-5 py-4 font-sora font-semibold text-[#000000] text-sm md:text-base">
+            {page.title}
+          </td>
+
+          <td className="px-5 py-4 font-mono text-xs md:text-sm text-[#5B5EF4]">
+            {page.slug}
+          </td>
+
+          <td className="px-5 py-4">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold font-roboto ${
+                statusLabel === "Active"
+                  ? "bg-green-50 text-green-600"
+                  : "bg-gray-100 text-gray-400"
+              }`}
+            >
+              {statusLabel}
+            </span>
+          </td>
+
+          <td className="px-5 py-4 text-right">
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => openEditModal(page)}
+                className="p-2 rounded-lg border border-[#E7E8FF] text-[#5B5EF4] hover:bg-[#E7E8FF]"
+              >
+                <Pencil size={16} />
+              </button>
+
+              <button
+                onClick={() => setDeleteTarget(page)}
+                className="p-2 rounded-lg border border-[#E7E8FF] text-red-500 hover:bg-red-50"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </td>
+        </tr>
+      );
+    })
+  )}
+</tbody>
         </table>
       </div>
 
@@ -299,19 +340,50 @@ export default function DynamicPages() {
             </div>
 
             {/* Status */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold font-sora text-[#000000] mb-2">
-                Status
-              </label>
-              <select
-                value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as PageStatus)}
-                className="w-full border border-[#E7E8FF] text-gray-600 rounded-[10px] px-4 py-3 text-sm font-roboto outline-none focus:border-primaryColor transition-colors cursor-pointer"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
+      <div className="mb-6 relative">
+  <label className="block text-sm font-semibold font-sora text-[#000000] mb-2">
+    Status
+  </label>
+
+  {/* Trigger */}
+  <button
+    type="button"
+    onClick={() => setOpenStatus(!openStatus)}
+    className="w-full border border-[#E7E8FF] text-gray-700 rounded-[10px] px-4 py-3 text-sm font-roboto flex justify-between items-center cursor-pointer"
+  >
+    {formStatus}
+
+    <svg
+      className={`w-4 h-4 transition-transform ${openStatus ? "rotate-180" : ""}`}
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+        clipRule="evenodd"
+      />
+    </svg>
+  </button>
+
+  {/* Dropdown */}
+  {openStatus && (
+    <div className="absolute z-50 mt-2 w-full bg-white border border-[#E7E8FF] rounded-[10px] shadow-lg overflow-hidden">
+      {["Active", "Inactive"].map((item) => (
+        <div
+          key={item}
+          onClick={() => {
+            setFormStatus(item as PageStatus);
+            setOpenStatus(false);
+          }}
+          className="px-4 py-2 text-sm text-gray-800 hover:bg-[#F7F7FF] cursor-pointer"
+        >
+          {item}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
             <button
               onClick={handleSave}

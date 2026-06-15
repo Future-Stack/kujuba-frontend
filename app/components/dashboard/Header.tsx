@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { SettingsIcon } from "../icon/SettingsIcon";
 import Link from "next/link";
 import NotificationModal from "./NotificationModal";
+import { useLogoutMutation } from "@/app/redux/api/authApi";
+import { toast } from "react-toastify";
 interface HeaderProps {
   onMenuToggle: () => void;
 }
@@ -17,10 +19,12 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
-
+  const [openLogout, setOpenLogout] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const [logout] = useLogoutMutation();
 
   const searchItems = [
     {
@@ -116,6 +120,25 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+const handleLogout = async () => {
+  try {
+    await logout().unwrap();
+
+   
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+
+    toast.success("Logged out successfully");
+
+    setOpenLogout(false);
+
+
+    window.location.href = "/";
+  } catch (error) {
+    toast.error("Logout failed");
+  }
+};
 
   return (
     <>
@@ -265,10 +288,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 </button> 
                </Link>
                 <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setShowLogoutModal(true);
-                  }}
+                  onClick={() => setOpenLogout(true)}
                   className="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-red-500 cursor-pointer hover:bg-red-50"
                 >
                   <LogOut size={16}/>
@@ -283,17 +303,11 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   isOpen={showNotificationModal}
   onClose={() => setShowNotificationModal(false)}
 />
-      <LogoutModal
-        isOpen={showLogoutModal}
-  onCancel={() => setShowLogoutModal(false)}
-  onConfirm={() => {
-    setShowLogoutModal(false);
-
-    localStorage.removeItem("token");
-  router.push("/");
-   
-  }}
-      />
+<LogoutModal
+  isOpen={openLogout}
+  onCancel={() => setOpenLogout(false)}
+  onConfirm={handleLogout}
+/>
     </>
   );
 };

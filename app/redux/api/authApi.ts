@@ -12,7 +12,32 @@ export const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+
+    changePassword: builder.mutation({
+  query: (body) => ({
+    url: "/change-password",
+    method: "POST",
+    body,
+  }),
+}),
+
+googleLogin: builder.mutation({
+  query: (id_token: string) => ({
+    url: "/google-token",
+    method: "POST",
+    body: {
+      id_token,
+    },
+  }),
+}),
+
+logout: builder.mutation<void, void>({
+  query: () => ({
+    url: "/logout",
+    method: "POST",
+  }),
+}),
   }),
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useChangePasswordMutation,useGoogleLoginMutation ,useLogoutMutation } = authApi;

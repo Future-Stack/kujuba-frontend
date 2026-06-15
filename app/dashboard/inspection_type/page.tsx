@@ -3,7 +3,7 @@
 
 import { useRef, useState } from "react";
 import { Plus, Pencil, Trash2, X, ImagePlus, ImageOff } from "lucide-react";
-import { useAddInspectionTypeMutation, useDeleteInspectionTypeMutation, useGetInspectionTypesQuery } from "@/app/redux/features/inspectiontypeApi";
+import { useAddInspectionTypeMutation, useDeleteInspectionTypeMutation, useGetInspectionTypesQuery, useUpdateInspectionTypeMutation } from "@/app/redux/features/inspectiontypeApi";
 import { toast } from "react-toastify";
 
 type InspectionTypeItem = {
@@ -39,6 +39,7 @@ export default function InspectionType() {
   const { data, isLoading, error } = useGetInspectionTypesQuery();
 const [deleteInspection] = useDeleteInspectionTypeMutation();
 const [addInspection] = useAddInspectionTypeMutation();
+const [updateInspection] = useUpdateInspectionTypeMutation();
 
   const openCreateModal = () => {
     setEditingId(null);
@@ -84,6 +85,7 @@ const handleSave = async () => {
   if (!title || isNaN(price)) return;
 
   const fd = new FormData();
+
   fd.append("title", title);
   fd.append("short_desc", formShortDesc.trim());
   fd.append("price", String(price));
@@ -94,22 +96,36 @@ const handleSave = async () => {
   }
 
   try {
-    await addInspection(fd).unwrap();
+    if (editingId) {
+      // EDIT
+      await updateInspection({
+        id: editingId,
+        formData: fd,
+      }).unwrap();
 
-    toast.success("Inspection added successfully");
+      toast.success("Inspection updated successfully");
+    } else {
+      // CREATE
+      await addInspection(fd).unwrap();
+
+      toast.success("Inspection added successfully");
+    }
 
     setIsModalOpen(false);
 
-    // reset form
     setFormTitle("");
     setFormShortDesc("");
     setFormPrice("");
     setFormImg(null);
     setFormImgFile(null);
     setFormStatus(1);
+    setEditingId(null);
 
   } catch (error: any) {
-    toast.error(error?.data?.message || "Failed to add inspection");
+    toast.error(
+      error?.data?.message ||
+      "Something went wrong"
+    );
   }
 };
 
