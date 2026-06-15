@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import SupportCard from "./SupportCard";
 import ReplyModal from "./ReplyModal";
+import { useGetSupportTicketsQuery, useReplySupportTicketMutation } from "@/app/redux/features/supportApi";
+import { toast } from "react-toastify";
 export type UserRole = "Home owner" | "HVAC Inspector";
 
 export interface SupportRequest {
@@ -18,103 +21,78 @@ export interface SupportRequest {
   answer?: string;
 }
 
-const AVATAR_OWNER = "https://randomuser.me/api/portraits/men/32.jpg";
-const AVATAR_INSPECTOR = "https://randomuser.me/api/portraits/men/45.jpg";
-
-const INITIAL_REQUESTS: SupportRequest[] = [
-  {
-    id: "1",
-    user: { name: "Marcus Johnson", role: "Home owner", avatar: AVATAR_OWNER },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: false,
-  },
-  {
-    id: "2",
-    user: { name: "Marcus Johnson", role: "HVAC Inspector", avatar: AVATAR_INSPECTOR },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: false,
-  },
-  {
-    id: "3",
-    user: { name: "Marcus Johnson", role: "Home owner", avatar: AVATAR_OWNER },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: false,
-  },
-  {
-    id: "4",
-    user: { name: "Marcus Johnson", role: "HVAC Inspector", avatar: AVATAR_INSPECTOR },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: false,
-  },
-  {
-    id: "5",
-    user: { name: "Marcus Johnson", role: "Home owner", avatar: AVATAR_OWNER },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: false,
-  },
-  {
-    id: "6",
-    user: { name: "Marcus Johnson", role: "HVAC Inspector", avatar: AVATAR_INSPECTOR },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: false,
-  },
-  {
-    id: "7",
-    user: { name: "Marcus Johnson", role: "Home owner", avatar: AVATAR_OWNER },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: true,
-    answer:
-      "The platform offers a variety of home inspection services, including Four-Point Inspections, Full Home Inspections, Roof Inspections, HVAC Inspections, Plumbing Inspections, Electrical Inspections, and Exterior & Interior Property Assessments. Available inspection types may vary based on your location and inspector availability.",
-  },
-  {
-    id: "8",
-    user: { name: "Marcus Johnson", role: "HVAC Inspector", avatar: AVATAR_INSPECTOR },
-    question: "What types of inspections are available?",
-    date: "2026-05-14",
-    replied: true,
-    answer:
-      "The platform offers a variety of home inspection services, including Four-Point Inspections, Full Home Inspections, Roof Inspections, HVAC Inspections, Plumbing Inspections, Electrical Inspections, and Exterior & Interior Property Assessments. Available inspection types may vary based on your location and inspector availability.",
-  },
-];
 
 export default function SupportRequests() {
-  const [requests, setRequests] = useState<SupportRequest[]>(INITIAL_REQUESTS);
+
   const [activeRequest, setActiveRequest] = useState<SupportRequest | null>(null);
 
-  const handleSend = (id: string, answer: string) => {
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, replied: true, answer } : r))
+  const { data, isLoading } = useGetSupportTicketsQuery();
+
+const [replySupport] = useReplySupportTicketMutation();
+
+const requests =
+  data?.data?.map((item: any) => ({
+    id: String(item.id),
+
+    user: {
+      name: item.user?.name,
+      role:
+        item.user?.user_type === "inspector"
+          ? "HVAC Inspector"
+          : "Home owner",
+
+      avatar:
+        item.user?.image ||
+        "https://ui-avatars.com/api/?name=" +
+          encodeURIComponent(item.user?.name),
+    },
+
+    question: item.explanation,
+    date: item.created_at?.split("T")[0],
+
+    replied: !!item.reply,
+    answer: item.reply,
+  })) || [];
+
+const handleSend = async (
+  id: string,
+  answer: string
+) => {
+  try {
+    await replySupport({
+      id: Number(id),
+      reply: answer,
+    }).unwrap();
+
+    toast.success("Reply sent successfully");
+
+    setActiveRequest(null);
+  } catch (error: any) {
+    toast.error(
+      error?.data?.message || "Failed to send reply"
     );
-  };
+  }
+};
 
-  const pending = requests.filter((r) => !r.replied);
-  const replied = requests.filter((r) => r.replied);
+  const pending = requests.filter((r:any) => !r.replied);
+  const replied = requests.filter((r:any) => r.replied);
 
-  const ownerPending = pending.filter((r) => r.user.role === "Home owner");
-  const inspectorPending = pending.filter((r) => r.user.role === "HVAC Inspector");
-  const ownerReplied = replied.filter((r) => r.user.role === "Home owner");
-  const inspectorReplied = replied.filter((r) => r.user.role === "HVAC Inspector");
+  const ownerPending = pending.filter((r:any) => r.user.role === "Home owner");
+  const inspectorPending = pending.filter((r:any) => r.user.role === "HVAC Inspector");
+  const ownerReplied = replied.filter((r:any) => r.user.role === "Home owner");
+  const inspectorReplied = replied.filter((r:any) => r.user.role === "HVAC Inspector");
+
+  if (isLoading) {
+  return (
+    <div className="p-6">
+      Loading...
+    </div>
+  );
+}
 
   return (
     <main className="min-h-screen  py-6 ">
       <div className="">
-
-        {/* Header */}
-        {/* <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1d23] tracking-tight">
-            Support Requests
-          </h1>
-          <p className="text-sm text-[#6b7280] mt-1">
-            {pending.length} pending · {replied.length} replied
-          </p>
-        </div> */}
 
         {/* Pending */}
         {pending.length > 0 && (
@@ -130,7 +108,7 @@ export default function SupportRequests() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-4">
-                {ownerPending.map((r) => (
+                {ownerPending.map((r:any) => (
                   <SupportCard key={r.id} request={r} onReply={setActiveRequest} />
                 ))}
               </div>
@@ -138,7 +116,7 @@ export default function SupportRequests() {
                 <p className="text-xs font-normal text-[#5C6470] font-roboto leading-5  sm:hidden">
                   Inspector
                 </p>
-                {inspectorPending.map((r) => (
+                {inspectorPending.map((r:any) => (
                   <SupportCard key={r.id} request={r} onReply={setActiveRequest} />
                 ))}
               </div>
@@ -162,7 +140,7 @@ export default function SupportRequests() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-4">
-                {ownerReplied.map((r) => (
+                {ownerReplied.map((r:any) => (
                   <SupportCard key={r.id} request={r} onReply={setActiveRequest} />
                 ))}
               </div>
@@ -170,7 +148,7 @@ export default function SupportRequests() {
                 <p className="text-xs font-normal text-[#5C6470] font-roboto leading-5  sm:hidden">
                   Inspector
                 </p>
-                {inspectorReplied.map((r) => (
+                {inspectorReplied.map((r:any) => (
                   <SupportCard key={r.id} request={r} onReply={setActiveRequest} />
                 ))}
               </div>

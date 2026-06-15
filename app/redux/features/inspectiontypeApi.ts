@@ -21,6 +21,14 @@ export const inspectionApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Inspection"],
     }),
+    updateInspectionType: builder.mutation({
+  query: ({ id, formData }) => ({
+    url: `/inspection-types/${id}`,
+    method: "POST", 
+    body: formData,
+  }),
+  invalidatesTags: ["Inspection"],
+}),
 
         deleteInspectionType: builder.mutation({
       query: (id: number) => ({
@@ -32,4 +40,4 @@ export const inspectionApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetInspectionTypesQuery, useAddInspectionTypeMutation, useDeleteInspectionTypeMutation } = inspectionApi;
+export const { useGetInspectionTypesQuery, useAddInspectionTypeMutation, useUpdateInspectionTypeMutation, useDeleteInspectionTypeMutation } = inspectionApi;

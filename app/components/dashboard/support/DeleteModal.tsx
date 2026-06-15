@@ -10,9 +10,9 @@ export default function DeleteModal({ open, onConfirm, onCancel }: DeleteModalPr
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center ">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full p-6">
+    <div className="fixed  inset-0 z-50 flex items-center justify-center ">
+      <div className="absolute inset-0 bg-black/30 " onClick={onCancel} />
+      <div className="relative bg-white  max-w-md mx-auto rounded-2xl shadow-xl  p-6">
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fef2f2] mx-auto mb-4">
           <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#ef4444" strokeWidth="1.8">
             <path d="M6 2h8M4 5h12M5 5l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12" strokeLinecap="round" />

@@ -7,7 +7,9 @@ export interface FAQ {
   id: string;
   question: string;
   answer: string;
-  publishedAt: string;
+  status: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface FAQCardProps {
@@ -31,7 +33,7 @@ export default function FAQCard({ faq, index, onEdit, onDelete }: FAQCardProps) 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const formattedDate = new Date(faq.publishedAt).toLocaleString("en-US", {
+  const formattedDate = new Date(faq.createdAt).toLocaleString("en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -50,7 +52,7 @@ export default function FAQCard({ faq, index, onEdit, onDelete }: FAQCardProps) 
         <div className="relative flex-shrink-0" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((v) => !v)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#f3f4f6] text-[#6b7280] hover:text-[#1a1d23] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#f3f4f6] cursor-pointer text-[#6b7280] hover:text-[#1a1d23] transition-colors"
             aria-label="More options"
           >
             <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">

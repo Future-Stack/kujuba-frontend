@@ -10,9 +10,10 @@ interface FAQFormProps {
   editingFaq?: FAQ | null;
   onPublish: (question: string, answer: string) => void;
   onCancelEdit?: () => void;
+  loading?: boolean;
 }
 
-export default function FAQForm({ index, editingFaq, onPublish, onCancelEdit }: FAQFormProps) {
+export default function FAQForm({ index, editingFaq, onPublish, onCancelEdit,loading }: FAQFormProps) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
 
@@ -92,13 +93,22 @@ export default function FAQForm({ index, editingFaq, onPublish, onCancelEdit }: 
             Cancel
           </button>
         )}
-        <button
-          onClick={handleSubmit}
-          disabled={!question.trim() || !answer.trim()}
-          className="px-6 py-2 text-base font-semibold text-white bg-primaryColor hover:bg-[#4338ca] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg  cursor-pointer transition-colors"
-        >
-          {isEditing ? "Update" : "Publish"}
-        </button>
+      <button
+  onClick={handleSubmit}
+  disabled={!question.trim() || !answer.trim() || loading}
+  className="px-6 py-2 text-base font-semibold text-white bg-primaryColor hover:bg-[#4338ca] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg cursor-pointer transition-colors flex items-center gap-2"
+>
+  {loading ? (
+    <>
+      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+      Processing...
+    </>
+  ) : isEditing ? (
+    "Update"
+  ) : (
+    "Publish"
+  )}
+</button>
       </div>
     </div>
   );
