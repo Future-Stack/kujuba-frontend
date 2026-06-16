@@ -5,7 +5,7 @@ export const reviewsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
    
     getReviews: builder.query({
-      query: (filter) => `/review?filter=${filter}`,
+      query: (filter) => `/reviews?filter=${filter}`,
       providesTags: ["Reviews"],
     }),
 
