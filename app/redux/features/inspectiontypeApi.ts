@@ -7,10 +7,20 @@ export const inspectionApi = baseApi.injectEndpoints({
     
      // GET
   getInspectionTypes: builder.query<any, void>({
-  query: () => "/inspection-types",
-  providesTags: ["Inspection"],
+  query: () => ({
+  url: "/inspection-types",
+  method: "GET",
+  headers: {
+    skipAuth: "true"
+  }
+})
+  
 }),
 
+getInspectionTypeById: builder.query<any, number>({
+  query: (id) => `/inspection-types/${id}`,
+  providesTags: ["Inspection"],
+}),
 
     // ADD (CREATE)
     addInspectionType: builder.mutation({
@@ -40,4 +50,4 @@ export const inspectionApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetInspectionTypesQuery, useAddInspectionTypeMutation, useUpdateInspectionTypeMutation, useDeleteInspectionTypeMutation } = inspectionApi;
+export const { useGetInspectionTypesQuery, useGetInspectionTypeByIdQuery, useAddInspectionTypeMutation, useUpdateInspectionTypeMutation, useDeleteInspectionTypeMutation } = inspectionApi;
