@@ -71,6 +71,7 @@ export default function LoginPage() {
     if (!clientId) {
       console.warn("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set");
       return;
+
     }
 
     const initializeGoogle = () => {
@@ -110,7 +111,7 @@ export default function LoginPage() {
     }
     window.google.accounts.id.prompt(); 
   };
-
+console.log("FULL LOGIN URL:", `${process.env.NEXT_PUBLIC_API_URL}/login`);
   // ─── Email/password submit ────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
