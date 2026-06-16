@@ -32,6 +32,7 @@ interface Review {
 // ─── Normalize API response → Review ─────────────────────────────────────────
 
 const normalizeReview = (r: any): Review => {
+    console.log('full review object:', r);
   const inspector = r.inspection_assign?.inspector;
   const homeowner = r.homeowner;
   const types: any[] = r.inspection_assign?.inspection_booking?.inspection_types ?? [];
@@ -40,7 +41,7 @@ const normalizeReview = (r: any): Review => {
   const lastName = inspector?.last_name ?? '';
   const fullName = `${firstName} ${lastName}`.trim() || 'Unknown Inspector';
   const initials = ((firstName[0] ?? '') + (lastName[0] ?? '')).toUpperCase() || '??';
-
+  console.log('inspector status:', inspector?.status);
   return {
     id: r.id,                                    // review id
     inspectorId: inspector?.id ?? 0,             // inspector id
@@ -52,7 +53,8 @@ const normalizeReview = (r: any): Review => {
     inspectionType: types.map((t) => t.title).join(', ') || 'N/A',
     rating: parseFloat(r.rating ?? '0'),
     isFlagged: r.status === 'flagged',
-    isSuspended: r.suspendInspector === 1,
+    isSuspended: inspector?.status === "suspended",
+    
   };
 };
 
@@ -140,15 +142,22 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             >
               {isToggling ? 'Dismising...' : 'Dismiss Flag'}
             </button>
-            {!isSuspended && (
-              <button
-                onClick={() => onSuspend(review.id)}
-                disabled={isSuspending}
-                className="text-xs font-normal text-white bg-red-500 rounded-lg px-3 py-1.5 hover:bg-red-600 cursor-pointer font-roboto transition-colors disabled:opacity-50"
-              >
-                {isSuspending ? 'Suspending...' : 'Suspend Inspector'}
-              </button>
-            )}
+ {!isSuspended ? (
+  <button
+    onClick={() => onSuspend(review.id)}
+    disabled={isSuspending}
+    className="text-xs font-normal text-white bg-red-500 rounded-lg px-3 py-1.5"
+  >
+    {isSuspending ? "Suspending..." : "Suspend Inspector"}
+  </button>
+) : (
+  <button
+    disabled
+    className="text-xs font-normal text-gray-500 bg-gray-100 rounded-lg px-3 py-1.5 cursor-not-allowed"
+  >
+    Suspended
+  </button>
+)}
           </div>
         ) : (
           <button
