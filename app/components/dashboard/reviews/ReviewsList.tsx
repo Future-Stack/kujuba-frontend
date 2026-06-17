@@ -41,7 +41,6 @@ const normalizeReview = (r: any): Review => {
   const lastName = inspector?.last_name ?? '';
   const fullName = `${firstName} ${lastName}`.trim() || 'Unknown Inspector';
   const initials = ((firstName[0] ?? '') + (lastName[0] ?? '')).toUpperCase() || '??';
-  console.log('inspector status:', inspector?.status);
   return {
     id: r.id,                                    // review id
     inspectorId: inspector?.id ?? 0,             // inspector id
@@ -53,8 +52,11 @@ const normalizeReview = (r: any): Review => {
     inspectionType: types.map((t) => t.title).join(', ') || 'N/A',
     rating: parseFloat(r.rating ?? '0'),
     isFlagged: r.status === 'flagged',
-    isSuspended: inspector?.status === "suspended",
-    
+    // FIX: the /reviews list endpoint never includes `inspector.status`,
+    // only the dedicated suspend endpoint does. The list endpoint instead
+    // returns a `suspendInspector` flag (0/1) on the review itself — that's
+    // the correct field to read here.
+    isSuspended: Boolean(r.suspendInspector),
   };
 };
 
@@ -252,14 +254,14 @@ const handleFlag = async (reviewId: number) => {
 };
 
   // Suspend — review id pathao (backend response-e review_id ache)
-  const handleSuspend = async (reviewId: number) => {
-    try {
-      await suspendInspector(reviewId).unwrap();
-      toast.success("Suspend successfully")
-    } catch (err) {
-      console.error('Suspend error:', err);
-    }
-  };
+const handleSuspend = async (reviewId: number) => {
+  try {
+    await suspendInspector(reviewId).unwrap();
+    toast.success("Suspend successfully")
+  } catch (err) {
+    console.error('Suspend error:', err);
+  }
+};
 
   const filters: {
     key: FilterType;

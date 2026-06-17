@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Image from "next/image";
-import { Search, Download, Eye, Star, X, FileText, Image as ImageIcon, } from "lucide-react";
+
+import { Search, Download, Eye, Star, Image as ImageIcon, } from "lucide-react";
 import {
   useGetReportsQuery,
   useGetReportStatsQuery,
@@ -14,23 +14,6 @@ import ReportDetailsModal from "./ReportDetailsModal";
 
 type StatusFilter = "All" | "Started" | "Completed" | "Pending" | "Archived";
 
-// ── Download single row as CSV ─────────────────────────────────────────────
-// function downloadRowCSV(row: Report) {
-//   const headers = ["User Name", "Location", "Inspection ID", "Report ID", "Inspector Email", "Created Date", "Status", "Homeowner Feedback"];
-//   const values = [
-//     row.user_name, row.location ?? "", row.inspection_id, row.report_id,
-//     row.inspector_email, row.created_date, row.status, row.homeowner_feedback ?? "",
-//   ];
-//   const csv =
-//     "data:text/csv;charset=utf-8," +
-//     [headers.join(","), values.map((v) => `"${v}"`).join(",")].join("\n");
-//   const link = document.createElement("a");
-//   link.setAttribute("href", encodeURI(csv));
-//   link.setAttribute("download", `Report_${row.report_id}_${row.user_name.trim().replace(/\s+/g, "_") || "user"}.csv`);
-//   document.body.appendChild(link);
-//   link.click();
-//   document.body.removeChild(link);
-// }
 
 const statusStyle: Record<string, string> = {
   Complete: "bg-[#E6F9F0] text-[#10B981]",
@@ -157,7 +140,7 @@ export default function ReportsTable() {
     All: stats?.total_reports ?? reports.length,
     Started: reports.filter((r) => r.status === "Started").length,
     Completed: stats?.total_completed_reports ?? reports.filter((r) => r.status === "Completed").length,
-    Pending: stats?.total_pending_reports ?? reports.filter((r) => r.status === "Pending").length,
+    // Pending: stats?.total_pending_reports ?? reports.filter((r) => r.status === "Pending").length,
     Archived: stats?.total_archived_reports ?? reports.filter((r) => r.status === "Archived").length,
   };
 
