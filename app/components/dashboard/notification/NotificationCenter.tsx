@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useGetAllNotificationsQuery, useSendNotificationMutation } from "@/app/redux/features/notificationApi";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 type NotificationType =
   | "Announcement"
@@ -10,7 +13,10 @@ type NotificationType =
   | "Cancellation"
   | "Update";
 
-type Recipient = "All Users" | "All Inspectors" | "Active Inspectors (Miami)" | "Marcus Johnson" | "Patricia Williams";
+type Recipient =
+  | "All Users"
+  | "All Inspectors"
+  | "All Homeowners";
 
 interface Notification {
   id: string;
@@ -31,63 +37,6 @@ const TYPE_STYLES: Record<NotificationType, { badge: string; dot: string }> = {
   Update: { badge: "bg-[#5E65FF1A] text-[#5E65FF] ", dot: "bg-[#5E65FF1A]"  },
 };
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    title: "Platform Maintenance Scheduled",
-    message:
-      "InspectHub will undergo scheduled maintenance on May 20, 2026 from 2:00 AM – 4:00 AM EST. All services will be temporarily unavailable during this time.",
-    type: "Announcement",
-    recipients: 3847,
-    recipientLabel: "All Users",
-    sentAt: "2026-05-15 09:00 AM",
-    status: "delivered",
-  },
-  {
-    id: "2",
-    title: "Inspector Application Approved",
-    message:
-      "Congratulations! Your Inspector application has been reviewed and approved. You can now start accepting inspection requests on InspectHub.",
-    type: "Approval",
-    recipients: 1,
-    recipientLabel: "Marcus Johnson",
-    sentAt: "2026-05-14 03:22 PM",
-    status: "delivered",
-  },
-  {
-    id: "3",
-    title: "Urgent Inspection Assigned",
-    message:
-      "An urgent inspection has been assigned to you at 55 Harbor Lane, Fort Lauderdale. Please confirm your availability within 30 minutes.",
-    type: "Alert",
-    recipients: 12,
-    recipientLabel: "Active Inspectors (Miami)",
-    sentAt: "2026-05-15 11:45 AM",
-    status: "delivered",
-  },
-  {
-    id: "4",
-    title: "Booking Cancellation Notice",
-    message:
-      "Booking #BK-2043 for 403 Brickell Ave has been cancelled by the homeowner. A cancellation fee has been processed as per platform policy.",
-    type: "Cancellation",
-    recipients: 1,
-    recipientLabel: "Patricia Williams",
-    sentAt: "2026-05-13 09:15 AM",
-    status: "delivered",
-  },
-  {
-    id: "5",
-    title: "New Pricing Policy Effective June 1",
-    message:
-      "Updated inspection pricing takes effect on June 1, 2026. Four Point Inspections: $280. Roof: $240. Wind Mitigation: $195. Please review the updated fee schedule.",
-    type: "Update",
-    recipients: 218,
-    recipientLabel: "All Inspectors",
-    sentAt: "2026-05-10 10:00 AM",
-    status: "delivered",
-  },
-];
 
 const NOTIFICATION_TYPES: NotificationType[] = [
   "Announcement",
@@ -100,18 +49,36 @@ const NOTIFICATION_TYPES: NotificationType[] = [
 const RECIPIENTS: Recipient[] = [
   "All Users",
   "All Inspectors",
-  "Active Inspectors (Miami)",
-  "Marcus Johnson",
-  "Patricia Williams",
+  "All Homeowners",
 ];
 
+const recipientLabels = {
+  all_users: "All Users",
+  all_inspectors: "All Inspectors",
+  all_homeowners: "All Homeowners",
+};
 export default function NotificationCenter() {
-  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+const { data, isLoading, refetch } = useGetAllNotificationsQuery(undefined);
+
+const notifications =
+  data?.data?.map((item: any) => ({
+    id: item.id,
+    title: item.title,
+    message: item.message,
+    type: item.type,
+    recipients: item.recipients,
+    recipientLabel: item.sent_to,
+    sentAt: item.sent_at,
+    status: item.status,
+  })) || [];
+  const [sendNotification, { isLoading: sending }] =
+  useSendNotificationMutation();
+
   const [notifType, setNotifType] = useState<NotificationType>("Announcement");
-  const [sendTo, setSendTo] = useState<Recipient>("All Users");
+ const [sendTo, setSendTo] = useState<Recipient>("All Users");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [sending, setSending] = useState(false);
+  // const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; message?: string }>({});
   const [isTypeOpen, setIsTypeOpen] = useState(false);
@@ -125,52 +92,34 @@ const [openRecipient, setOpenRecipient] = useState(false);
     return e;
   }
 
-  async function handleSend() {
-    const e = validate();
-    if (Object.keys(e).length) {
-      setErrors(e);
-      return;
-    }
-    setErrors({});
-    setSending(true);
-    await new Promise((r) => setTimeout(r, 900));
+const handleSend = async () => {
+  try {
 
-    const recipientCount =
-      sendTo === "All Users"
-        ? Math.floor(Math.random() * 4000) + 500
-        : sendTo === "All Inspectors"
-        ? Math.floor(Math.random() * 300) + 50
-        : sendTo.startsWith("Active")
-        ? Math.floor(Math.random() * 30) + 5
-        : 1;
+const recipientMap: Record<Recipient, string> = {
+  "All Users": "all_users",
+  "All Inspectors": "all_inspectors",
+  "All Homeowners": "all_homeowners",
+};
 
-    const now = new Date();
-    const formatted = now.toLocaleString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+const payload = {
+  type: notifType.toLowerCase(),
+  title,
+  message,
+  send_to: recipientMap[sendTo],
+};
+    console.log("Sending payload:", payload);
 
-    const newNotif: Notification = {
-      id: Date.now().toString(),
-      title,
-      message,
-      type: notifType,
-      recipients: recipientCount,
-      recipientLabel: sendTo,
-      sentAt: formatted,
-      status: "delivered",
-    };
+    const res = await sendNotification(payload).unwrap();
 
-    setNotifications((prev) => [newNotif, ...prev]);
-    setTitle("");
-    setMessage("");
-    setSending(false);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    console.log("Response:", res);
+
+    toast.success("Notification sent successfully");
+    refetch()
+  } catch (error) {
+    console.error("Send error:", error);
+    toast.error("Failed to send notification");
   }
+};
 
   return (
     <div className="min-h-screen  font-roboto">
@@ -327,7 +276,7 @@ const [openRecipient, setOpenRecipient] = useState(false);
                 {notifications.length === 0 && (
                   <div className="py-16 text-center text-sm text-gray-400">No notifications yet.</div>
                 )}
-                {notifications.map((n) => (
+                {notifications.map((n:any) => (
                   <NotificationRow key={n.id} notification={n} />
                 ))}
               </div>

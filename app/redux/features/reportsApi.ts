@@ -29,7 +29,7 @@ export interface Report {
 
 export interface ReportStats {
   total_reports: number;
-  total_pending_reports: number;
+  // total_pending_reports: number;
   total_completed_reports: number;
   total_cancelled_reports: number;
   total_archived_reports: number;
