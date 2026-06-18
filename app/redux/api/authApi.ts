@@ -31,6 +31,38 @@ googleLogin: builder.mutation({
   }),
 }),
 
+forgotPassword: builder.mutation({
+  query: (body) => ({
+    url: "/forgot-password",
+    method: "POST",
+    body,
+  }),
+}),
+
+verifyOtp: builder.mutation({
+  query: (body) => ({
+    url: "/verify-otp",
+    method: "POST",
+    body,
+  }),
+}),
+
+resendOtp: builder.mutation({
+  query: (body) => ({
+    url: "/resend-otp",
+    method: "POST",
+    body,
+  }),
+}),
+
+resetPassword: builder.mutation({
+  query: (body) => ({
+    url: "/reset-password",
+    method: "POST",
+    body,
+  }),
+}),
+
 logout: builder.mutation<void, void>({
   query: () => ({
     url: "/logout",
@@ -40,4 +72,4 @@ logout: builder.mutation<void, void>({
   }),
 });
 
-export const { useLoginMutation, useChangePasswordMutation,useGoogleLoginMutation ,useLogoutMutation } = authApi;
+export const { useLoginMutation, useChangePasswordMutation,useGoogleLoginMutation, useForgotPasswordMutation, useVerifyOtpMutation,useResendOtpMutation,useResetPasswordMutation ,useLogoutMutation } = authApi;

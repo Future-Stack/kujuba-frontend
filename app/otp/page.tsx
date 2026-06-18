@@ -1,25 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useRef, useEffect, KeyboardEvent, ClipboardEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect, Suspense, KeyboardEvent, ClipboardEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthLayout from "../components/login/AuthLayout";
 import LogoIcon from "../components/icon/LogoIcon";
-
+import { useVerifyOtpMutation, useResendOtpMutation } from "../redux/api/authApi";
+import { toast } from "react-toastify";
 
 const OTP_LENGTH = 4;
+const RESEND_SECONDS = 300; // 5 minutes
 
-export default function OtpPage() {
+function OtpForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+
+  const [verifyOtp, { isLoading: isVerifying }] = useVerifyOtpMutation();
+  const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
+
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [timeLeft, setTimeLeft] = useState(RESEND_SECONDS);
   const [expired, setExpired] = useState(false);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  const router = useRouter();
 
   // countdown timer
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (timeLeft <= 0) { setExpired(true); return; }
+    if (timeLeft <= 0) {
+      setExpired(true);
+      return;
+    }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);
   }, [timeLeft]);
@@ -50,40 +60,67 @@ export default function OtpPage() {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
     const newOtp = [...otp];
-    pasted.split("").forEach((char, i) => { newOtp[i] = char; });
+    pasted.split("").forEach((char, i) => {
+      newOtp[i] = char;
+    });
     setOtp(newOtp);
     inputs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
   };
 
-  const handleResend = () => {
-    setOtp(Array(OTP_LENGTH).fill(""));
-    setTimeLeft(300);
-    setExpired(false);
-    inputs.current[0]?.focus();
+  const handleResend = async () => {
+    if (!email) {
+      toast.error("Missing email address. Please restart the process.");
+      return;
+    }
+    try {
+      await resendOtp({ email }).unwrap();
+      toast.success("OTP resent successfully");
+      setOtp(Array(OTP_LENGTH).fill(""));
+      setTimeLeft(RESEND_SECONDS);
+      setExpired(false);
+      inputs.current[0]?.focus();
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to resend OTP");
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/reset-password");
+    const otpValue = otp.join("");
+    if (otpValue.length < OTP_LENGTH) return;
+    if (!email) {
+      toast.error("Missing email address. Please restart the process.");
+      return;
+    }
+
+    try {
+      await verifyOtp({ email, otp: otpValue }).unwrap();
+      toast.success("OTP verified successfully");
+      // carrying email + otp forward so reset-password can confirm both in one call.
+      // if your API returns a one-time reset token from verify-otp instead, swap
+      // the line below to pass that token and read/send it on the reset page.
+      router.push(`/reset-password?email=${encodeURIComponent(email)}&otp=${otpValue}`);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Invalid or expired OTP");
+    }
   };
 
   return (
     <AuthLayout>
       <div className="w-full max-w-[420px]">
-      {/* Logo */}
+        {/* Logo */}
         <div className="flex justify-center mb-10">
-            <LogoIcon/>
+          <LogoIcon />
         </div>
-   
 
         {/* Card */}
         <div className="bg-white border border-gray-100 rounded-sm p-5 md:p-10 hover:shadow-sm">
-          <h1 className="ext-xl md:text-2xl font-bold text-gray-900 font-roboto leading-7 text-center mb-1">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 font-roboto leading-7 text-center mb-1">
             Verify Your Email
           </h1>
           <p className="text-sm text-gray-600 font-normal leading-5 text-center mb-6">
-            We have Sent OTP to{" "}
-            <span className="font-medium text-[#374151]">info@example.com</span>{" "}
+            We have sent an OTP to{" "}
+            <span className="font-medium text-[#374151]">{email || "your email"}</span>{" "}
             to verify your email address and activate your account by entering the OTP
           </p>
 
@@ -93,7 +130,9 @@ export default function OtpPage() {
               {otp.map((digit, index) => (
                 <input
                   key={index}
-                  ref={(el) => { inputs.current[index] = el; }}
+                  ref={(el) => {
+                    inputs.current[index] = el;
+                  }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
@@ -115,7 +154,7 @@ export default function OtpPage() {
 
             {/* Timer */}
             <div className="text-center">
-              <span className={`text-base font-normal leading-5 ${expired ? "text-[#E22871" : "text-[#EF4444]"}`}>
+              <span className={`text-base font-normal leading-5 ${expired ? "text-[#E22871]" : "text-[#EF4444]"}`}>
                 {expired ? "00:00" : formatTime(timeLeft)}
               </span>
             </div>
@@ -125,24 +164,33 @@ export default function OtpPage() {
               <button
                 type="button"
                 onClick={handleResend}
-                className="text-sm text-gray-900 font-normal leading-5 underline hover:text-[#5B5EF4] transition"
+                disabled={isResending}
+                className="text-sm text-gray-900 font-normal leading-5 underline hover:text-[#5B5EF4] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Resend OTP
+                {isResending ? "Resending..." : "Resend OTP"}
               </button>
             </div>
 
             <button
               type="submit"
-              disabled={otp.join("").length < OTP_LENGTH}
+              disabled={otp.join("").length < OTP_LENGTH || isVerifying}
               className="w-full bg-primaryColor hover:bg-[#4a4dd4] active:scale-[0.98] disabled:opacity-50
                 disabled:cursor-not-allowed text-white text-sm cursor-pointer font-semibold
                 py-3 rounded-sm transition-all duration-150"
             >
-              Submit
+              {isVerifying ? "Verifying..." : "Submit"}
             </button>
           </form>
         </div>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function OtpPage() {
+  return (
+    <Suspense fallback={null}>
+      <OtpForm />
+    </Suspense>
   );
 }

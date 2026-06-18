@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { LogOut, Search } from "lucide-react";
@@ -9,6 +10,7 @@ import Link from "next/link";
 import NotificationModal from "./NotificationModal";
 import { useLogoutMutation } from "@/app/redux/api/authApi";
 import { toast } from "react-toastify";
+import { useGetUserProfileQuery } from "@/app/redux/features/personalInfo";
 interface HeaderProps {
   onMenuToggle: () => void;
 }
@@ -24,6 +26,9 @@ const DashboardHeader: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const { data } = useGetUserProfileQuery();
+
+  const user = (data as any)?.data; 
   const [logout] = useLogoutMutation();
 
   const searchItems = [
@@ -245,16 +250,17 @@ const handleLogout = async () => {
               onClick={() => setShowDropdown(!showDropdown)}
             >
               <div className="relative w-10 h-10 rounded-full bg-slate-200 overflow-hidden border border-slate-100 flex-shrink-0">
-                <img src="/placeholder.svg" alt="" />
+                <img  src={user?.profile?.profile_img || "/placeholder.svg"} alt="" />
+                
               </div>
 
               <div className="hidden lg:block text-left leading-tight">
                 <h4 className="text-base font-semibold text-[#000000] group-hover:text-indigo-600 transition-colors">
-                  Caryadee
+                    {user?.first_name} {user?.last_name}
                 </h4>
 
                 <span className="text-xs font-bold text-[#8F8F8F]">
-                  Super Admin
+                  {user?.user_types || "Super Admin"}
                 </span>
               </div>
 
