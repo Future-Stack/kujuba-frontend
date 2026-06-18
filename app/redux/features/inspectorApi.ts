@@ -86,7 +86,7 @@ export const inspectorApi = baseApi.injectEndpoints({
       { success: boolean; data: InspectorStats },
       void
     >({
-      query: () => "/admin/inspector/stats",
+      query: () => "/admin/inspectors/stats",
       providesTags: ["Inspector"],
     }),
 
