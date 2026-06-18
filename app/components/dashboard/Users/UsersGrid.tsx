@@ -6,45 +6,61 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { Search, ArrowUpDown, Download, Mail, ChevronRight, ChevronDown } from "lucide-react";
 import UserDetailsModal, { UserCard } from "./UserDetailsModal";
+import { useGetUserByIdQuery, useGetUsersQuery } from "@/app/redux/features/usersApi";
 
 
-const initialUsers: UserCard[] = [
-  { id: "1", name: "Brain Thompson", role: "User", location: "Florida", email: "brian@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", createdAt: 1716462000000, status: "Active", joiningDate: "10 Apr, 2025" },
-  { id: "2", name: "Florence Haith", role: "User", location: "Florida", email: "florence@example.com", phone: "+1 310 555 0190", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80", createdAt: 1716375600000, status: "Active", joiningDate: "08 Apr, 2025" },
-  { id: "3", name: "Jerry Palmer", role: "User", location: "Florida", email: "jerry@example.com", phone: "+1 415 555 0122", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80", createdAt: 1716289200000, status: "Active", joiningDate: "06 Apr, 2025" },
-  { id: "4", name: "Mark Brainerd", role: "User", location: "Florida", email: "mark@example.com", phone: "+1 646 555 0167", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", createdAt: 1716202800000, status: "Suspended", joiningDate: "04 Apr, 2025" },
-  { id: "5", name: "Roy Thomas", role: "User", location: "Florida", email: "roy@example.com", phone: "+1 702 555 0181", inspectionsCount: 3, cancelledInspections: 3, avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80", createdAt: 1716116400000, status: "Active", joiningDate: "02 Apr, 2025" },
-  { id: "6", name: "Alisia Chen", role: "User", location: "Florida", email: "alisia@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80", createdAt: 1716030000000, status: "Active", joiningDate: "01 Apr, 2025" },
-  { id: "7", name: "Kelly Myers", role: "User", location: "Florida", email: "kelly@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, createdAt: 1715943600000, status: "Active", joiningDate: "30 Mar, 2025" },
-  { id: "8", name: "James Walton", role: "User", location: "Florida", email: "james@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=100&q=80", createdAt: 1715857200000, status: "Active", joiningDate: "28 Mar, 2025" },
-  { id: "9", name: "Dennis Smith", role: "User", location: "Florida", email: "dennis@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80", createdAt: 1715770800000, status: "Suspended", joiningDate: "26 Mar, 2025" },
-  { id: "10", name: "David Spiegel", role: "User", location: "Florida", email: "david@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80", createdAt: 1715684400000, status: "Active", joiningDate: "24 Mar, 2025" },
-  { id: "11", name: "Melissa Davis", role: "User", location: "Florida", email: "melissa@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80", createdAt: 1715598000000, status: "Active", joiningDate: "22 Mar, 2025" },
-  { id: "12", name: "Roberto Theisen", role: "Italy", location: "Florida", email: "roberto@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=100&q=80", createdAt: 1715511600000, status: "Active", joiningDate: "20 Mar, 2025" },
-];
+// const initialUsers: UserCard[] = [
+//   { id: "1", name: "Brain Thompson", role: "User", location: "Florida", email: "brian@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", createdAt: 1716462000000, status: "Active", joiningDate: "10 Apr, 2025" },
+//   { id: "2", name: "Florence Haith", role: "User", location: "Florida", email: "florence@example.com", phone: "+1 310 555 0190", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80", createdAt: 1716375600000, status: "Active", joiningDate: "08 Apr, 2025" },
+//   { id: "3", name: "Jerry Palmer", role: "User", location: "Florida", email: "jerry@example.com", phone: "+1 415 555 0122", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80", createdAt: 1716289200000, status: "Active", joiningDate: "06 Apr, 2025" },
+//   { id: "4", name: "Mark Brainerd", role: "User", location: "Florida", email: "mark@example.com", phone: "+1 646 555 0167", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", createdAt: 1716202800000, status: "Suspended", joiningDate: "04 Apr, 2025" },
+//   { id: "5", name: "Roy Thomas", role: "User", location: "Florida", email: "roy@example.com", phone: "+1 702 555 0181", inspectionsCount: 3, cancelledInspections: 3, avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80", createdAt: 1716116400000, status: "Active", joiningDate: "02 Apr, 2025" },
+//   { id: "6", name: "Alisia Chen", role: "User", location: "Florida", email: "alisia@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80", createdAt: 1716030000000, status: "Active", joiningDate: "01 Apr, 2025" },
+//   { id: "7", name: "Kelly Myers", role: "User", location: "Florida", email: "kelly@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, createdAt: 1715943600000, status: "Active", joiningDate: "30 Mar, 2025" },
+//   { id: "8", name: "James Walton", role: "User", location: "Florida", email: "james@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=100&q=80", createdAt: 1715857200000, status: "Active", joiningDate: "28 Mar, 2025" },
+//   { id: "9", name: "Dennis Smith", role: "User", location: "Florida", email: "dennis@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80", createdAt: 1715770800000, status: "Suspended", joiningDate: "26 Mar, 2025" },
+//   { id: "10", name: "David Spiegel", role: "User", location: "Florida", email: "david@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80", createdAt: 1715684400000, status: "Active", joiningDate: "24 Mar, 2025" },
+//   { id: "11", name: "Melissa Davis", role: "User", location: "Florida", email: "melissa@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80", createdAt: 1715598000000, status: "Active", joiningDate: "22 Mar, 2025" },
+//   { id: "12", name: "Roberto Theisen", role: "Italy", location: "Florida", email: "roberto@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=100&q=80", createdAt: 1715511600000, status: "Active", joiningDate: "20 Mar, 2025" },
+// ];
 
 export default function UserGridDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null); 
+ const [selectedId, setSelectedId] = useState<number | null>(null);
+const { data: usersData, isLoading } = useGetUsersQuery("homeowner");
 
-  const filteredAndSortedUsers = useMemo(() => {
-    let result = [...initialUsers];
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (user) =>
-          user.name.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query) ||
-          user.location.toLowerCase().includes(query)
-      );
-    }
-    result.sort((a, b) =>
-      sortOrder === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+ const { data: singleUserData } = useGetUserByIdQuery(
+  { id: selectedId as number, user_type: "homeowner" },
+  { skip: !selectedId }
+);
+  
+const users = usersData?.data?.data || [];
+
+const filteredAndSortedUsers = useMemo(() => {
+  let result = [...users];
+
+  if (searchQuery.trim() !== "") {
+    const query = searchQuery.toLowerCase();
+
+    result = result.filter(
+      (user) =>
+        user.first_name?.toLowerCase().includes(query) ||
+        user.email?.toLowerCase().includes(query) ||
+        user.address?.toLowerCase().includes(query)
     );
-    return result;
-  }, [searchQuery, sortOrder]);
+  }
+
+  result.sort((a, b) =>
+    sortOrder === "newest"
+      ? new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+
+  return result;
+}, [users, searchQuery, sortOrder]);
 
 
   const handleExport = () => {
@@ -131,7 +147,16 @@ export default function UserGridDashboard() {
         {filteredAndSortedUsers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {filteredAndSortedUsers.map((user) => {
-              const initials = user.name.split(" ").map((n:any) => n[0]).join("").toUpperCase().slice(0, 2);
+              const fullName = `${user.first_name || ""} ${user.last_name || ""}`;
+
+const initials = fullName
+  .trim()
+  .split(" ")
+  .map((n) => n[0])
+  .join("")
+  .toUpperCase()
+  .slice(0, 2);
+             
               return (
                 <div
                   key={user.id}
@@ -140,20 +165,26 @@ export default function UserGridDashboard() {
                   <div>
                     <div className="flex items-center gap-3 mb-5">
                       <div className="relative w-11 h-11 shrink-0">
-                        {user.avatarUrl ? (
-                          <div className="w-full h-full rounded-full overflow-hidden relative border border-gray-50">
-                            <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" unoptimized />
-                          </div>
-                        ) : (
-                          <div className="w-full h-full bg-purple-50 text-purple-600 rounded-full flex items-center justify-center font-bold text-xs tracking-wide border border-purple-100">
-                            {initials}
-                          </div>
-                        )}
+                    {user.image ? (
+  <div className="w-full h-full rounded-full overflow-hidden relative border border-gray-50">
+    <Image
+      src={user.image}
+      alt={`${user.first_name} ${user.last_name}`}
+      fill
+      className="object-cover"
+      unoptimized
+    />
+  </div>
+) : (
+  <div className="w-full h-full bg-purple-50 text-purple-600 rounded-full flex items-center justify-center font-bold text-xs">
+    {initials}
+  </div>
+)}
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#09BD3C] border-2 border-white shadow-sm" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-blue-600 transition-colors">{user.name}</h4>
-                        <p className="text-[13px] text-gray-600 font-normal leading-4 mt-0.5">{user.role}</p>
+                        <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-blue-600 transition-colors">  {user.first_name} {user.last_name}</h4>
+                        <p className="text-[13px] text-gray-600 font-normal leading-4 mt-0.5">{user.user_type}</p>
                       </div>
                     </div>
 
@@ -162,11 +193,11 @@ export default function UserGridDashboard() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                           <path d="M2 14H14M3.33333 14V4.66667L8.66667 2V14M12.6667 14V7.33333L8.66667 4.66667M6 6V6.00667M6 8V8.00667M6 10V10.0067M6 12V12.0067" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        <span className="truncate">{user.location}</span>
+                        <span className="truncate">{user.address}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 font-normal leading-5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-  <path d="M2 4.66671C2 4.31309 2.14048 3.97395 2.39052 3.7239C2.64057 3.47385 2.97971 3.33337 3.33333 3.33337H12.6667C13.0203 3.33337 13.3594 3.47385 13.6095 3.7239C13.8595 3.97395 14 4.31309 14 4.66671M2 4.66671V11.3334C2 11.687 2.14048 12.0261 2.39052 12.2762C2.64057 12.5262 2.97971 12.6667 3.33333 12.6667H12.6667C13.0203 12.6667 13.3594 12.5262 13.6095 12.2762C13.8595 12.0261 14 11.687 14 11.3334V4.66671M2 4.66671L8 8.66671L14 4.66671" stroke="#1A1A1A" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M2 4.66671C2 4.31309 2.14048 3.97395 2.39052 3.7239C2.64057 3.47385 2.97971 3.33337 3.33333 3.33337H12.6667C13.0203 3.33337 13.3594 3.47385 13.6095 3.7239C13.8595 3.97395 14 4.31309 14 4.66671M2 4.66671V11.3334C2 11.687 2.14048 12.0261 2.39052 12.2762C2.64057 12.5262 2.97971 12.6667 3.33333 12.6667H12.6667C13.0203 12.6667 13.3594 12.5262 13.6095 12.2762C13.8595 12.0261 14 11.687 14 11.3334V4.66671M2 4.66671L8 8.66671L14 4.66671" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
 </svg>
                         <span className="truncate">{user.email}</span>
                       </div>
@@ -174,7 +205,7 @@ export default function UserGridDashboard() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                           <path d="M7.33333 2.66667H8.66667M8 11.3333V11.34M4 3.33333C4 2.97971 4.14048 2.64057 4.39052 2.39052C4.64057 2.14048 4.97971 2 5.33333 2H10.6667C11.0203 2 11.3594 2.14048 11.6095 2.39052C11.8595 2.64057 12 2.97971 12 3.33333V12.6667C12 13.0203 11.8595 13.3594 11.6095 13.6095C11.3594 13.8595 11.0203 14 10.6667 14H5.33333C4.97971 14 4.64057 13.8595 4.39052 13.6095C4.14048 13.3594 4 13.0203 4 12.6667V3.33333Z" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        <span className="truncate">{user.phone}</span>
+                        <span className="truncate">{user.phone || "N/A"}</span>
                       </div>
                     </div>
                   </div>
@@ -183,12 +214,15 @@ export default function UserGridDashboard() {
                     <div className="flex items-center justify-between text-[13px] text-gray-900 font-semibold leading-5 mb-3 px-0.5">
                       <span>Inspection</span>
                       <span className="text-gray-900 text-sm leading-5 font-normal px-1.5 py-0.5 rounded">
-                        {String(user.inspectionsCount).padStart(2, "0")}
+                       {String(user.total_inspections).padStart(2, "0")}
                       </span>
                     </div>
 
                     <button
-                      onClick={() => setSelectedUser(user)} 
+                      onClick={() => {
+  setSelectedId(user.id);
+  setSelectedUser(user);
+}}
                       className="w-full border border-gray-200 text-gray-900 hover:bg-blue-600 hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-1 transition-colors"
                     >
                       <span>View Details</span>
@@ -209,12 +243,12 @@ export default function UserGridDashboard() {
       </div>
 
     
-      {selectedUser && (
-        <UserDetailsModal
-          user={selectedUser}
-          onClose={() => setSelectedUser(null)}
-        />
-      )}
+{selectedUser && (
+  <UserDetailsModal
+    user={selectedUser}
+    onClose={() => setSelectedUser(null)}
+  />
+)}
     </div>
   );
 }

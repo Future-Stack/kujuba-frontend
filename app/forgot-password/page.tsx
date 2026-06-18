@@ -1,20 +1,36 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import {  Mail,  } from "lucide-react";
+import { Mail } from "lucide-react";
 import AuthLayout from "../components/login/AuthLayout";
 import LogoIcon from "../components/icon/LogoIcon";
-
-
+import { useRouter } from "next/navigation";
+import { useForgotPasswordMutation } from "../redux/api/authApi";
+import { toast } from "react-toastify";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // handle login
+
+    try {
+      await forgotPassword({
+        email: form.email,
+      }).unwrap();
+
+      toast.success("OTP sent successfully");
+
+      // OTP page e redirect, with the email carried along in the query string
+      router.push(`/otp?email=${encodeURIComponent(form.email)}`);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to send OTP");
+    }
   };
 
   return (
@@ -22,7 +38,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-[420px]">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-            <LogoIcon/>
+          <LogoIcon />
         </div>
 
         {/* Card */}
@@ -35,7 +51,7 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium leading-5 font-robot text-gray-900">Email</label>
+              <label className="text-sm font-medium leading-5 font-roboto text-gray-900">Email</label>
               <div className="relative">
                 <input
                   type="email"
@@ -49,35 +65,24 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-         
-
-     
             {/* Submit */}
-            <Link href="/otp">
-             <button
+            <button
               type="submit"
+              disabled={isLoading}
               className="w-full bg-primaryColor hover:bg-[#4a4dd4] active:scale-[0.98] text-white text-sm font-semibold
-                py-2.5 rounded-lg transition-all duration-150 cursor-pointer mt-4"
+                py-2.5 rounded-lg transition-all duration-150 cursor-pointer mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Verify Email
+              {isLoading ? "Sending..." : "Verify Email"}
             </button>
-            </Link>
-    <p className="text-sm flex gap-2 text-gray-600 items-center justify-center mt-5">
-        Return to 
- <Link href="/" className="text-gray-900 font-medium hover:underline">
-            Sign In
-          </Link>
-</p>
-   
+
+            <p className="text-sm flex gap-2 text-gray-600 items-center justify-center mt-5">
+              Return to
+              <Link href="/" className="text-gray-900 font-medium hover:underline">
+                Sign In
+              </Link>
+            </p>
           </form>
         </div>
-
-        {/* <p className="text-sm text-[#9CA3AF] text-center mt-5">
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-[#5B5EF4] font-medium hover:underline">
-            Signup now
-          </Link>
-        </p> */}
       </div>
     </AuthLayout>
   );
