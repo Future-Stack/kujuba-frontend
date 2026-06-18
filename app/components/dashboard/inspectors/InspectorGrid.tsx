@@ -2,10 +2,47 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { Search, Download, ChevronRight, ChevronDown } from "lucide-react";
+import { Search, Download, ChevronDown } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import InspectorDetailModal, { InspectorCard, InspectorStatus } from "./InspectorModal";
 
+import InspectorDetailModal, { InspectorCard, InspectorStatus } from "./InspectorModal";
+import {
+  useGetInspectorsQuery,
+  useApproveInspectorMutation,
+  Inspector,
+} from "@/app/redux/features/inspectorApi";
+import { toast } from "react-toastify";
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+/** Normalize API status string → component InspectorStatus */
+function toStatus(raw: string): InspectorStatus {
+  const map: Record<string, InspectorStatus> = {
+    active:         "Active",
+    pending:        "Pending Review",
+    pending_review: "Pending Review",
+    suspended:      "Suspended",
+    rejected:       "Rejected",
+  };
+  return map[raw?.toLowerCase()] ?? "Active";
+}
+
+/** Map a raw API Inspector → InspectorCard used by the grid / modal */
+function toCard(inspector: Inspector): InspectorCard {
+  return {
+    id:             String(inspector.id),
+    name:           inspector.name,
+    role:           "Licensed Inspector",
+    inspectionType: inspector.inspection_type ?? "N/A",
+    email:          inspector.email,
+    phone:          inspector.phone,
+    status:         toStatus(inspector.status),
+    avatarUrl:      inspector.image ?? "",
+    createdAt:      new Date(inspector.created_at).getTime(),
+  };
+}
+
+// ─── tab config ─────────────────────────────────────────────────────────────
 
 type TabType = InspectorStatus | "All";
 
@@ -15,33 +52,69 @@ interface TabItem {
   badge?: string;
 }
 
-const INITIAL_INSPECTORS: InspectorCard[] = [
-  { id: "1", name: "Shaun Farley",  role: "Licensed Inspector", inspectionType: "Flood Elevation",      email: "shaun@example.com",  phone: "+1 578 209 4965", status: "Active",         avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", createdAt: 1716548400000 },
-  { id: "2", name: "Jenny Ellis",   role: "Licensed Inspector", inspectionType: "Wind Mitigation",      email: "jenny@example.com",  phone: "+1 278 301 7284", status: "Pending Review", avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80", createdAt: 1716462000000 },
-  { id: "3", name: "Leon Baxter",   role: "Licensed Inspector", inspectionType: "Roof Inspection",      email: "leon@example.com",   phone: "+1 212 555 0173", status: "Active",         avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80", createdAt: 1716375600000 },
-  { id: "4", name: "Adrian Travon", role: "Licensed Inspector", inspectionType: "Four Point Inspection",email: "adrian@example.com", phone: "+1 310 555 0148", status: "Suspended",      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", createdAt: 1716289200000 },
-  { id: "5", name: "Marcus Vance",  role: "Licensed Inspector", inspectionType: "Four Point Inspection",email: "marcus@example.com", phone: "+1 310 555 0148", status: "Rejected",       avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80", createdAt: 1716202800000 },
-  { id: "6", name: "Sarah Jenkins", role: "Licensed Inspector", inspectionType: "Combined Inspection",  email: "sarah@example.com",  phone: "+1 578 209 4965", status: "Active",         avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80", createdAt: 1716116400000 },
-];
-
 const paramToTab: Record<string, TabType> = {
-  active: "Active", pending: "Pending Review", suspended: "Suspended", rejected: "Rejected",
+  active: "Active", pending: "Pending Review",
+  suspended: "Suspended", rejected: "Rejected",
 };
 const tabToParam: Record<TabType, string> = {
-  All: "", Active: "active", "Pending Review": "pending", Suspended: "suspended", Rejected: "rejected",
+  All: "", Active: "active", "Pending Review": "pending",
+  Suspended: "suspended", Rejected: "rejected",
 };
+
+// ─── skeleton ────────────────────────────────────────────────────────────────
+
+function CardSkeleton() {
+  return (
+    <div className="bg-white rounded-sm border border-gray-200 p-5 flex flex-col justify-between animate-pulse">
+      <div>
+        {/* avatar + name row */}
+        <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
+          <div className="w-11 h-11 rounded-full bg-gray-200 shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 bg-gray-200 rounded w-3/4" />
+            <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+          </div>
+        </div>
+        {/* inspection type */}
+        <div className="space-y-4 mb-5">
+          <div className="space-y-1.5">
+            <div className="h-2.5 bg-gray-200 rounded w-1/3" />
+            <div className="h-2.5 bg-gray-100 rounded w-2/3" />
+          </div>
+          <div className="pt-4 border-t border-gray-100 space-y-2">
+            <div className="h-2.5 bg-gray-100 rounded w-full" />
+            <div className="h-2.5 bg-gray-100 rounded w-3/4" />
+          </div>
+        </div>
+      </div>
+      {/* button */}
+      <div className="h-9 bg-gray-100 rounded-sm w-full mt-2" />
+    </div>
+  );
+}
+
+// ─── main component ──────────────────────────────────────────────────────────
 
 export default function InspectorGrid() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // ✅ inspectors now in state so status updates re-render the grid
-  const [inspectors, setInspectors] = useState<InspectorCard[]>(INITIAL_INSPECTORS);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery]       = useState("");
+  const [sortOrder, setSortOrder]           = useState<"newest" | "oldest">("newest");
+  const [sortOpen, setSortOpen]             = useState(false);
   const [selectedInspector, setSelectedInspector] = useState<InspectorCard | null>(null);
 
+  // ── data fetching ──────────────────────────────────────────────────────────
+  const { data, isLoading, isError } = useGetInspectorsQuery();
+  const [approveInspector, { isLoading: approvingId }] = useApproveInspectorMutation();
+
+  // Map raw API data → InspectorCard[]
+  const inspectors: InspectorCard[] = useMemo(
+    () => (data?.data?.inspectors ?? []).map(toCard),
+    [data]
+  );
+
+  // ── tabs ───────────────────────────────────────────────────────────────────
   const activeTab = useMemo<TabType>(() => {
     const tab = searchParams.get("tab") ?? "";
     return paramToTab[tab] ?? "All";
@@ -52,112 +125,90 @@ export default function InspectorGrid() {
     router.push(param ? `?tab=${param}` : "?");
   };
 
-  const handleOpenModal = useCallback((inspector: InspectorCard) => {
-    setSelectedInspector(inspector);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedInspector(null);
-  }, []);
-
-  // ✅ Updates inspector status in state — grid re-renders with new status instantly
-  const handleStatusChange = useCallback((id: string, newStatus: InspectorStatus) => {
-    setInspectors((prev) =>
-      prev.map((inspector) =>
-        inspector.id === id ? { ...inspector, status: newStatus } : inspector
-      )
-    );
-  }, []);
-
-  // ✅ Grid Approve button handler (Pending Review → Active)
-  const handleGridApprove = useCallback((e: React.MouseEvent, inspector: InspectorCard) => {
-    e.stopPropagation(); // prevent card click
-    handleStatusChange(inspector.id, "Active");
-  }, [handleStatusChange]);
-
+  // ── counts (derived from fetched data) ────────────────────────────────────
   const counts = useMemo(() => ({
     All:              inspectors.length,
     Active:           inspectors.filter((i) => i.status === "Active").length,
     "Pending Review": inspectors.filter((i) => i.status === "Pending Review").length,
     Suspended:        inspectors.filter((i) => i.status === "Suspended").length,
     Rejected:         inspectors.filter((i) => i.status === "Rejected").length,
-  }), [inspectors]); // ✅ recomputes when inspectors state changes
+  }), [inspectors]);
 
   const tabs: TabItem[] = [
     { name: "All",            count: null },
-    { name: "Active",         count: counts.Active,           badge: "bg-emerald-500 text-white" },
+    { name: "Active",         count: counts.Active,            badge: "bg-emerald-500 text-white" },
     { name: "Pending Review", count: counts["Pending Review"], badge: "bg-amber-400 text-white" },
     { name: "Suspended",      count: counts.Suspended,         badge: "bg-rose-400 text-white" },
     { name: "Rejected",       count: counts.Rejected,          badge: "bg-red-400 text-white" },
   ];
 
-
-  
+  // ── filter + sort ──────────────────────────────────────────────────────────
   const filteredAndSortedInspectors = useMemo(() => {
     let result = [...inspectors];
     if (activeTab !== "All") result = result.filter((i) => i.status === activeTab);
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((i) =>
-        i.name.toLowerCase().includes(query) ||
-        i.email.toLowerCase().includes(query) ||
-        i.inspectionType.toLowerCase().includes(query)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (i) =>
+          i.name.toLowerCase().includes(q) ||
+          i.email.toLowerCase().includes(q) ||
+          i.inspectionType.toLowerCase().includes(q)
       );
     }
-    result.sort((a, b) => sortOrder === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+    result.sort((a, b) =>
+      sortOrder === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+    );
     return result;
-  }, [inspectors, activeTab, searchQuery, sortOrder]); // ✅ depends on inspectors state
+  }, [inspectors, activeTab, searchQuery, sortOrder]);
 
+  // ── modal handlers ─────────────────────────────────────────────────────────
+  const handleOpenModal  = useCallback((inspector: InspectorCard) => setSelectedInspector(inspector), []);
+  const handleCloseModal = useCallback(() => setSelectedInspector(null), []);
 
+  // Called by modal after a successful API action — just close (RTK invalidates cache)
+  const handleStatusChange = useCallback((_id: string, _newStatus: InspectorStatus) => {
+    setSelectedInspector(null);
+  }, []);
+
+  // ── grid-level approve (Pending Review card) ───────────────────────────────
+  const handleGridApprove = useCallback(async (e: React.MouseEvent, inspector: InspectorCard) => {
+    e.stopPropagation();
+    try {
+      await approveInspector(Number(inspector.id)).unwrap();
+      toast.success(`${inspector.name} has been approved.`);
+    } catch {
+      toast.error("Failed to approve inspector. Please try again.");
+    }
+  }, [approveInspector]);
+
+  // ── export ─────────────────────────────────────────────────────────────────
   const handleExport = () => {
-  const headers = [
-    "Name",
-    "Role",
-    "Inspection Type",
-    "Email",
-    "Phone",
-    "Status",
-    "Created At",
-  ];
+    const headers = ["Name", "Role", "Inspection Type", "Email", "Phone", "Status", "Created At"];
+    const rows = filteredAndSortedInspectors.map((i) => [
+      i.name, i.role, i.inspectionType, i.email, i.phone, i.status,
+      new Date(i.createdAt).toLocaleDateString(),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((v) => `"${v ?? ""}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url; a.setAttribute("download", "inspectors-data.csv");
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
 
-  const rows = filteredAndSortedInspectors.map((inspector) => [
-    inspector.name,
-    inspector.role,
-    inspector.inspectionType,
-    inspector.email,
-    inspector.phone,
-    inspector.status,
-    new Date(inspector.createdAt).toLocaleDateString(),
-  ]);
-
-  const csvContent = [headers, ...rows]
-    .map((row) => row.map((v) => `"${v ?? ""}"`).join(","))
-    .join("\n");
-
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "inspectors-data.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
+  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="w-full bg-[#f8fafc]/40 min-h-screen font-roboto my-6 md:my-12 antialiased">
-      <div className="border rounded-sm border-gray-100  px-4 py-6">
+      <div className="border rounded-sm border-gray-100 px-4 py-6">
+
+        {/* ── Toolbar ── */}
         <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between mb-8 bg-white">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center flex-1">
             {/* Search */}
             <div className="relative w-full lg:max-w-xs shrink-0">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
-                type="text"
-                placeholder="Search inspector..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                type="text" placeholder="Search inspector..."
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/60 border border-gray-100 rounded-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400 leading-5 font-medium"
               />
             </div>
@@ -166,8 +217,7 @@ export default function InspectorGrid() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 no-scrollbar tracking-tight">
               {tabs.map((tab) => (
                 <button
-                  key={tab.name}
-                  onClick={() => handleTabChange(tab.name)}
+                  key={tab.name} onClick={() => handleTabChange(tab.name)}
                   className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
                     activeTab === tab.name ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
                   }`}
@@ -185,9 +235,9 @@ export default function InspectorGrid() {
 
           {/* Sort + Export */}
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <div className="relative">
+            {/* <div className="relative">
               <button
-                onClick={() => setOpen(!open)}
+                onClick={() => setSortOpen(!sortOpen)}
                 className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-sm px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -196,13 +246,13 @@ export default function InspectorGrid() {
                 <span>Sort By : {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </button>
-              {open && (
+              {sortOpen && (
                 <div className="absolute right-0 mt-2 w-44 rounded-xl border border-gray-100 bg-white text-gray-600 shadow-lg z-50 overflow-hidden">
-                  <button onClick={() => { setSortOrder("newest"); setOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Newest</button>
-                  <button onClick={() => { setSortOrder("oldest"); setOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Oldest</button>
+                  <button onClick={() => { setSortOrder("newest"); setSortOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Newest</button>
+                  <button onClick={() => { setSortOrder("oldest"); setSortOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Oldest</button>
                 </div>
               )}
-            </div>
+            </div> */}
             <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-sm shadow-md shadow-blue-100 transition-all cursor-pointer active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
               <span>Export Inspector Data</span>
@@ -210,18 +260,32 @@ export default function InspectorGrid() {
           </div>
         </div>
 
-        {/* Grid */}
-        {filteredAndSortedInspectors.length > 0 ? (
+        {/* ── Grid ── */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+            {Array.from({ length: 10 }).map((_, i) => <CardSkeleton key={i} />)}
+          </div>
+        ) : isError ? (
+          <div className="w-full text-center py-20 bg-white rounded-2xl border border-dashed border-red-200">
+            <p className="text-red-400 font-medium text-sm">Failed to load inspectors. Please refresh.</p>
+          </div>
+        ) : filteredAndSortedInspectors.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {filteredAndSortedInspectors.map((inspector) => (
-              <div key={inspector.id} className="bg-white rounded-sm border border-gray-200 p-5  hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+              <div key={inspector.id} className="bg-white rounded-sm border border-gray-200 p-5 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
                 <div>
                   <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
                     <div className="relative w-11 h-11 shrink-0">
-                      <div className="w-full h-full rounded-full overflow-hidden relative border border-gray-100">
-                        <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
+                      <div className="w-full h-full rounded-full overflow-hidden relative border border-gray-100 bg-purple-50 flex items-center justify-center">
+                        {inspector.avatarUrl ? (
+                          <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
+                        ) : (
+                          <span className="text-purple-600 font-bold text-xs">
+                            {inspector.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                          </span>
+                        )}
                       </div>
-                      <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${inspector.status === "Active" ? "bg-[#09BD3C]" : "bg-gray-200"}`} />
+                      <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${inspector.status === "Active" ? "bg-[#09BD3C]" : "bg-gray-300"}`} />
                     </div>
                     <div className="min-w-0">
                       <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-primaryColor transition-colors">{inspector.name}</h4>
@@ -254,65 +318,33 @@ export default function InspectorGrid() {
                 <div className="pt-2">
                   {inspector.status === "Pending Review" ? (
                     <div className="grid grid-cols-2 gap-2">
-                  <button
-  onClick={() => handleOpenModal(inspector)}
-  className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-1 rounded-sm flex items-center justify-center gap-1 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
->
-  <span className="transition-all duration-300 group-hover:translate-x-[-2px]">
-    View Details
-  </span>
-
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]"
-  >
-    <path
-      d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-</button>
-                      {/* ✅ Grid Approve button — works without opening modal */}
+                      <button
+                        onClick={() => handleOpenModal(inspector)}
+                        className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-1 rounded-sm flex items-center justify-center gap-1 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+                      >
+                        <span className="transition-all duration-300 group-hover:translate-x-[-2px]">View Details</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]">
+                          <path d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
                       <button
                         onClick={(e) => handleGridApprove(e, inspector)}
-                        className="bg-primaryColor text-white hover:bg-blue-600 font-medium text-xs py-2 rounded-sm transition-colors cursor-pointer text-center shadow-sm"
+                        disabled={approvingId}
+                        className="bg-primaryColor text-white hover:bg-blue-600 font-medium text-xs py-2 rounded-sm transition-colors cursor-pointer text-center shadow-sm disabled:opacity-60"
                       >
-                        Approve
+                        {approvingId ? "..." : "Approve"}
                       </button>
                     </div>
                   ) : (
-                   <button
-  onClick={() => handleOpenModal(inspector)}
-  className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
->
-  <span className="transition-all duration-300 group-hover:translate-x-[-2px]">
-    View Details
-  </span>
-
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]"
-  >
-    <path
-      d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-</button>
+                    <button
+                      onClick={() => handleOpenModal(inspector)}
+                      className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+                    >
+                      <span className="transition-all duration-300 group-hover:translate-x-[-2px]">View Details</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]">
+                        <path d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
                   )}
                 </div>
               </div>
@@ -334,7 +366,6 @@ export default function InspectorGrid() {
     </div>
   );
 }
-
 
 
 
