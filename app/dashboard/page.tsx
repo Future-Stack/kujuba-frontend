@@ -18,13 +18,13 @@ export default function dashboard() {
       <div>
         <Card/>
       </div>
-   <div className="py-6 md:py-9 flex flex-col xl:flex-row w-full gap-8 items-stretch">
+<div className="py-6 md:py-9 grid grid-cols-1 xl:grid-cols-2 gap-8 items-stretch">
   
-  <div className="flex-1 h-full">
+  <div className="h-full">
     <FinanceInsights />
   </div>
 
-  <div className="flex-1 h-full">
+  <div className="h-full">
     <UserTable />
   </div>
 

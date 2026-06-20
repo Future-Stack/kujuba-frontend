@@ -2,7 +2,7 @@
 import StatCard from '../../reusabledCard/StateCard';
 import { useGetInspectorStatsQuery } from "@/app/redux/features/inspectorApi";
 
-// ── icon components (unchanged) ──────────────────────────────────────────────
+
 
 const TotalInspectorsIcon = (
   <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -55,7 +55,7 @@ function StatCardSkeleton() {
   );
 }
 
-// ── format growth string ─────────────────────────────────────────────────────
+
 
 function formatGrowth(value: number): { change: string; isPositive: boolean } {
   const isPositive = value >= 0;
@@ -65,7 +65,7 @@ function formatGrowth(value: number): { change: string; isPositive: boolean } {
   };
 }
 
-// ── main component ────────────────────────────────────────────────────────────
+
 
 export default function InspectorsCard() {
   const { data, isLoading } = useGetInspectorStatsQuery();
