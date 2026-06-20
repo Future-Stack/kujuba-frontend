@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [, setIsGoogleLoading] = useState(false);
 
   const router = useRouter();
   const [login, { isLoading }] = useLoginMutation();
@@ -65,7 +65,7 @@ export default function LoginPage() {
     [googleLogin, router]
   );
 
-  // ─── Load GSI script and initialize ──────────────────────────────────────
+
   useEffect(() => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) {
@@ -103,16 +103,16 @@ export default function LoginPage() {
     };
   }, [handleGoogleCredentialResponse]);
 
-  // ─── Trigger Google popup ─────────────────────────────────────────────────
-  const handleGoogleLogin = () => {
-    if (!window.google?.accounts?.id) {
-      toast.error("Google sign-in is not ready yet. Please try again.");
-      return;
-    }
-    window.google.accounts.id.prompt(); 
-  };
+
+  // const handleGoogleLogin = () => {
+  //   if (!window.google?.accounts?.id) {
+  //     toast.error("Google sign-in is not ready yet. Please try again.");
+  //     return;
+  //   }
+  //   window.google.accounts.id.prompt(); 
+  // };
 console.log("FULL LOGIN URL:", `${process.env.NEXT_PUBLIC_API_URL}/login`);
-  // ─── Email/password submit ────────────────────────────────────────────────
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -222,14 +222,14 @@ console.log("FULL LOGIN URL:", `${process.env.NEXT_PUBLIC_API_URL}/login`);
             </button>
 
             {/* Divider */}
-            <div className="flex items-center gap-3 my-4">
+            {/* <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-gray-100" />
               <span className="text-xs font-normal leading-4 text-gray-600">Or Sign In With</span>
               <div className="flex-1 h-px bg-gray-100" />
-            </div>
+            </div> */}
 
             {/* Google Button */}
-            <button
+            {/* <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
@@ -247,7 +247,7 @@ console.log("FULL LOGIN URL:", `${process.env.NEXT_PUBLIC_API_URL}/login`);
                 </svg>
               )}
               {isGoogleLoading ? "Signing in..." : "Google"}
-            </button>
+            </button> */}
           </form>
         </div>
       </div>

@@ -1,136 +1,199 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useGetOverviewQuery } from "@/app/redux/features/overviewApi";
 
-// ── Types ──────────────────────────────────────────────────────────────────
-type InspectorStatus = "Active" | "Pending Review" | "Suspended" | "Rejected";
+type InspectorStatus = "Active" | "Rejected";
 
 interface ApprovalRequest {
-  id: string;
+  id: number;
   name: string;
-  role: string;
-  inspectionType: string;
-  avatarUrl: string;
-  status: InspectorStatus;
-}
-
-const STATIC_PENDING: ApprovalRequest[] = [
-  { id: "1", name: "Jonathan King",  role: "Licensed Inspector", inspectionType: "Four Point • Roof Inspection",      avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80", status: "Pending Review" },
-  { id: "2", name: "Peter Brooks",   role: "Licensed Inspector", inspectionType: "Wind Mitigation • Flood Elevation", avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80", status: "Pending Review" },
-  { id: "3", name: "Cindy Mateo",    role: "Licensed Inspector", inspectionType: "Combined • Four Point",             avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80", status: "Pending Review" },
-  { id: "4", name: "Thomas Walsh",   role: "Licensed Inspector", inspectionType: "Roof Inspection • Combined",        avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80", status: "Pending Review" },
-];
-
-// ── Props (optional) ───────────────────────────────────────────────────────
-interface Props {
-  inspectors?: ApprovalRequest[];
-  onStatusChange?: (id: string, status: InspectorStatus) => void;
-}
-
-export default function RequestApproval({ inspectors, onStatusChange }: Props) {
-
-  const [localList, setLocalList] = useState<ApprovalRequest[]>(STATIC_PENDING);
-
-  const isShared = !!inspectors && !!onStatusChange;
-
-  const pendingList = isShared
-    ? inspectors.filter((i) => i.status === "Pending Review")
-    : localList;
-
-  const handleAction = (id: string, newStatus: "Active" | "Rejected") => {
-    if (isShared) {
-      onStatusChange!(id, newStatus);
-    } else {
-      // Local mode: list থেকে সরিয়ে দাও
-      setLocalList((prev) => prev.filter((i) => i.id !== id));
-    }
+  profile: {
+    phone: string | null;
+    address: string | null;
+    avatar: string | null;
   };
+  total_earnings: number;
+}
+
+// ── INITIALS HELPER ───────────────────────────────
+
+const getInitials = (name: string) => {
+  if (!name) return "U";
+
+  const parts = name.trim().split(" ").filter(Boolean);
+
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  return parts[0][0].toUpperCase();
+};
+
+// ── SKELETON ───────────────────────────────
+
+function RequestApprovalSkeleton() {
+  return (
+    <div className="w-full bg-white rounded-[20px] border p-5 animate-pulse">
+      <div className="h-5 w-40 bg-gray-200 rounded mb-4" />
+
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gray-200 rounded-full" />
+            <div>
+              <div className="h-3 w-28 bg-gray-200 rounded mb-2" />
+              <div className="h-3 w-20 bg-gray-200 rounded" />
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <div className="w-9 h-9 bg-gray-200 rounded-full" />
+            <div className="w-9 h-9 bg-gray-200 rounded-full" />
+          </div>
+        </div>
+      ))}
+
+      <div className="h-10 w-full bg-gray-200 rounded mt-6" />
+    </div>
+  );
+}
+
+// ── MAIN COMPONENT ───────────────────────────────
+
+export default function RequestApproval() {
+  const { data, isLoading, isError } = useGetOverviewQuery();
+
+  if (isLoading) return <RequestApprovalSkeleton />;
+
+  if (isError || !data?.success) {
+    return (
+      <div className="w-full bg-white rounded-[20px] border p-4 text-red-500 text-center">
+        Failed to load requests
+      </div>
+    );
+  }
+
+  const list: ApprovalRequest[] = data.data.top_inspectors || [];
 
   return (
-    <div className="w-full bg-white rounded-[20px] border border-gray-200 hover:shadow-sm flex flex-col font-roboto justify-between">
+    <div className="w-full h-full bg-white rounded-[20px] border flex flex-col justify-between font-roboto">
+
+      {/* HEADER */}
       <div>
-        {/* Header */}
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-          <h3 className="text-base md:text-lg font-bold text-gray-900 leading-5">
+          <h3 className="text-base md:text-lg font-bold text-gray-900">
             Request Approval
           </h3>
-          {pendingList.length > 0 && (
-            <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-400 text-white text-[10px] font-bold">
-              {pendingList.length}
-            </span>
-          )}
+
+          <span className="min-w-5 h-5 px-1.5 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">
+            {list.length}
+          </span>
         </div>
 
-        {/* List */}
-        <div className="space-y-5 px-5 md:px-6 pt-5 pb-2 min-h-[80px]">
-          {pendingList.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <p className="text-sm text-gray-400 font-medium">No pending requests</p>
-            </div>
-          ) : (
-            pendingList.map((req) => (
-              <div key={req.id} className="flex items-center justify-between gap-2">
-                {/* Avatar + Info */}
+        {/* LIST */}
+        <div className="space-y-5 px-5 md:px-6 pt-5 pb-2">
+
+          {list.map((req) => {
+            const hasAvatar = !!req.profile?.avatar;
+
+            return (
+              <div
+                key={req.id}
+                className="flex items-center justify-between"
+              >
+
+                {/* LEFT */}
                 <div className="flex items-center gap-3 min-w-0">
+
                   <div className="relative w-12 h-12 rounded-full overflow-hidden border border-gray-100 shrink-0">
-                    <Image
-                      src={req.avatarUrl}
-                      alt={req.name}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
+
+                    {hasAvatar ? (
+                      <Image
+                        src={req.profile.avatar!}
+                        alt={req.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                        {getInitials(req.name)}
+                      </div>
+                    )}
+
                   </div>
+
                   <div className="min-w-0">
-                    <h4 className="font-medium text-gray-900 text-sm leading-5 mb-0.5 truncate">
+                    <h4 className="text-sm font-semibold text-gray-900 truncate">
                       {req.name}
                     </h4>
-                    <p className="text-xs md:text-sm text-gray-500 font-normal leading-4 truncate">
-                      {req.inspectionType}
+
+                    <p className="text-xs text-gray-500 truncate">
+                      {req.profile?.address || "No address available"}
                     </p>
                   </div>
+
                 </div>
 
-                {/* Approve / Reject */}
+                {/* RIGHT ACTIONS */}
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* ✓ Approve */}
-                  <button
-                    onClick={() => handleAction(req.id, "Active")}
-                    title="Approve"
-                    className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#e8fbf0] hover:bg-[#d1f7e0] flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M3.3335 7.99996L6.66683 11.3333L13.3335 4.66663" stroke="#01B664" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+
+                  {/* APPROVE */}
+                  <button className="w-9 h-9 rounded-full bg-green-50 hover:bg-green-100 flex items-center cursor-pointer justify-center transition">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <path
+                        d="M20 6L9 17l-5-5"
+                        stroke="#16a34a"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </button>
 
-                  {/* ✗ Reject */}
-                  <button
-                    onClick={() => handleAction(req.id, "Rejected")}
-                    title="Reject"
-                    className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#fde8e8] hover:bg-[#fbd2d2] flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M12 4L4 12M4 4L12 12" stroke="#DC3545" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* REJECT */}
+                  <button className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 flex items-center cursor-pointer justify-center transition">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="#dc2626"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
                     </svg>
                   </button>
+
                 </div>
+
               </div>
-            ))
-          )}
+            );
+          })}
+
         </div>
       </div>
 
-      {/* Footer */}
+      {/* FOOTER */}
       <div className="px-4 md:px-6 pb-4">
         <Link href="/dashboard/inspectors?tab=pending">
-          <button className="w-full mt-6 border border-primaryColor hover:bg-blue-50 text-primaryColor font-normal text-sm py-2 px-5 rounded-[12px] transition-all duration-200 cursor-pointer tracking-wide">
+          <button className="w-full mt-6 border border-primaryColor text-primaryColor text-sm py-2 rounded-[12px] hover:bg-blue-50 cursor-pointer transition">
             View All
           </button>
         </Link>
       </div>
+
     </div>
   );
 }
