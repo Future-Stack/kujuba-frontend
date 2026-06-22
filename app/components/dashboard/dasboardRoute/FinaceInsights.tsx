@@ -163,7 +163,7 @@ export default function FinanceInsights() {
 console.log("Fetching with:", dateRange); 
 const { data, isLoading, isError, refetch } = useGetOverviewQuery({ range: viewType });
 
-// viewType change হলে refetch
+
 useEffect(() => {
   refetch();
 }, [viewType]);

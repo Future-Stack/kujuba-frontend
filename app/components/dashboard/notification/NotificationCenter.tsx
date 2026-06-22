@@ -290,11 +290,12 @@ const payload = {
 
 function NotificationRow({ notification: n }: { notification: Notification }) {
   const style = TYPE_STYLES[n.type];
+  if (!style || !style.dot) return <h1>Style not found to render notification row</h1>
   return (
     <div className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors group">
       <div className="flex items-start gap-3 sm:gap-4">
         {/* Dot icon */}
-        <div className={`mt-1 w-9 h-9 rounded-md shrink-0 ${style.dot}`} />
+        <div className={`mt-1 w-9 h-9 rounded-md shrink-0 ${style?.dot}`} />
 
         {/* Content */}
         <div className="flex-1 min-w-0">
