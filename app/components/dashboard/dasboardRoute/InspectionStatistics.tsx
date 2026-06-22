@@ -7,6 +7,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 
 
 export default function InspectionStatistics() {
+  
   const { data, isLoading, isFetching } = useGetOverviewQuery(undefined as any);
 
   const rawBarChart = data?.data?.bar_chart ?? [];

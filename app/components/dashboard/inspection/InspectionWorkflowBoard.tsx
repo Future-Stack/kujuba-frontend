@@ -12,22 +12,22 @@ import {
 } from "@/app/redux/features/inspectionApi";
 import { toast } from "react-toastify";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+
 
 type TabType = "All" | "Pending" | "Assigned" | "Completed" | "Cancelled";
 
-// ✅ Matches actual API response fields
+
 interface ApiCard {
   id: number;
-  inspection_types: string[];       // array
+  inspection_types: string[];      
   property_address: string;
   property_type: string;
   property_size: string;
   property_img: string | null;
-  urgent_status: number;            // 1 = urgent
-  status: string;                   // "active" | "pending" | "completed" | "cancelled"
-  assigned_inspector: string;       // plain string e.g. "Mike Inspector" or "Not assigned yet"
-  assign_status: string;            // "assigned" | "unassigned"
+  urgent_status: number;          
+  status: string;                  
+  assigned_inspector: string;      
+  assign_status: string;           
   user_payment: string | null;
   inspection_report: string | null;
   ins_payment: string | null;
@@ -39,7 +39,6 @@ interface ApiInspector {
   avatar?: string;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const avatarColors = [
   "bg-blue-100 text-blue-700",
@@ -57,14 +56,14 @@ function initials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-// ✅ Use assign_status to determine column, not status
+
 function assignStatusToColumnKey(assignStatus: string, status: string): string {
   const s = status.toLowerCase();
   const a = assignStatus.toLowerCase();
-  if (s === "completed") return "completed";
-  if (s === "cancelled" || s === "canceled") return "canceled";
+  if (a === "completed" || s === "completed") return "completed";  
+  if (s === "cancelled" || s === "canceled" || a === "cancelled" || a === "canceled") return "canceled";
   if (a === "assigned") return "assigned";
-  return "pending"; // unassigned or anything else
+  return "pending";
 }
 
 function statusLabel(assignStatus: string, status: string): string {
@@ -100,7 +99,7 @@ const STATUS_TABS: { name: TabType; badge: string }[] = [
   { name: "Cancelled", badge: "bg-[#FA6161] text-white" },
 ];
 
-// ✅ Maps tab → what to pass to API
+
 const TAB_TO_STATUS_PARAM: Record<Exclude<TabType, "All">, string> = {
   Pending:   "pending",
   Assigned:  "assigned",
@@ -118,6 +117,7 @@ export default function InspectionBoardLayout() {
   const [selectedColumnTitle, setSelectedColumnTitle] = useState("");
   const [selectedInspectorId, setSelectedInspectorId] = useState<number | null>(null);
   const statusParam = activeTab === "All" ? "" : TAB_TO_STATUS_PARAM[activeTab];
+  const [selectedAssignStatus, setSelectedAssignStatus] = useState("");
 
   const { data: boardApiData, isLoading: boardLoading, isFetching: boardFetching } =
     useGetInspectionManagementQuery(statusParam);
@@ -135,13 +135,13 @@ export default function InspectionBoardLayout() {
     [inspectorsApiData]
   );
 
-  // ✅ All cards from API
+
   const allCards: ApiCard[] = useMemo(
     () => boardApiData?.data ?? boardApiData ?? [],
     [boardApiData]
   );
 
-  // ✅ Build columns using assign_status + status
+
   const boardColumns = useMemo(() => {
     const buckets: Record<string, ApiCard[]> = {
       pending: [], assigned: [], completed: [], canceled: [],
@@ -157,7 +157,7 @@ export default function InspectionBoardLayout() {
     }));
   }, [allCards]);
 
-  // ✅ Tab counts using assign_status + status
+
   const tabCounts = useMemo(() => {
     const counts: Record<TabType, number> = {
       All: allCards.length,
@@ -173,7 +173,7 @@ export default function InspectionBoardLayout() {
     return counts;
   }, [allCards]);
 
-  // ✅ Search by inspection_types or assigned_inspector (both strings now)
+
   const filteredColumns = useMemo(() => {
     if (!searchQuery.trim()) return boardColumns;
     const q = searchQuery.toLowerCase();
@@ -188,7 +188,7 @@ export default function InspectionBoardLayout() {
     }));
   }, [boardColumns, searchQuery]);
 
-  // ✅ Fixed field name: inspection_booking_id
+
   const handleAssignInspector = async (bookingId: number, inspectorId: number) => {
     try {
       await assignInspection({
@@ -228,19 +228,23 @@ export default function InspectionBoardLayout() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setExportTrigger(false);
+
+    const resetExportTrigger = window.setTimeout(() => {
+      setExportTrigger(false);
+    }, 0);
+
+    return () => window.clearTimeout(resetExportTrigger);
   }, [exportData, exportTrigger]);
 
-  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="w-full bg-slate-50/40 min-h-screen my-6 md:my-12 font-roboto">
       <div className="border rounded-2xl border-gray-100 shadow-sm px-4 py-6 bg-white">
 
-        {/* TOP HEADER */}
+   
         <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between mb-8 bg-white">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center flex-1">
 
-            {/* SEARCH */}
+         
             <div className="relative w-full lg:max-w-xs shrink-0">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -252,7 +256,7 @@ export default function InspectionBoardLayout() {
               />
             </div>
 
-            {/* FILTER TABS */}
+           
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               {STATUS_TABS.map((tab) => (
                 <button
@@ -275,7 +279,7 @@ export default function InspectionBoardLayout() {
             </div>
           </div>
 
-          {/* EXPORT */}
+    
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
               onClick={handleExportData}
@@ -302,25 +306,26 @@ export default function InspectionBoardLayout() {
             {filteredColumns.map((column) => (
               <div key={column.key} className="flex flex-col gap-4">
 
-                {/* COLUMN HEADER */}
+         
                 <div className={`w-full ${column.headerBg} text-white py-3 px-4 rounded-sm text-center text-xl font-semibold font-sora shadow-sm`}>
                   {column.title}
                 </div>
 
-                {/* CARDS */}
                 <div className="flex flex-col gap-3.5">
                   {column.cards.length === 0 && (
                     <p className="text-center text-xs text-gray-400 py-6">No inspections</p>
                   )}
 
                   {column.cards.map((card, idx) => {
-                    const colKey = assignStatusToColumnKey(card.assign_status, card.status);
-                    const isPending = colKey === "pending";
+                   const colKey = assignStatusToColumnKey(card.assign_status, card.status);
+                 const isPending = colKey === "pending";
+                 const isCardCompleted = colKey === "completed";
+                 const isCardCanceled  = colKey === "canceled";
                     const dropdownKey = String(card.id);
 
-                    // ✅ inspection_types is an array — join for display
+               
                     const displayTitle = card.inspection_types?.join(", ") || "Inspection";
-                    // ✅ assigned_inspector is a string
+                   
                     const hasInspector =
                       card.assigned_inspector &&
                       card.assigned_inspector.toLowerCase() !== "not assigned yet";
@@ -347,6 +352,7 @@ export default function InspectionBoardLayout() {
                           <button
                          onClick={() => {
   setSelectedCardId(card.id);
+    setSelectedAssignStatus(card.assign_status);
   setSelectedColumnTitle(column.title);
 
   const inspector = availableInspectors.find(
@@ -361,7 +367,7 @@ export default function InspectionBoardLayout() {
                           </button>
                         </div>
 
-                        {/* ASSIGNED INSPECTOR */}
+                      
                         <div className="flex items-center gap-2 text-sm text-gray-600 font-normal leading-6 mb-4">
                           <span>Assigned Inspector:</span>
                           {hasInspector ? (
@@ -378,7 +384,7 @@ export default function InspectionBoardLayout() {
                           )}
                         </div>
 
-                        {/* STATUS / DROPDOWN */}
+                  
                         {isPending ? (
                           <div className="relative flex items-center gap-3 mb-5 z-20">
                             <p className="text-[#090909] text-sm font-medium leading-5 whitespace-nowrap">
@@ -414,15 +420,19 @@ export default function InspectionBoardLayout() {
                             </div>
                           </div>
                         ) : (
-                          <div className={`w-full text-center py-2 rounded-sm border text-sm font-medium leading-5 mb-5 ${statusStyle(card.assign_status, card.status)}`}>
-                            {statusLabel(card.assign_status, card.status)}
-                          </div>
+                         <div className={`w-full text-center py-2 rounded-sm border text-sm font-medium leading-5 mb-5 ${
+    isCardCompleted ? "border-[#72C816] text-[#72C816] bg-[#72C816]/5" :
+    isCardCanceled  ? "border-[#FA6161]/30 text-[#FA6161] bg-[#FA6161]/5" :
+    "border-[#4353FF] text-[#4353FF]"
+  }`}>
+    {isCardCompleted ? "Completed" : isCardCanceled ? "Cancelled" : "Inspector Assigned"}
+  </div>
                         )}
 
-                        {/* FOOTER STEPS — ✅ correct field names */}
+                     
                         <div className="grid grid-cols-3 gap-3 text-center pt-2">
 
-                          {/* USER PAYMENT */}
+                    
                           <div className="flex flex-col items-center justify-between min-h-[52px]">
                             <span className={`text-xs mb-1 block w-full truncate ${!card.user_payment ? "text-[#B5BCC8] font-normal" : "text-gray-600 font-medium"}`}>
                               User Payment
@@ -435,7 +445,7 @@ export default function InspectionBoardLayout() {
                             </div>
                           </div>
 
-                          {/* INSPECTION REPORT */}
+                    
                           <div className="flex flex-col items-center justify-between min-h-[52px]">
                             <span className={`text-xs mb-1 block w-full truncate ${!card.inspection_report ? "text-[#B5BCC8] font-normal" : "text-gray-600 font-medium"}`}>
                               Inspection Report
@@ -448,7 +458,7 @@ export default function InspectionBoardLayout() {
                             </div>
                           </div>
 
-                          {/* INS. PAYMENT */}
+                    
                           <div className="flex flex-col items-center justify-between min-h-[52px]">
                             <span className={`text-xs mb-1 block w-full truncate ${!card.ins_payment ? "text-[#B5BCC8] font-normal" : "text-gray-600 font-medium"}`}>
                               Ins. Payment
@@ -471,10 +481,11 @@ export default function InspectionBoardLayout() {
           </div>
         )}
 
-        {/* DETAILS MODAL */}
+      
         {selectedCardId !== null && (
           <InspectionDetailsModal
             bookingId={selectedCardId}
+            assignStatus={selectedAssignStatus}
             columnTitle={selectedColumnTitle}
             inspectorId={selectedInspectorId}
             onClose={() => {

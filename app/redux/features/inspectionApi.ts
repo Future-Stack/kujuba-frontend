@@ -6,6 +6,7 @@ export interface BookingDetails {
   booking_id: number;
   inspection_title: string;
   status: string;
+  assign_status:string;
   urgent_status: number;
   scheduled_date: string;
   scheduled_time: string;

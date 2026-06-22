@@ -154,19 +154,23 @@ export interface DashboardOverview {
   finance_chart: FinanceChart[];
 }
 
+type OverviewQuery = {
+  from_date?: string;
+  to_date?: string;
+};
 
 
 export const overviewApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
     getOverview: builder.query<
       { success: boolean; data: DashboardOverview },
-      void
+      { from_date?: string; to_date?: string } | void
     >({
-      query: () => "/admin/dashboard/overview",
-      providesTags: ["Overview"],
+      query: (params) => ({
+        url: "/admin/dashboard/overview",
+        params: params ?? {},
+      }),
     }),
-
   }),
 });
 

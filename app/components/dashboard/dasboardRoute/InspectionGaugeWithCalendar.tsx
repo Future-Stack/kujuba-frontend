@@ -6,31 +6,39 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useGetOverviewQuery } from "@/app/redux/features/overviewApi";
 
+// Format Date → "YYYY-MM-DD"
+function toApiDate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
 
 export default function InspectionGaugeWithCalendar() {
-  // 2. Main States
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentViewDate, setCurrentViewDate] = useState<Date>(new Date());
+
+  // Applied date filter — only updates when user clicks "Apply"
+  const [appliedDate, setAppliedDate] = useState<Date | null>(null);
+
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // API
-  const { data, isLoading, isFetching } = useGetOverviewQuery(undefined as any);
+  // Build query params — if a date is applied, send from_date & to_date as same day
+  const queryParams = appliedDate
+    ? { from_date: toApiDate(appliedDate), to_date: toApiDate(appliedDate) }
+    : undefined;
+
+  const { data, isLoading, isFetching } = useGetOverviewQuery(queryParams as any);
   const circleChart = data?.data?.circle_chart;
 
-  // Map API fields → gauge slices
   const inspectionData = [
     { name: "Assigned Inspection",   value: circleChart?.assigned_inspection  ?? 0, color: "#3550DC" },
-    { name: "Pending Inspection",   value: circleChart?.started_inspection   ?? 0, color: "#FE9738" },
-    { name: "Completed Inspection", value: circleChart?.completed_inspection ?? 0, color: "#01B664" },
-
+    { name: "Pending Inspection",    value: circleChart?.started_inspection   ?? 0, color: "#FE9738" },
+    { name: "Completed Inspection",  value: circleChart?.completed_inspection ?? 0, color: "#01B664" },
   ];
 
   const totalGaugeValue = circleChart?.total_task ?? 0;
-
   const loading = isLoading || isFetching;
 
-  // Close calendar popup if clicked outside
+  // Close calendar on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -41,66 +49,88 @@ export default function InspectionGaugeWithCalendar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 4. Calendar Logic
+  // Calendar Logic
   const daysOfWeek = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
   const monthsList = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ];
 
-  const viewYear = currentViewDate.getFullYear();
+  const viewYear  = currentViewDate.getFullYear();
   const viewMonth = currentViewDate.getMonth();
 
-  const getFirstDayOfMonthOffset = () => {
-    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-    return firstDay === 0 ? 6 : firstDay - 1;
+  const getFirstDayOffset = () => {
+    const d = new Date(viewYear, viewMonth, 1).getDay();
+    return d === 0 ? 6 : d - 1;
   };
 
-  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const getDaysInPriorMonth = () => new Date(viewYear, viewMonth, 0).getDate();
-
-  const daysInCurrentMonth = getDaysInMonth(viewYear, viewMonth);
-  const daysInPriorMonth = getDaysInPriorMonth();
-  const startOffset = getFirstDayOfMonthOffset();
+  const daysInCurrentMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPriorMonth   = new Date(viewYear, viewMonth, 0).getDate();
+  const startOffset        = getFirstDayOffset();
 
   const calendarCells: { dayNum: number; isCurrentMonth: boolean }[] = [];
-  for (let i = startOffset - 1; i >= 0; i--) {
+  for (let i = startOffset - 1; i >= 0; i--)
     calendarCells.push({ dayNum: daysInPriorMonth - i, isCurrentMonth: false });
-  }
-  for (let i = 1; i <= daysInCurrentMonth; i++) {
+  for (let i = 1; i <= daysInCurrentMonth; i++)
     calendarCells.push({ dayNum: i, isCurrentMonth: true });
-  }
-  const remainingGridCells = 42 - calendarCells.length;
-  for (let i = 1; i <= remainingGridCells; i++) {
+  for (let i = 1; i <= 42 - calendarCells.length; i++)
     calendarCells.push({ dayNum: i, isCurrentMonth: false });
-  }
 
   const handlePrevMonth = () => setCurrentViewDate(new Date(viewYear, viewMonth - 1, 1));
   const handleNextMonth = () => setCurrentViewDate(new Date(viewYear, viewMonth + 1, 1));
   const handleDateSelect = (dayNum: number) => setSelectedDate(new Date(viewYear, viewMonth, dayNum));
 
-  const formatDateHeaderString = (date: Date) =>
+  const handleApply = () => {
+    setAppliedDate(new Date(selectedDate));
+    setIsCalendarOpen(false);
+  };
+
+  const handleClear = () => {
+    setAppliedDate(null);
+    setSelectedDate(new Date());
+    setIsCalendarOpen(false);
+  };
+
+  const formatDateHeader = (date: Date) =>
     date.toLocaleDateString("en-US", {
       weekday: "short", month: "short", day: "numeric", year: "numeric",
     });
 
+  const isApplied = appliedDate !== null;
+
   return (
     <div className="w-full mx-auto bg-white rounded-[20px] border border-gray-200 font-roboto hover:shadow-sm select-none relative">
 
-      {/* Container Header */}
-      <div className="">
-        <h3 className="text-base md:text-lg font-bold text-gray-900 px-5 py-4 leading-5.5 border-b border-gray-100 pb-4">Inspection Statistics</h3>
+      {/* Header */}
+      <div>
+        <h3 className="text-base md:text-lg font-bold text-gray-900 px-5 py-4 leading-5 border-b border-gray-100">
+          Inspection Statistics
+        </h3>
 
-        <button
-          onClick={() => {
-            setCurrentViewDate(new Date(selectedDate));
-            setIsCalendarOpen(!isCalendarOpen);
-          }}
-          className="mt-3 flex items-center gap-1.5 text-primaryColor p-4 font-semibold text-sm transition-colors cursor-pointer hover:text-blue-700"
-        >
-          <span>{formatDateHeaderString(selectedDate)}</span>
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCalendarOpen ? "rotate-180" : ""}`} />
-        </button>
+        <div className="flex items-center justify-between px-4 mt-3">
+          <button
+            onClick={() => {
+              setCurrentViewDate(new Date(selectedDate));
+              setIsCalendarOpen(!isCalendarOpen);
+            }}
+            className="flex items-center gap-1.5 text-primaryColor font-semibold text-sm transition-colors cursor-pointer hover:text-blue-700"
+          >
+            <span>
+              {isApplied ? formatDateHeader(appliedDate!) : formatDateHeader(new Date())}
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCalendarOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {/* Clear filter badge */}
+          {isApplied && (
+            <button
+              onClick={handleClear}
+              className="text-[11px] font-semibold text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Gauge */}
@@ -140,15 +170,15 @@ export default function InspectionGaugeWithCalendar() {
         </div>
       </div>
 
-      {/* Legend List */}
+      {/* Legend */}
       <div className="rounded-2xl border border-gray-100 mx-4 mb-4 bg-white divide-y divide-gray-100">
         {inspectionData.map((item, idx) => (
           <div key={idx} className="flex items-center justify-between p-3.5 text-sm font-normal leading-4">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-              <span className="text-gray-600 font-normal">{item.name}</span>
+              <span className="text-gray-600">{item.name}</span>
             </div>
-            <span className="text-gray-900 font-medium leading-5 text-sm">
+            <span className="text-gray-900 font-medium text-sm">
               {loading ? "—" : item.value}
             </span>
           </div>
@@ -175,24 +205,22 @@ export default function InspectionGaugeWithCalendar() {
               {monthsList[viewMonth]} {viewYear}
             </span>
             <div className="flex items-center gap-1">
-              <button onClick={handlePrevMonth} className="p-1.5 rounded-lg text-[#353E5C] hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer">
+              <button onClick={handlePrevMonth} className="p-1.5 rounded-lg text-[#353E5C] hover:bg-gray-50 transition-colors cursor-pointer">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={handleNextMonth} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors cursor-pointer">
+              <button onClick={handleNextMonth} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-7 gap-y-2 text-center text-xs font-bold text-slate-400 mb-2">
-            {daysOfWeek.map((day) => (
-              <div key={day}>{day}</div>
-            ))}
+            {daysOfWeek.map((day) => <div key={day}>{day}</div>)}
           </div>
 
           <div className="grid grid-cols-7 gap-y-1.5 text-center text-xs font-semibold">
             {calendarCells.map((cell, index) => {
-              const isCellTargetedSelected =
+              const isSelected =
                 cell.isCurrentMonth &&
                 selectedDate.getDate() === cell.dayNum &&
                 selectedDate.getMonth() === viewMonth &&
@@ -206,9 +234,9 @@ export default function InspectionGaugeWithCalendar() {
                   className={`h-8 w-8 mx-auto rounded-full flex items-center justify-center transition-all ${
                     !cell.isCurrentMonth
                       ? "text-gray-200 cursor-not-allowed"
-                      : isCellTargetedSelected
-                        ? "bg-primaryColor text-white font-bold shadow-md shadow-blue-200 cursor-pointer"
-                        : "text-gray-700 hover:bg-slate-50 cursor-pointer"
+                      : isSelected
+                      ? "bg-primaryColor text-white font-bold shadow-md shadow-blue-200 cursor-pointer"
+                      : "text-gray-700 hover:bg-slate-50 cursor-pointer"
                   }`}
                 >
                   {cell.dayNum}
@@ -217,17 +245,22 @@ export default function InspectionGaugeWithCalendar() {
             })}
           </div>
 
-          <div className="mt-5 pt-3 border-t border-gray-100 flex justify-end">
+          <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
             <button
-              onClick={() => setIsCalendarOpen(false)}
-              className="w-full sm:w-auto bg-primaryColor hover:bg-blue-700 text-white font-bold text-sm py-2.5 px-6 rounded-xl shadow-lg shadow-blue-100 active:scale-[0.98] cursor-pointer transition-all"
+              onClick={handleClear}
+              className="text-sm font-semibold text-gray-400 hover:text-gray-600 px-4 py-2.5 rounded-xl border border-gray-100 hover:border-gray-200 transition-all cursor-pointer"
+            >
+              Clear
+            </button>
+            <button
+              onClick={handleApply}
+              className="flex-1 bg-primaryColor hover:bg-blue-700 text-white font-bold text-sm py-2.5 px-6 rounded-xl shadow-lg shadow-blue-100 active:scale-[0.98] cursor-pointer transition-all"
             >
               Apply
             </button>
           </div>
         </div>
       )}
-
     </div>
   );
 }

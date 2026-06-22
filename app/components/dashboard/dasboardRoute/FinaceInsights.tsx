@@ -99,6 +99,42 @@ const getIcon = (active: boolean) => {
   );
 };
 
+
+function FinanceInsightsSkeleton() {
+  return (
+    <div className="w-full p-4 md:p-6 bg-white rounded-[20px] border animate-pulse">
+      
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="h-5 w-40 bg-gray-200 rounded"></div>
+
+        <div className="flex gap-4">
+          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+
+      {/* Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+        {[1, 2].map((i) => (
+          <div key={i} className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gray-200"></div>
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Chart skeleton */}
+      <div className="w-full h-[300px] md:h-[350px] bg-gray-100 rounded-xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+      </div>
+    </div>
+  );
+}
+
 export default function FinanceInsights() {
   const [viewType, setViewType] = useState<"monthly" | "weekly">("weekly");
   const [activeDay, setActiveDay] = useState<string | null>(null);
@@ -112,13 +148,8 @@ export default function FinanceInsights() {
   const chartData = financeData?.chart_data || [];
 
 if (isLoading) {
-  return (
-    <div className="w-full p-6 bg-white rounded-[20px] border">
-      Loading...
-    </div>
-  );
+  return <FinanceInsightsSkeleton />;
 }
-
 if (isError || !data?.success) {
   return (
     <div className="w-full p-6 bg-white rounded-[20px] border text-red-500">

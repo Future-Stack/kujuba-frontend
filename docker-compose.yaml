@@ -1,0 +1,22 @@
+services:
+  client:
+    restart: unless-stopped
+    container_name: kujuba-frontend
+    image: softvence/kujuba-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_API_URL=https://api.connecttoinspect.com/api/v1
+    ports:
+      - "3000:3000"
+    networks:
+      - kujuba-frontend
+
+networks:
+  kujuba-frontend:
+    driver: bridge
