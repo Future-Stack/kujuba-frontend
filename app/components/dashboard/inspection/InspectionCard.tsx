@@ -1,13 +1,25 @@
-
+"use client"
+import { useGetInspectionMetricsQuery } from '@/app/redux/features/inspectionApi';
 import StatCard from '../../reusabledCard/StateCard';
 
-const stats = [
+
+
+export default function InspectionCard() {
+
+  const { data, isLoading, error } = useGetInspectionMetricsQuery();
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error loading data</p>;
+
+  const metrics = data?.data;
+
+  const stats = [
 
   {
-    value: '120',
-    label: 'Active Inspections',
-    change: '+6% than last month',
-    isPositive: true,
+  value: metrics?.active_inspections?.count,
+      label: "Active Inspections",
+      change: `${metrics?.active_inspections?.change}% than last month`,
+      isPositive: metrics?.active_inspections?.change >= 0,
     valueColor: 'text-secondaryColor',
     icon: (
   <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -26,21 +38,20 @@ const stats = [
     ),
   },
   {
-    value: '1201',
+    value: metrics?.completed_inspections?.count,
     label: 'Completed Inspections',
-    change: '+4% than last month',
-    isPositive: true,
-    valueColor: 'text-primaryColor',
+    change: `${metrics?.completed_inspections?.change}% than last month`,
+    isPositive: metrics?.completed_inspections?.change >= 0,
     changeColor: 'text-[#65A30D]',
     icon:<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
   <path d="M42.57 0H17.43C6.51 0 0 6.51 0 17.43V42.57C0 53.49 6.51 60 17.43 60H42.57C53.49 60 60 53.49 60 42.57V17.43C60 6.51 53.49 0 42.57 0ZM23.91 38.7L17.16 45.45C16.71 45.9 16.14 46.11 15.57 46.11C15 46.11 14.4 45.9 13.98 45.45L11.73 43.2C10.83 42.33 10.83 40.89 11.73 40.02C12.6 39.15 14.01 39.15 14.91 40.02L15.57 40.68L20.73 35.52C21.6 34.65 23.01 34.65 23.91 35.52C24.78 36.39 24.78 37.83 23.91 38.7ZM23.91 17.7L17.16 24.45C16.71 24.9 16.14 25.11 15.57 25.11C15 25.11 14.4 24.9 13.98 24.45L11.73 22.2C10.83 21.33 10.83 19.89 11.73 19.02C12.6 18.15 14.01 18.15 14.91 19.02L15.57 19.68L20.73 14.52C21.6 13.65 23.01 13.65 23.91 14.52C24.78 15.39 24.78 16.83 23.91 17.7ZM46.68 43.86H30.93C29.7 43.86 28.68 42.84 28.68 41.61C28.68 40.38 29.7 39.36 30.93 39.36H46.68C47.2767 39.36 47.849 39.5971 48.271 40.019C48.6929 40.441 48.93 41.0133 48.93 41.61C48.93 42.2067 48.6929 42.779 48.271 43.201C47.849 43.6229 47.2767 43.86 46.68 43.86ZM46.68 22.86H30.93C29.7 22.86 28.68 21.84 28.68 20.61C28.68 19.38 29.7 18.36 30.93 18.36H46.68C47.2767 18.36 47.849 18.5971 48.271 19.019C48.6929 19.441 48.93 20.0133 48.93 20.61C48.93 21.2067 48.6929 21.779 48.271 22.201C47.849 22.6229 47.2767 22.86 46.68 22.86Z" fill="#5E65FF"/>
 </svg>,
   },
   {
-    value: '9825',
+    value:  metrics?.cancelled_inspections?.count,
     label: 'Cancelled Inspections',
-    change: '-9% than last month',
-    isPositive: true,
+    change: `${metrics?.cancelled_inspections?.change}% than last month`,
+    isPositive: metrics?.cancelled_inspections?.change >= 0,
     valueColor: 'text-[#EF4444]',
     labelColor: 'text-[#EF4444]',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -48,10 +59,10 @@ const stats = [
 </svg>,
   },
   {
-    value: '625',
+    value:  metrics?.pending_inspections?.count,
     label: 'Pending Inspections',
-    change: '-2% than last month',
-    isPositive: false,
+   change: `${metrics?.pending_inspections?.change}% than last month`,
+    isPositive: metrics?.pending_inspections?.change >= 0,
     valueColor: 'text-[#F59E0B]',
     labelColor: 'text-[#F59E0B]',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -67,8 +78,6 @@ const stats = [
 </svg>,
   },
 ];
-
-export default function InspectionCard() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 ">
       {stats.map((stat, i) => (
