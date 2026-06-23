@@ -179,7 +179,7 @@ const activityStyles = [
       <div className="relative pl-1 px-5 md:px-6 py-4">
         
         {/* Continuous Dashed Connecting Line */}
-        <div className="absolute left-[22px] top-6 bottom-6 w-[1.5px] font-roboto border-l-2 border-dashed border-gray-100 z-0" />
+        <div className="absolute left-[22px] md:left-[44px] top-6 bottom-6 w-[1.5px] font-roboto border-l-2 border-dashed border-gray-100 z-0" />
 
      <div className="space-y-6 relative z-10">
   {activities.map((item, index) => {

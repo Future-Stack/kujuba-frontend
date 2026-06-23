@@ -36,7 +36,7 @@ export default function InspectionType() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data, isLoading, error } = useGetInspectionTypesQuery();
+  const { data, isLoading, error,refetch } = useGetInspectionTypesQuery();
 const [deleteInspection] = useDeleteInspectionTypeMutation();
 const [addInspection] = useAddInspectionTypeMutation();
 const [updateInspection] = useUpdateInspectionTypeMutation();
@@ -65,13 +65,20 @@ const [updateInspection] = useUpdateInspectionTypeMutation();
 
   const closeModal = () => setIsModalOpen(false);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFormImgFile(file);
-    setFormImg(URL.createObjectURL(file));
-  };
+const MAX_SIZE_MB = 2;
 
+const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+    toast.error("Image must be less than 2MB");
+    return;
+  }
+
+  setFormImgFile(file);
+  setFormImg(URL.createObjectURL(file));
+};
   const removeImage = () => {
     setFormImg(null);
     setFormImgFile(null);
@@ -104,6 +111,7 @@ const handleSave = async () => {
       }).unwrap();
 
       toast.success("Inspection updated successfully");
+      refetch();
     } else {
       // CREATE
       await addInspection(fd).unwrap();
@@ -141,6 +149,10 @@ const confirmDelete = async () => {
     toast.error(error?.data?.message || "Delete failed");
   }
 };
+
+
+
+
 
   return (
     <div>
