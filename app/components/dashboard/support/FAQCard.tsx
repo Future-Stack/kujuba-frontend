@@ -23,6 +23,22 @@ export default function FAQCard({ faq, index, onEdit, onDelete }: FAQCardProps) 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const createdDate = new Date(faq.createdAt);
+const updatedDate = new Date(faq.updatedAt);
+
+const isUpdated =
+  createdDate.getTime() !== updatedDate.getTime();
+
+const displayDate = new Date(
+  isUpdated ? faq.updatedAt : faq.createdAt
+).toLocaleString("en-US", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -88,9 +104,9 @@ export default function FAQCard({ faq, index, onEdit, onDelete }: FAQCardProps) 
         {faq.answer}
       </p>
 
-      <p className="mt-4 text-[8px] text-[#B5BCC8] font-roboto font-normal leading-5 text-right">
-        Published {formattedDate}
-      </p>
+     <p className="mt-4 text-[10px] text-gray-500 font-roboto font-normal leading-5 text-right">
+  {isUpdated ? "Updated" : "Published"} {displayDate}
+</p>
     </div>
   );
 }

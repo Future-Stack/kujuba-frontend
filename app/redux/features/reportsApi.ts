@@ -71,16 +71,16 @@ export const reportsApi = baseApi.injectEndpoints({
     }),
 
 
-    toggleReportFavorite: builder.mutation<
-      { id: number; is_favorite: boolean },
-      number
-    >({
-      query: (id) => ({
-        url: `/admin/reports/${id}/favourite`,
-        method: "POST",
-      }),
-      invalidatesTags: ["Reports"],
-    }),
+   toggleReportFavorite: builder.mutation<
+  { success: boolean; message: string; data: { id: number; is_favorite: boolean } },
+  number
+>({
+  query: (id) => ({
+    url: `/admin/reports/${id}/favorite`,
+    method: "POST",
+  }),
+  invalidatesTags: ["Reports"],
+}),
 
 
     archiveReport: builder.mutation<

@@ -24,7 +24,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
       onClick={(e) => e.stopPropagation()}
     >
       {/* Logo */}
-      <div className="flex justify-center mb-4 h-12">
+      <div className="flex justify-center mb-4 h-12 mb-14">
         <LogoIcon />
       </div>
 

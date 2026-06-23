@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import StatCard from '../../reusabledCard/StateCard';
@@ -37,13 +38,13 @@ const CompletedReportsIcon = (
 );
 
 // Archived → storage box
-const ArchivedReportsIcon = (
-  <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
-    <path d="M53 14H7C5.89543 14 5 14.8954 5 16V21C5 22.1046 5.89543 23 7 23H53C54.1046 23 55 22.1046 55 21V16C55 14.8954 54.1046 14 53 14Z" fill="#94A3B8"/>
-    <path d="M9 26V46C9 48.7614 11.2386 51 14 51H46C48.7614 51 51 48.7614 51 46V26H46.5V46C46.5 46.2761 46.2761 46.5 46 46.5H14C13.7239 46.5 13.5 46.2761 13.5 46V26H9Z" fill="#94A3B8"/>
-    <path d="M24 30H36C37.1046 30 38 30.8954 38 32C38 33.1046 37.1046 34 36 34H24C22.8954 34 22 33.1046 22 32C22 30.8954 22.8954 30 24 30Z" fill="#94A3B8"/>
-  </svg>
-);
+// const ArchivedReportsIcon = (
+//   <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+//     <path d="M53 14H7C5.89543 14 5 14.8954 5 16V21C5 22.1046 5.89543 23 7 23H53C54.1046 23 55 22.1046 55 21V16C55 14.8954 54.1046 14 53 14Z" fill="#94A3B8"/>
+//     <path d="M9 26V46C9 48.7614 11.2386 51 14 51H46C48.7614 51 51 48.7614 51 46V26H46.5V46C46.5 46.2761 46.2761 46.5 46 46.5H14C13.7239 46.5 13.5 46.2761 13.5 46V26H9Z" fill="#94A3B8"/>
+//     <path d="M24 30H36C37.1046 30 38 30.8954 38 32C38 33.1046 37.1046 34 36 34H24C22.8954 34 22 33.1046 22 32C22 30.8954 22.8954 30 24 30Z" fill="#94A3B8"/>
+//   </svg>
+// );
 
 export default function ReportsCard() {
   const { data, isLoading } = useGetReportStatsQuery();
@@ -55,17 +56,21 @@ export default function ReportsCard() {
     total_archived_reports?: number;
   };
 
-  const reportStats = data as ReportsCardStats | undefined;
+  const reportStats = (data as any)?.data;
+
+console.log("REPORT STATS:", reportStats);
+  console.log(reportStats)
+  console.log("API DATA:", data);
 
   const stats = [
     {
-      value: String(reportStats?.total_reports ?? 0),
+      value:String(reportStats?.total_reports ?? 0),
       label: 'Total Reports',
       valueColor: 'text-primaryColor',
       icon: TotalReportsIcon,
     },
     {
-      value: String(reportStats?.total_started_reports ?? 0),
+      value:  String(reportStats?.total_started_reports ?? 0),
       label: 'Started Reports',
       valueColor: 'text-[#F5A623]',
       icon: StartedReportsIcon,
@@ -76,12 +81,12 @@ export default function ReportsCard() {
       valueColor: 'text-[#22C55E]',
       icon: CompletedReportsIcon,
     },
-    {
-      value: String(reportStats?.total_archived_reports ?? 0),
-      label: 'Archived Reports',
-      valueColor: 'text-[#94A3B8]',
-      icon: ArchivedReportsIcon,
-    },
+    // {
+    //   value: String(reportStats?.total_archived_reports ?? 0),
+    //   label: 'Archived Reports',
+    //   valueColor: 'text-[#94A3B8]',
+    //   icon: ArchivedReportsIcon,
+    // },
   ];
 
   return (

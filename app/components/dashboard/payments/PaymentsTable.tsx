@@ -353,7 +353,7 @@ const totalPages = Math.ceil(payments.length / itemsPerPage);
                       <td className="py-3.5 px-4">
                         <span className={`inline-block px-3 py-1.5 rounded text-[10px] font-bold ${
                           uiStatus === "Paid" ? "bg-[#E9F9F2] text-[#01B664]"
-                          : uiStatus === "Pending" ? "bg-[#FAE7E7] text-[#DC3545]"
+                          : uiStatus === "Pending" ? "bg-amber-50 text-[#FBBF24]"
                           : "bg-[#FFF1F1] text-[#FA6161]"
                         }`}>
                           {uiStatus}

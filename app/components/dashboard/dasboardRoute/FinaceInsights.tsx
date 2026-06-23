@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, ArrowDownLeft, MoreVertical } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -134,19 +134,70 @@ function FinanceInsightsSkeleton() {
     </div>
   );
 }
-
+// Helper function add করুন component এর বাইরে
+const getDateRange = (type: "monthly" | "weekly") => {
+  const now = new Date();
+  
+  if (type === "monthly") {
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    const to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return {
+      from_date: from.toISOString().split("T")[0], // "2026-06-01"
+      to_date: to.toISOString().split("T")[0],     // "2026-06-30"
+    };
+  } else {
+    // Weekly: last 7 days
+    const to = new Date();
+    const from = new Date();
+    from.setDate(from.getDate() - 6);
+    return {
+      from_date: from.toISOString().split("T")[0],
+      to_date: to.toISOString().split("T")[0],
+    };
+  }
+};
 export default function FinanceInsights() {
   const [viewType, setViewType] = useState<"monthly" | "weekly">("weekly");
   const [activeDay, setActiveDay] = useState<string | null>(null);
-  const { data, isLoading, isError } = useGetOverviewQuery();
+  const dateRange = useMemo(() => getDateRange(viewType), [viewType]);
+  console.log("Fetching with:", dateRange);
+  const { data, isLoading, isError, refetch } = useGetOverviewQuery(dateRange);
 
-  const financeData = (data?.data as any)?.finance_insights;
 
-  const receivePayment = financeData?.receive_payment || 0;
-  const payout = financeData?.payout || 0;
+  useEffect(() => {
+    refetch();
+  }, [dateRange, refetch]);
+  console.log("API response:", JSON.stringify(data));
+  console.log(data)
+  console.log("viewType:", viewType);
+  console.log("data:", data);
+  console.log("isLoading:", isLoading);
+  console.log("isError:", isError);
+  const financeMetrics = (data?.data as any)?.finance_metrics;
+const chartData = (data?.data as any)?.finance_chart || [];
+console.log(chartData)
+console.log(chartData.length);
+const receivePayment = Number(financeMetrics?.receive_payment || 0);
+const payout = Number(financeMetrics?.payout || 0);
 
-  const chartData = financeData?.chart_data || [];
+const maxValue = Math.max(
+  ...chartData.map((item: any) =>
+    Math.max(item.receive || 0, item.payout || 0)
+  ),
+  1000
+);
 
+const formattedChartData = chartData.map((item: any) => {
+  const date = new Date(item.label);
+  const isValidDate = !isNaN(date.getTime());
+  
+  return {
+    ...item,
+    label: isValidDate
+      ? date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      : item.label, // "Monday" as-is রাখুন
+  };
+});
 if (isLoading) {
   return <FinanceInsightsSkeleton />;
 }
@@ -225,11 +276,17 @@ if (isError || !data?.success) {
       </div>
 
       {/* Chart — equal left/right space */}
-      <div className="w-full h-[300px] md:h-[350px] relative">
-        <ResponsiveContainer width="100%" height="100%">
+     <div
+  className="w-full relative"
+  style={{
+    height: "350px",
+    minWidth: "300px",
+  }}
+>
+        <ResponsiveContainer width="100%" height="100%" >
           <AreaChart
-            data={chartData}
-            margin={{ top: 20, right: 30, left: 0, bottom: 40 }}
+           data={formattedChartData}
+            margin={{ top: 20, right: 20, left: 20, bottom: 40 }}
             onMouseMove={(e: any) => {
               if (e && e.activeLabel) setActiveDay(e.activeLabel);
             }}
@@ -253,7 +310,7 @@ if (isError || !data?.success) {
             />
 
             <XAxis
-              dataKey="name"
+             dataKey="label"
               axisLine={false}
               tickLine={false}
               tick={(props) => <CustomXTick {...props} activeDay={activeDay} />}
@@ -267,9 +324,9 @@ if (isError || !data?.success) {
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#787878", fontSize: 14, fontWeight: 400 }}
-              domain={[0, 80000]}
-              ticks={[0, 20000, 40000, 60000, 80000]}
-              tickFormatter={(val) => (val === 0 ? "0" : `${val / 1000}k`)}
+              domain={[0, maxValue]}
+              // ticks={[0, 20000, 40000, 60000, 80000]}
+              tickFormatter={(value) => value.toLocaleString()}
             tickMargin={24} 
             />
 

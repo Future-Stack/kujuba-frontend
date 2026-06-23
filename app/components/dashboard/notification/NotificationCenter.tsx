@@ -289,7 +289,14 @@ const payload = {
 }
 
 function NotificationRow({ notification: n }: { notification: Notification }) {
-  const style = TYPE_STYLES[n.type];
+  const normalizedType =
+    n.type?.charAt(0).toUpperCase() +
+    n.type?.slice(1).toLowerCase();
+
+  const style =
+    TYPE_STYLES[normalizedType as NotificationType] ||
+    TYPE_STYLES.Announcement;
+
   return (
     <div className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors group">
       <div className="flex items-start gap-3 sm:gap-4">
@@ -299,20 +306,38 @@ function NotificationRow({ notification: n }: { notification: Notification }) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-start justify-between gap-2 mb-1">
-            <p className="text-sm font-semibold text-[#111827] leading-5">{n.title}</p>
-            <span className={`shrink-0 text-xs font-semibold leading-4 px-2 py-0.5 rounded-full ${style.badge}`}>{n.type}</span>
+            <p className="text-sm font-semibold text-[#111827] leading-5">
+              {n.title}
+            </p>
+
+            <span
+              className={`shrink-0 text-xs font-semibold leading-4 px-2 py-0.5 rounded-full ${style.badge}`}
+            >
+              {normalizedType}
+            </span>
           </div>
-          <p className="text-xs text-[#6B7280] font-normal leading-relaxed line-clamp-2 mb-2">{n.message}</p>
+
+          <p className="text-xs text-[#6B7280] font-normal leading-relaxed line-clamp-2 mb-2">
+            {n.message}
+          </p>
+
           <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-[#9CA3AF] font-normal">
             <span className="flex items-center gap-1">
-         
-              {n.recipients.toLocaleString()} {n.recipients === 1 ? "recipient" : "recipients"}
+              {Number(n.recipients || 0).toLocaleString()}{" "}
+              {Number(n.recipients || 0) === 1
+                ? "recipient"
+                : "recipients"}
             </span>
-           
+
             <span>{n.sentAt}</span>
-            
-            <span className="text-[#9CA3AF]">{n.recipientLabel}</span>
-            <span className="ml-auto text-green-500 font-medium">{n.status}</span>
+
+            <span className="text-[#9CA3AF]">
+              {n.recipientLabel}
+            </span>
+
+            <span className="ml-auto text-green-500 font-medium">
+              {n.status}
+            </span>
           </div>
         </div>
       </div>
