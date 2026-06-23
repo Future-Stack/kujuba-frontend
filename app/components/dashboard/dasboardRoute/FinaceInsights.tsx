@@ -159,21 +159,21 @@ const getDateRange = (type: "monthly" | "weekly") => {
 export default function FinanceInsights() {
   const [viewType, setViewType] = useState<"monthly" | "weekly">("weekly");
   const [activeDay, setActiveDay] = useState<string | null>(null);
-  const dateRange = useMemo(() => getDateRange(viewType), [viewType]);
-  console.log("Fetching with:", dateRange);
-  const { data, isLoading, isError, refetch } = useGetOverviewQuery(dateRange);
+  const dateRange = getDateRange(viewType);
+console.log("Fetching with:", dateRange); 
+const { data, isLoading, isError, refetch } = useGetOverviewQuery({ range: viewType });
 
 
-  useEffect(() => {
-    refetch();
-  }, [dateRange, refetch]);
-  console.log("API response:", JSON.stringify(data));
-  console.log(data)
-  console.log("viewType:", viewType);
-  console.log("data:", data);
-  console.log("isLoading:", isLoading);
-  console.log("isError:", isError);
-  const financeMetrics = (data?.data as any)?.finance_metrics;
+useEffect(() => {
+  refetch();
+}, [viewType]);
+console.log("API response:", JSON.stringify(data));
+console.log(data)
+console.log("viewType:", viewType);
+console.log("data:", data);
+console.log("isLoading:", isLoading);
+console.log("isError:", isError);
+const financeMetrics = (data?.data as any)?.finance_metrics;
 const chartData = (data?.data as any)?.finance_chart || [];
 console.log(chartData)
 console.log(chartData.length);
