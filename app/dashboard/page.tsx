@@ -1,4 +1,4 @@
-
+"use client"
 import Card from "../components/dashboard/dasboardRoute/Card";
 import FinanceInsights from "../components/dashboard/dasboardRoute/FinaceInsights";
 import UserTable from "../components/dashboard/dasboardRoute/Users";
@@ -9,11 +9,15 @@ import TopCategory from "../components/dashboard/dasboardRoute/TopCategory";
 import RecentInspection from "../components/dashboard/dasboardRoute/RecentInspection";
 import InspectionGaugeWithCalendar from "../components/dashboard/dasboardRoute/InspectionGaugeWithCalendar";
 import RecentActivity from "../components/dashboard/dasboardRoute/RecentActivity";
+import { useGetUserProfileQuery } from "../redux/features/personalInfo";
 
-export default function dashboard() {
+export default function Dashboard() {
+    const { data } = useGetUserProfileQuery(undefined);
+    const user = data?.data;
+const adminName = `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim();
   return (
     <div className="">
-    <h1 className="text-[#000000] text-2xl md:text-3xl font-semibold font-sora mb-3">Good morning, Admin 👋 </h1>
+    <h1 className="text-[#000000] text-2xl md:text-3xl font-semibold font-sora mb-3">  Good morning, {adminName || "Admin"} 👋</h1>
       <p className="text-[#B5BCC8] text-xl md:text-2xl font-normal font-roboto mb-10">Here&apos;s what&apos;s happening on your platform today.</p>
       <div>
         <Card/>

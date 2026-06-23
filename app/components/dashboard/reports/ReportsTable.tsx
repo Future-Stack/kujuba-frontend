@@ -11,8 +11,9 @@ import {
   Report,
 } from "@/app/redux/features/reportsApi"; // 👈 path adjust korun
 import ReportDetailsModal from "./ReportDetailsModal";
+import { toast } from "react-toastify";
 
-type StatusFilter = "All" | "Started" | "Completed" | "Pending" | "Archived";
+type StatusFilter = "All" | "Started" | "Completed" | "Pending" ;
 
 
 const statusStyle: Record<string, string> = {
@@ -124,14 +125,19 @@ export default function ReportsTable() {
     }
     window.open(url, "_blank", "noopener,noreferrer");
   }
+const [togglingId, setTogglingId] = useState<number | null>(null);
+const handleToggleFavorite = async (
+  id: number,
+  isFavorite: boolean
+) => {
+  try {
+    const res = await toggleFavorite(id).unwrap();
 
-  const handleToggleFavorite = async (id: number) => {
-    try {
-      await toggleFavorite(id).unwrap();
-    } catch (err) {
-      console.error("Toggle favorite error:", err);
-    }
-  };
+    toast.success(res.message);
+  } catch (err: any) {
+    toast.error(err?.data?.message || "Something went wrong");
+  }
+};
 
   const handleArchive = async (id: number) => {
     try {
@@ -180,7 +186,7 @@ export default function ReportsTable() {
               All
               <span className="px-1.5 py-0.5 rounded-md text-[10px] bg-slate-100 text-slate-600">{counts.All}</span>
             </button>
-            {(["Completed", "Started", "Archived"] as const).map((filter) => (
+            {(["Completed", "Started",] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
@@ -304,21 +310,25 @@ export default function ReportsTable() {
                         </button>
 
                         {/* 3. Star / Favourite toggle */}
-                        <button
-                          onClick={() => handleToggleFavorite(row.id)}
-                          disabled={isToggling}
-                          title={row.is_favorite ? "Unstar" : "Star"}
-                          className={`p-2 rounded-sm cursor-pointer transition-colors border border-gray-100 disabled:opacity-50 ${
-                            row.is_favorite
-                              ? "bg-amber-50 text-amber-400 hover:bg-amber-100 border-amber-100"
-                              : "text-[#5C6470] hover:text-amber-400 bg-[#EFEFFF] hover:bg-amber-50"
-                          }`}
-                        >
-                          <Star className={`w-4 h-4 ${row.is_favorite ? "fill-amber-400" : ""}`} />
-                        </button>
+   <button
+ onClick={() => handleToggleFavorite(row.id, row.is_favorite)}
+  disabled={togglingId === row.id}
+  title={row.is_favorite ? "Unstar" : "Star"}
+  className={`p-2 rounded-sm cursor-pointer transition-colors border border-gray-100 disabled:opacity-50 ${
+    row.is_favorite
+      ? "bg-amber-50 text-amber-400 hover:bg-amber-100 border-amber-100"
+      : "text-[#5C6470] hover:text-amber-400 bg-[#EFEFFF] hover:bg-amber-50"
+  }`}
+>
+  <Star
+    className={`w-4 h-4 ${
+      row.is_favorite ? "fill-amber-400" : ""
+    }`}
+  />
+</button>
 
                         {/* 4. Archive row */}
-                        <button
+                        {/* <button
                           onClick={() => handleArchive(row.id)}
                           title="Archive"
                           disabled={row.status === "Archived" || isArchiving}
@@ -329,7 +339,7 @@ export default function ReportsTable() {
                             <path d="M2.66602 5.33337V12.6667C2.66602 13.0203 2.80649 13.3595 3.05654 13.6095C3.30659 13.8596 3.64573 14 3.99935 14H11.9993C12.353 14 12.6921 13.8596 12.9422 13.6095C13.1922 13.3595 13.3327 13.0203 13.3327 12.6667V5.33337" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
                             <path d="M6.66602 8H9.33268" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
-                        </button>
+                        </button> */}
 
                       </div>
                     </td>

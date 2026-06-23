@@ -115,19 +115,12 @@ export default function PersonalInfoPage() {
   const { data, isLoading, isError, error } = useGetUserProfileQuery();
   const [updateUserProfile, { isLoading: isSaving }] = useUpdateUserProfileMutation();
 
-  // TEMP DEBUG — check the browser console vs your Postman response.
-  // If `raw` here is undefined/empty while Postman shows data, it's an
-  // auth/header issue (the browser request isn't sending what Postman sends).
-  // If `raw` has the data but nested differently than below, it's a shape
-  // mismatch — remove this once confirmed.
+
   useEffect(() => {
     console.log("[personal-info] query state ->", { data, isLoading, isError, error });
   }, [data, isLoading, isError, error]);
 
   const raw = data as any;
-  // Handles both shapes: the full {success, message, data} envelope, or a
-  // baseApi that already unwraps it via transformResponse so `data` IS the
-  // profile object.
   const user: UserProfile | undefined = raw?.data ?? raw;
 
   const [form, setForm] = useState(emptyForm);
@@ -137,7 +130,7 @@ export default function PersonalInfoPage() {
   // populate the form once the profile has loaded
   useEffect(() => {
     if (!user) return;
-    setForm({
+    const newForm = {
       first_name: user.first_name || "",
       last_name: user.last_name || "",
       phone: user.profile?.phone || "",
@@ -146,50 +139,83 @@ export default function PersonalInfoPage() {
       license_expiry: user.profile?.license_expiry?.slice(0, 10) || "",
       insurance_expiry: user.profile?.insurance_expiry?.slice(0, 10) || "",
       inspection_types: user.profile?.inspection_types || [],
-    });
+    } as typeof emptyForm;
+
+    // Update form state only when the incoming user data differs from current form.
+    // Use functional updater to compare against the latest previous state and
+    // avoid including `form` in the dependency array (prevents cascading renders).
+    try {
+      setForm((prev) => {
+        const same = JSON.stringify(newForm) === JSON.stringify(prev);
+        return same ? prev : newForm;
+      });
+    } catch {
+      setTimeout(() => setForm(newForm), 0);
+    }
   }, [user]);
 
   const handleChange = (field: keyof typeof emptyForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  // Type validation
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (!allowedTypes.includes(file.type)) {
+    toast.error("Only JPG, PNG, WEBP or GIF images are allowed.");
+    e.target.value = "";
+    return;
+  }
+
+  // Size validation — 2MB max
+  const maxSizeMB = 2;
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    toast.error(`Image is too large. Maximum allowed size is ${maxSizeMB}MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`);
+    e.target.value = "";
+    return;
+  }
+
+  setAvatarFile(file);
+  setAvatarPreview(URL.createObjectURL(file));
+};
+
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+
+  const payload = {
+    first_name: form.first_name || "",
+    last_name: form.last_name || "",
+    phone: form.phone || "",
+    address: form.address || "",
+    license_number: form.license_number || "",
+    license_expiry: form.license_expiry || "",
+    insurance_expiry: form.insurance_expiry || "",
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  try {
+    if (avatarFile) {
+      const formData = new FormData();
 
-    // inspection_types are catalog items (id/title/price), not something
-    // typed in here — leaving them out of the save payload for now since
-    // there's no endpoint yet to pick from the catalog. They're only shown
-    // read-only below until that's wired up.
-    const { inspection_types, ...editableFields } = form;
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
 
-    try {
-      // NOTE: assuming the POST /user-profile endpoint accepts these fields
-      // flat at the top level (mirroring how reset-password needed a couple
-      // of field-name tweaks once checked in Postman, worth double-checking
-      // this one the same way). Switches to FormData only when a new avatar
-      // is chosen, since file uploads can't go through as plain JSON.
-      if (avatarFile) {
-        const payload = new FormData();
-        Object.entries(editableFields).forEach(([key, value]) => {
-          payload.append(key, value as string);
-        });
-        payload.append("profile_img", avatarFile);
-        await updateUserProfile(payload).unwrap();
-      } else {
-        await updateUserProfile(editableFields).unwrap();
-      }
-      toast.success("Profile updated successfully");
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update profile");
+      formData.append("profile_img", avatarFile);
+
+      await updateUserProfile(formData).unwrap();
+    } else {
+      await updateUserProfile(payload).unwrap();
     }
-  };
+
+    toast.success("Profile updated successfully");
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Failed to update profile");
+  }
+};
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -330,10 +356,10 @@ export default function PersonalInfoPage() {
                   type="date"
                   value={form.license_expiry}
                   onChange={(e) => handleChange("license_expiry", e.target.value)}
-                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#111827]
+                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-2 cursor-pointer text-sm text-[#111827]
                     focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition"
                 />
-                <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" />
+                {/* <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" /> */}
               </div>
             </div>
 
@@ -345,10 +371,10 @@ export default function PersonalInfoPage() {
                   type="date"
                   value={form.insurance_expiry}
                   onChange={(e) => handleChange("insurance_expiry", e.target.value)}
-                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#111827]
+                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-2 cursor-pointer text-sm text-[#111827]
                     focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition"
                 />
-                <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" />
+                {/* <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" /> */}
               </div>
             </div>
           </div>
