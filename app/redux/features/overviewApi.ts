@@ -164,12 +164,14 @@ export const overviewApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getOverview: builder.query<
       { success: boolean; data: DashboardOverview },
-      { from_date?: string; to_date?: string } | void
+   { from_date?: string; to_date?: string; range?: string } | void
+      
     >({
       query: (params) => ({
         url: "/admin/dashboard/overview",
         params: params ?? {},
       }),
+       keepUnusedDataFor: 0, 
     }),
   }),
 });

@@ -2,35 +2,24 @@
 
 import React from "react";
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  sent_at: string;
+}
+
 interface NotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  notifications: Notification[];
 }
 
-const notifications = [
-  {
-    id: 1,
-    title: "Payment Support",
-    message: "A new payment support request has been submitted.",
-    time: "2 min ago",
-  },
-  {
-    id: 2,
-    title: "Inspector Upload",
-    message: "Inspector uploaded new inspection documents.",
-    time: "10 min ago",
-  },
-  {
-    id: 3,
-    title: "System Update",
-    message: "New package information has been updated.",
-    time: "1 hour ago",
-  },
-];
 
 const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
+   notifications,
 }) => {
   if (!isOpen) return null;
 
@@ -61,29 +50,38 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
 
         {/* List */}
         <div className="max-h-[400px] overflow-y-auto">
-          {notifications.map((item) => (
-            <div
-              key={item.id}
-              className="px-5 py-4 border-b last:border-b-0 hover:bg-gray-50 transition cursor-pointer"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-primaryColor mt-1.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-medium text-sm font-sora text-[#171C35] leading-5">
-                      {item.title}
-                    </h3>
-                    <span className="text-xs text-gray-400 flex-shrink-0">
-                      {item.time}
-                    </span>
-                  </div>
-                  <p className="text-sm text-[#667085] font-normal font-roboto leading-4 mt-0.5">
-                    {item.message}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+        {notifications.length > 0 ? (
+  notifications.map((item) => (
+    <div
+      key={item.id}
+      className="px-5 py-4 border-b last:border-b-0 hover:bg-gray-50 transition cursor-pointer"
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-2 h-2 rounded-full bg-primaryColor mt-1.5 flex-shrink-0" />
+
+        <div className="flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-medium text-sm font-sora text-[#171C35]">
+              {item.title}
+            </h3>
+
+            <span className="text-xs text-gray-400">
+              {item.sent_at}
+            </span>
+          </div>
+
+          <p className="text-sm text-[#667085] mt-1">
+            {item.message}
+          </p>
+        </div>
+      </div>
+    </div>
+  ))
+) : (
+  <div className="p-6 text-center text-gray-500">
+    No notifications found
+  </div>
+)}
         </div>
 
         {/* Footer */}
