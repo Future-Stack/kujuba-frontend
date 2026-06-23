@@ -235,6 +235,23 @@ export default function InspectionBoardLayout() {
 
     return () => window.clearTimeout(resetExportTrigger);
   }, [exportData, exportTrigger]);
+const CARDS_PER_PAGE = 4;
+const [currentPage, setCurrentPage] = useState(1);
+
+const totalPages = Math.max(
+  1,
+  ...filteredColumns.map((col) =>
+    Math.ceil(col.cards.length / CARDS_PER_PAGE)
+  )
+);
+
+const pagedColumns = filteredColumns.map((col) => ({
+  ...col,
+  cards: col.cards.slice(
+    (currentPage - 1) * CARDS_PER_PAGE,
+    currentPage * CARDS_PER_PAGE
+  ),
+}));
 
   return (
     <div className="w-full bg-slate-50/40 min-h-screen my-6 md:my-12 font-roboto">
@@ -251,7 +268,10 @@ export default function InspectionBoardLayout() {
                 type="text"
                 placeholder="Search inspector, type or address..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+  setSearchQuery(e.target.value);
+  setCurrentPage(1); 
+}}
                 className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/60 border border-gray-100 rounded-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400 leading-5 font-medium"
               />
             </div>
@@ -261,7 +281,10 @@ export default function InspectionBoardLayout() {
               {STATUS_TABS.map((tab) => (
                 <button
                   key={tab.name}
-                  onClick={() => setActiveTab(tab.name)}
+                  onClick={() => {
+  setActiveTab(tab.name);
+  setCurrentPage(1);  
+}}
                   className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
                     activeTab === tab.name
                       ? "bg-black text-white"
@@ -303,7 +326,7 @@ export default function InspectionBoardLayout() {
           </div>
         ) : (
           <div className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-start transition-opacity ${boardFetching ? "opacity-60 pointer-events-none" : ""}`}>
-            {filteredColumns.map((column) => (
+            {pagedColumns.map((column) => (
               <div key={column.key} className="flex flex-col gap-4">
 
          
@@ -479,6 +502,8 @@ export default function InspectionBoardLayout() {
               </div>
             ))}
           </div>
+
+          
         )}
 
       
@@ -494,7 +519,37 @@ export default function InspectionBoardLayout() {
             }}
           />
         )}
-
+{totalPages > 1 && (
+  <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-gray-100">
+    <button
+      onClick={() => setCurrentPage((p) => p - 1)}
+      disabled={currentPage <= 1}
+      className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-base"
+    >
+      ‹
+    </button>
+    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      <button
+        key={page}
+        onClick={() => setCurrentPage(page)}
+        className={`w-8 h-8 flex items-center justify-center rounded text-sm cursor-pointer font-medium transition-colors ${
+          page === currentPage
+            ? "bg-[#2563eb] text-white border border-[#2563eb]"
+            : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+        }`}
+      >
+        {page}
+      </button>
+    ))}
+    <button
+      onClick={() => setCurrentPage((p) => p + 1)}
+      disabled={currentPage >= totalPages}
+      className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 cursor-pointer text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-base"
+    >
+      ›
+    </button>
+  </div>
+)}
       </div>
     </div>
   );

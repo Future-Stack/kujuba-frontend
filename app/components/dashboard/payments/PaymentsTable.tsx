@@ -211,6 +211,16 @@ export default function PaymentsTable() {
     Canceled: payments.filter((p) => p.status === "failed").length,
   }), [payments, totalCount]);
 
+
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
+
+const paginatedPayments = useMemo(() => {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  return payments.slice(startIndex, startIndex + itemsPerPage);
+}, [payments, currentPage]);
+
+const totalPages = Math.ceil(payments.length / itemsPerPage);
   return (
     <div className="w-full bg-white min-h-screen font-roboto my-6 md:my-12 antialiased select-none">
 
@@ -268,8 +278,8 @@ export default function PaymentsTable() {
 
       
       {isLoading && (
-        <div className="w-full text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold text-sm">Loading payments…</p>
+        <div className="">
+          <TableSkeleton/>
         </div>
       )}
 
@@ -299,7 +309,7 @@ export default function PaymentsTable() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {payments.map((item) => {
+                {paginatedPayments.map((item) => {
                   const booking   = item.inspection_booking;
                   const homeowner = booking.homeowner;
                   const inspector = booking.inspection_assign?.inspector;
@@ -385,6 +395,42 @@ export default function PaymentsTable() {
           </p>
         </div>
       )}
+
+      {totalPages > 1 && (
+  <div className="flex items-center justify-center gap-2 mt-6">
+    <button
+      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      disabled={currentPage === 1}
+      className="px-3 py-2  border rounded disabled:opacity-100"
+    >
+      Prev
+    </button>
+
+    {Array.from({ length: totalPages }, (_, i) => (
+      <button
+        key={i + 1}
+        onClick={() => setCurrentPage(i + 1)}
+        className={`px-3 py-1  border border-primaryColor cursor-pointer rounded ${
+          currentPage === i + 1
+            ? "bg-primaryColor text-white"
+            : "bg-white text-black"
+        }`}
+      >
+        {i + 1}
+      </button>
+    ))}
+
+    <button
+      onClick={() =>
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+      }
+      disabled={currentPage === totalPages}
+      className="px-3 py-2 border cursor-pointer rounded disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+)}
     </div>
   );
 }

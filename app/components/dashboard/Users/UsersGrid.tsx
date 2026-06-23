@@ -119,7 +119,7 @@ const filteredAndSortedUsers = useMemo(() => {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-sm px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
@@ -134,7 +134,7 @@ const filteredAndSortedUsers = useMemo(() => {
                   <button onClick={() => { setSortOrder("oldest"); setOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Oldest</button>
                 </div>
               )}
-            </div>
+            </div> */}
 
             <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 curosr-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
