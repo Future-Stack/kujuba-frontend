@@ -71,9 +71,14 @@ export default function ReportsTable() {
     if (!filteredReports.length) return;
     const headers = ["User Name", "Location", "Inspection ID", "Report ID", "Inspector Email", "Created Date", "Status", "Homeowner Feedback"];
     const rows = filteredReports.map((r) => [
-      r.user_name, r.location ?? "", r.inspection_id, r.report_id,
-      r.inspector_email, r.created_date, r.status ?? "",
-      // r.inspector_email, r.created_date, r.status, r.homeowner_feedback ?? "",
+      r.user_name,
+      r.location ?? "",
+      r.inspection_id,
+      r.report_id,
+      r.inspector_email,
+      r.created_date,
+      r.status ?? "",
+      r.report_details?.notes ?? "",
     ]);
     const csv =
       "data:text/csv;charset=utf-8," +

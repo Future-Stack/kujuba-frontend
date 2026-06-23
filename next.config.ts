@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   /* config options here */
    images: {
     domains: ["api.connecttoinspect.com"],
+    // remotePatterns: [
+    //   {
+    //     protocol: "https",
+    //     hostname: "api.connecttoinspect.com",
+    //   }
+    // ]
   },
 };
 
