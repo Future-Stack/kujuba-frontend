@@ -120,8 +120,15 @@ export default function PersonalInfoPage() {
     console.log("[personal-info] query state ->", { data, isLoading, isError, error });
   }, [data, isLoading, isError, error]);
 
-  const raw = data as any;
-  const user: UserProfile | undefined = raw?.data ?? raw;
+const raw = data as any;
+// আগে console করে দেখো কী আসছে
+console.log("raw data:", raw);
+
+// এভাবে দুটো case handle করো
+const user: UserProfile | undefined =
+  raw?.data?.id ? raw.data :       // { success, data: { id, ... } }
+  raw?.id ? raw :                   // already unwrapped { id, ... }
+  undefined;
 
   const [form, setForm] = useState(emptyForm);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -349,34 +356,47 @@ const handleSubmit = async (e: FormEvent) => {
             </div>
 
             {/* License Expiry */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium leading-5 font-roboto text-gray-900">License Expiry</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={form.license_expiry}
-                  onChange={(e) => handleChange("license_expiry", e.target.value)}
-                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-2 cursor-pointer text-sm text-[#111827]
-                    focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition"
-                />
-                {/* <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" /> */}
-              </div>
-            </div>
+        {/* License Expiry */}
+<div className="flex flex-col gap-1.5">
+  <label className="text-sm font-medium leading-5 font-roboto text-gray-900">License Expiry</label>
+  <div className="relative">
+    <input
+      type="date"
+      value={form.license_expiry}
+      onChange={(e) => handleChange("license_expiry", e.target.value)}
+      className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#111827]
+        focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition
+        [&::-webkit-calendar-picker-indicator]:opacity-0
+        [&::-webkit-calendar-picker-indicator]:absolute
+        [&::-webkit-calendar-picker-indicator]:right-0
+        [&::-webkit-calendar-picker-indicator]:w-10
+        [&::-webkit-calendar-picker-indicator]:h-full
+        [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+    />
+    <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F] pointer-events-none" />
+  </div>
+</div>
 
-            {/* Insurance Expiry */}
-            <div className="flex flex-col gap-1.5 md:col-span-2 md:w-1/2">
-              <label className="text-sm font-medium leading-5 font-roboto text-gray-900">Insurance Expiry</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={form.insurance_expiry}
-                  onChange={(e) => handleChange("insurance_expiry", e.target.value)}
-                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-2 cursor-pointer text-sm text-[#111827]
-                    focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition"
-                />
-                {/* <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" /> */}
-              </div>
-            </div>
+{/* Insurance Expiry */}
+<div className="flex flex-col gap-1.5 md:col-span-2 md:w-1/2">
+  <label className="text-sm font-medium leading-5 font-roboto text-gray-900">Insurance Expiry</label>
+  <div className="relative">
+    <input
+      type="date"
+      value={form.insurance_expiry}
+      onChange={(e) => handleChange("insurance_expiry", e.target.value)}
+      className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#111827]
+        focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition
+        [&::-webkit-calendar-picker-indicator]:opacity-0
+        [&::-webkit-calendar-picker-indicator]:absolute
+        [&::-webkit-calendar-picker-indicator]:right-0
+        [&::-webkit-calendar-picker-indicator]:w-10
+        [&::-webkit-calendar-picker-indicator]:h-full
+        [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+    />
+    <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F] pointer-events-none" />
+  </div>
+</div>
           </div>
 
           {/* Inspection Types — catalog items (id/title/price) the inspector
