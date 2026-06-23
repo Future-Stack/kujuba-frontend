@@ -37,7 +37,7 @@ export default function PricingItemsList({
       setItems((prev) =>
         prev.map((item) =>
           item.id === id
-            ? { ...item, price: parsed, originalPrice: undefined } // ✅ clear
+            ? { ...item, price: parsed, originalPrice: undefined } 
             : item
         )
       );

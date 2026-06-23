@@ -78,12 +78,12 @@ export const inspectionApi = baseApi.injectEndpoints({
 
     getInspectionMetrics: builder.query<any, void>({
       query: () => "/admin/inspection-metrics",
-      providesTags: ["Inspection"],
+      providesTags: ["InspectionType"],
     }),
 
     getInspectionManagement: builder.query<any, string>({
       query: (filter) => `/admin/inspection-management?status=${filter}`,
-      providesTags: ["Inspection"],
+      providesTags: ["InspectionType"],
     }),
 
     assignInspection: builder.mutation<any, any>({
@@ -92,7 +92,7 @@ export const inspectionApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Inspection"],
+      invalidatesTags: ["InspectionType"],
     }),
 
     getAvailableInspectors: builder.query<any, void>({
@@ -102,7 +102,7 @@ export const inspectionApi = baseApi.injectEndpoints({
 
     getExportInspections: builder.query<any, void>({
       query: () => "/admin/export-inspections-data",
-      providesTags: ["Inspection"],
+      providesTags: ["InspectionType"],
     }),
 
    
