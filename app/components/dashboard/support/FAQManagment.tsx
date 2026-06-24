@@ -30,6 +30,9 @@ export default function FAQManagement() {
   const [addFaq, { isLoading: isAdding }] = useAddFaqMutation();
   const [updateFaq, { isLoading: isUpdating }] = useUpdateFaqMutation();
   const [deleteFaq] = useDeleteFaqMutation();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+const ITEMS_PER_PAGE = 10;
 
   const faqs =
     data?.data
@@ -46,7 +49,7 @@ export default function FAQManagement() {
         updatedAt: item.updated_at,
       })) || [];
 
-  // Add new FAQ
+
   const handleAdd = async (question: string, answer: string) => {
     try {
       await addFaq({ question, answers: answer, status: true }).unwrap();
@@ -83,8 +86,24 @@ export default function FAQManagement() {
     }
   };
 
+  const totalPages = Math.ceil(faqs.length / ITEMS_PER_PAGE);
+const paginatedFaqs = faqs.slice(
+  (currentPage - 1) * ITEMS_PER_PAGE,
+  currentPage * ITEMS_PER_PAGE
+);
+
   return (
     <main className="min-h-screen py-6">
+       {/* Header */}
+  <div className="flex items-center justify-between mb-6">
+    <h1 className="text-2xl font-bold font-sora text-gray-900">FAQ Management</h1>
+    <button
+      onClick={() => setIsAddModalOpen(true)}
+      className="px-5 py-2.5 bg-primaryColor hover:bg-[#4338ca] text-white font-semibold text-sm rounded-lg cursor-pointer transition-colors"
+    >
+      + Add FAQ
+    </button>
+  </div>
       <div className="space-y-3 mb-4">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => <FAQSkeleton key={i} />)
@@ -93,7 +112,7 @@ export default function FAQManagement() {
             <FAQCard
               key={faq.id}
               faq={faq}
-              index={i + 1}
+              index={(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
               onEdit={(f) => setEditingFaq(f)}
               onDelete={(id) => setDeleteId(id)}
             />
@@ -102,13 +121,32 @@ export default function FAQManagement() {
       </div>
 
       {/* Always visible Add form */}
-      <div id="faq-form">
-        <FAQForm
-          index={faqs.length + 1}
-          onPublish={handleAdd}
-          loading={isAdding}
-        />
+{/* Add FAQ Modal */}
+{isAddModalOpen && (
+  <div  onClick={() => setIsAddModalOpen(false)}  className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+    <div  onClick={(e) => e.stopPropagation()}  className="bg-white rounded-3xl w-full max-w-xl shadow-xl">
+      <div className="flex items-center justify-between px-6 pt-6 pb-2">
+        <h2 className="text-lg font-bold font-sora text-gray-900">Add New FAQ</h2>
+        <button
+          onClick={() => setIsAddModalOpen(false)}
+          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 cursor-pointer transition"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </div>
+      <FAQForm
+        index={faqs.length + 1}
+        onPublish={async (q, a) => {
+          await handleAdd(q, a);
+          setIsAddModalOpen(false);
+        }}
+        loading={isAdding}
+      />
+    </div>
+  </div>
+)}
 
       {/* Edit Modal */}
       {editingFaq && (
@@ -125,6 +163,57 @@ export default function FAQManagement() {
         onConfirm={confirmDelete}
         onCancel={() => setDeleteId(null)}
       />
+
+      {totalPages > 1 && (
+  <div className="flex items-center justify-center gap-1.5 my-6">
+    <button
+      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+      disabled={currentPage <= 1}
+            className={`px-3 py-1 border rounded transition ${
+    currentPage === 1
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
+    >
+     Prev
+    </button>
+    {Array.from({ length: totalPages }, (_, i) => i + 1)
+      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+      .reduce<(number | "...")[]>((acc, p, i, arr) => {
+        if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+        acc.push(p);
+        return acc;
+      }, [])
+      .map((p, i) =>
+        p === "..." ? (
+          <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => setCurrentPage(p as number)}
+            className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+              p === currentPage
+                ? "bg-primaryColor text-white border border-primaryColor"
+                : "border border-primaryColor cursor-pointer text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            {p}
+          </button>
+        )
+      )}
+    <button
+      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+      disabled={currentPage >= totalPages}
+           className={`px-3 py-1 border rounded transition ${
+    currentPage === totalPages
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
+    >
+      Next
+    </button>
+  </div>
+)}
     </main>
   );
 }

@@ -94,38 +94,47 @@ export default function ReportsTable() {
   };
 
 
-  async function downloadPDF(url?: string, fileName?: string) {
-    if (!url) {
-      console.error("No report file URL found to download");
-      return;
-    }
-    try {
+async function downloadPDF(url?: string, fileName?: string) {
+  if (!url) { 
+    toast.error("No report file available."); 
+    return; 
+  }
+  
+  try {
+    toast.info("Downloading...");
     
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to fetch file: ${response.status}`);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName ?? "report.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.error("Direct download failed, opening in a new tab instead:", err);
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+    const res = await fetch(url, { mode: "cors" });
+    
+    if (!res.ok) throw new Error();
+    
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = fileName ?? "report.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+    
+    toast.success("Downloaded successfully!");
+  } catch {
+    // CORS block হলে fallback — direct link দিয়ে download
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName ?? "report.pdf";
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Download started!");
   }
+}
 
-  function viewPDF(url?: string) {
-    if (!url) {
-      console.error("No report file URL found to view");
-      return;
-    }
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
+ function viewPDF(url?: string) {
+  if (!url) { toast.error("No report file available."); return; }
+  window.open(url, "_blank", "noopener,noreferrer");
+}
 const [togglingId, setTogglingId] = useState<number | null>(null);
 const handleToggleFavorite = async (
   id: number,
@@ -149,12 +158,15 @@ const handleToggleFavorite = async (
 
   const busy = isLoading || isFetching;
 
+const ITEMS_PER_PAGE = 10;
 
+
+const totalPages = Math.ceil(filteredReports.length / ITEMS_PER_PAGE);
 
   return (
     <div className="w-full bg-white min-h-screen my-6 md:my-12 font-roboto antialiased select-none">
 
-      {/* ── Toolbar ── */}
+ 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div className="flex flex-col lg:flex-row items-stretch sm:items-center gap-4 flex-1">
           <div className="relative w-full lg:max-w-xs">
@@ -170,13 +182,14 @@ const handleToggleFavorite = async (
 
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             <button
-              onClick={() => setActiveFilter("All")}
+                 onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+onClick={() => { setActiveFilter("All"); setPage(1); }}
               className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
                 activeFilter === "All" ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
               }`}
             >
               All
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] bg-slate-100 text-slate-600">{counts.All}</span>
+              <span className="px-1.5 py-0.5 min-w-4 h-4 px-1.5 rounded-full  flex items-center justify-center  text-[10px] bg-slate-100 text-slate-600">{counts.All}</span>
             </button>
             {(["Completed", "Started",] as const).map((filter) => (
               <button
@@ -187,7 +200,7 @@ const handleToggleFavorite = async (
                 }`}
               >
                 {filter}
-                <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${
+                <span className={`min-w-4 h-4 px-1.5 rounded-full  flex items-center justify-center  text-[10px] ${
                   filter === "Completed" ? "bg-emerald-50 text-emerald-600" : "text-orange-500 bg-orange-50"
                   // filter === "Pending" ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600"
                 }`}>
@@ -258,12 +271,19 @@ const handleToggleFavorite = async (
                       </button>
                     </td>
 
-                    {/* Homeowner Feedback */}
-                    <td className="py-3.5 px-4 max-w-[220px]">
-                      <span className="text-gray-600 text-[13px] leading-5 line-clamp-2">
-                        {/* {row.homeowner_feedback?.trim() || "—"} */}
-                      </span>
-                    </td>
+                    
+                 {/* Homeowner Feedback */}
+<td className="py-3.5 px-4 max-w-[220px]">
+  {row.report_details?.notes?.trim() ? (
+    <span className="text-gray-600 text-[13px] leading-5 line-clamp-2">
+      {row.report_details.notes}
+    </span>
+  ) : (
+    <span className="inline-block px-2.5 py-0.5 rounded-md text-[13px] font-bold  text-slate-400">
+      No Feedback
+    </span>
+  )}
+</td>
 
                     <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.created_date}</td>
 
@@ -338,6 +358,53 @@ const handleToggleFavorite = async (
                   </tr>
                 ))}
               </tbody>
+              {totalPages > 1 && (
+  <div className="flex items-center justify-between mt-4 px-1">
+    <span className="text-sm text-gray-500">
+      Page {page} of {totalPages} · {filteredReports.length} total
+    </span>
+    <div className="flex items-center gap-1.5">
+      <button
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+        disabled={page <= 1}
+        className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        Prev
+      </button>
+      {Array.from({ length: totalPages }, (_, i) => i + 1)
+        .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+        .reduce<(number | "...")[]>((acc, p, i, arr) => {
+          if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+          acc.push(p);
+          return acc;
+        }, [])
+        .map((p, i) =>
+          p === "..." ? (
+            <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => setPage(p as number)}
+              className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+                p === page
+                  ? "bg-primaryColor text-white border border-primaryColor"
+                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {p}
+            </button>
+          )
+        )}
+      <button
+        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+        disabled={page >= totalPages}
+        className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+)}
             </table>
           </div>
 

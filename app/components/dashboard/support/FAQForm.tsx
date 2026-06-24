@@ -22,7 +22,7 @@ export default function FAQForm({ index, onPublish, loading }: FAQFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-[#e2e5eb] p-5 sm:p-6">
+    <div className="bg-white rounded-3xl  p-5 sm:p-6">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-base md:text-lg font-sora font-semibold text-[#090909]">
           Question :

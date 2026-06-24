@@ -84,6 +84,8 @@ const notifications =
   const [isTypeOpen, setIsTypeOpen] = useState(false);
 
 const [openRecipient, setOpenRecipient] = useState(false);
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 3;
 
   function validate() {
     const e: { title?: string; message?: string } = {};
@@ -120,6 +122,14 @@ const payload = {
     toast.error("Failed to send notification");
   }
 };
+
+
+const totalPages = Math.ceil(notifications.length / itemsPerPage);
+
+const paginatedNotifications = notifications.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
 
   return (
     <div className="min-h-screen  font-roboto">
@@ -276,13 +286,56 @@ const payload = {
                 {notifications.length === 0 && (
                   <div className="py-16 text-center text-sm text-gray-400">No notifications yet.</div>
                 )}
-                {notifications.map((n:any) => (
+                {paginatedNotifications.map((n:any) => (
                   <NotificationRow key={n.id} notification={n} />
                 ))}
               </div>
             </div>
           </div>
         </div>
+        {notifications.length > 0 && (
+  <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-100">
+<button
+  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+  disabled={currentPage === 1}
+  className={`px-3 py-1 border rounded transition ${
+    currentPage === 1
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
+>
+  Previous
+</button>
+
+    {Array.from({ length: totalPages }, (_, index) => (
+      <button
+        key={index}
+        onClick={() => setCurrentPage(index + 1)}
+        className={`px-3 py-1 rounded  cursor-pointer ${
+          currentPage === index + 1
+            ? "bg-blue-600 text-white"
+            : "border border-primaryColor text-gray-500"
+        }`}
+      >
+        {index + 1}
+      </button>
+    ))}
+
+<button
+  onClick={() =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+  }
+  disabled={currentPage === totalPages}
+  className={`px-3 py-1 border rounded transition ${
+    currentPage === totalPages
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
+>
+  Next
+</button>
+  </div>
+)}
       </main>
     </div>
   );

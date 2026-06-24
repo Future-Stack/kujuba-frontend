@@ -88,7 +88,7 @@ export default function PaymentsCard() {
     {
     value: `${metrics?.total_refunded ?? 0}`,
     label: 'Total Refunded',
-    change: `${metrics?.total_refunded ?? 0}% than last month`,
+    change: `${formatMoney(metrics?.total_refunded ?? 0)} than last month`,
     isPositive: (metrics?.growth_rate ?? 0) >= 0,
     valueColor: 'text-[#EF4444]',
     labelColor: 'text-[#EF4444]',

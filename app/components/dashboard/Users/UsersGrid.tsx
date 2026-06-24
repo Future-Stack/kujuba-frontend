@@ -9,28 +9,14 @@ import UserDetailsModal, { UserCard } from "./UserDetailsModal";
 import { useGetUserByIdQuery, useGetUsersQuery } from "@/app/redux/features/usersApi";
 
 
-// const initialUsers: UserCard[] = [
-//   { id: "1", name: "Brain Thompson", role: "User", location: "Florida", email: "brian@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", createdAt: 1716462000000, status: "Active", joiningDate: "10 Apr, 2025" },
-//   { id: "2", name: "Florence Haith", role: "User", location: "Florida", email: "florence@example.com", phone: "+1 310 555 0190", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80", createdAt: 1716375600000, status: "Active", joiningDate: "08 Apr, 2025" },
-//   { id: "3", name: "Jerry Palmer", role: "User", location: "Florida", email: "jerry@example.com", phone: "+1 415 555 0122", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80", createdAt: 1716289200000, status: "Active", joiningDate: "06 Apr, 2025" },
-//   { id: "4", name: "Mark Brainerd", role: "User", location: "Florida", email: "mark@example.com", phone: "+1 646 555 0167", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", createdAt: 1716202800000, status: "Suspended", joiningDate: "04 Apr, 2025" },
-//   { id: "5", name: "Roy Thomas", role: "User", location: "Florida", email: "roy@example.com", phone: "+1 702 555 0181", inspectionsCount: 3, cancelledInspections: 3, avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80", createdAt: 1716116400000, status: "Active", joiningDate: "02 Apr, 2025" },
-//   { id: "6", name: "Alisia Chen", role: "User", location: "Florida", email: "alisia@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80", createdAt: 1716030000000, status: "Active", joiningDate: "01 Apr, 2025" },
-//   { id: "7", name: "Kelly Myers", role: "User", location: "Florida", email: "kelly@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, createdAt: 1715943600000, status: "Active", joiningDate: "30 Mar, 2025" },
-//   { id: "8", name: "James Walton", role: "User", location: "Florida", email: "james@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=100&q=80", createdAt: 1715857200000, status: "Active", joiningDate: "28 Mar, 2025" },
-//   { id: "9", name: "Dennis Smith", role: "User", location: "Florida", email: "dennis@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&q=80", createdAt: 1715770800000, status: "Suspended", joiningDate: "26 Mar, 2025" },
-//   { id: "10", name: "David Spiegel", role: "User", location: "Florida", email: "david@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 1, avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80", createdAt: 1715684400000, status: "Active", joiningDate: "24 Mar, 2025" },
-//   { id: "11", name: "Melissa Davis", role: "User", location: "Florida", email: "melissa@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 0, avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80", createdAt: 1715598000000, status: "Active", joiningDate: "22 Mar, 2025" },
-//   { id: "12", name: "Roberto Theisen", role: "Italy", location: "Florida", email: "roberto@example.com", phone: "+1 578 209 4965", inspectionsCount: 3, cancelledInspections: 2, avatarUrl: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=100&q=80", createdAt: 1715511600000, status: "Active", joiningDate: "20 Mar, 2025" },
-// ];
-
 export default function UserGridDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null); 
  const [selectedId, setSelectedId] = useState<number | null>(null);
 const { data: usersData, isLoading } = useGetUsersQuery("homeowner");
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
 
  const { data: singleUserData } = useGetUserByIdQuery(
   { id: selectedId as number, user_type: "homeowner" },
@@ -61,7 +47,14 @@ const filteredAndSortedUsers = useMemo(() => {
 
   return result;
 }, [users, searchQuery, sortOrder]);
+const paginatedUsers = useMemo(() => {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
 
+  return filteredAndSortedUsers.slice(startIndex, endIndex);
+}, [filteredAndSortedUsers, currentPage]);
+
+const totalPages = Math.ceil(filteredAndSortedUsers.length / itemsPerPage);
 
   const handleExport = () => {
   const headers = [
@@ -75,7 +68,7 @@ const filteredAndSortedUsers = useMemo(() => {
     "Joining Date",
   ];
 
-  const rows = filteredAndSortedUsers.map((user) => [
+  const rows = paginatedUsers.map((user) => [
     user.name,
     user.email,
     user.phone,
@@ -101,6 +94,8 @@ const filteredAndSortedUsers = useMemo(() => {
   link.click();
   document.body.removeChild(link);
 };
+
+
   return (
     <div className="w-full min-h-screen font-roboto mt-4 antialiased selection:bg-blue-500 selection:text-white">
       <div className="border rounded-sm border-[#E8E8E8]  p-5">
@@ -119,23 +114,7 @@ const filteredAndSortedUsers = useMemo(() => {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            {/* <div className="relative">
-              <button
-                onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-sm px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
-              >
-                <ArrowUpDown className="w-4 h-4 text-gray-400" />
-                <span>Sort By : {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </button>
-              {open && (
-                <div className="absolute right-0 mt-2 w-44 rounded-xl border border-gray-100 bg-white text-gray-600 shadow-lg z-50 overflow-hidden">
-                  <button onClick={() => { setSortOrder("newest"); setOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Newest</button>
-                  <button onClick={() => { setSortOrder("oldest"); setOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Oldest</button>
-                </div>
-              )}
-            </div> */}
-
+      
             <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 curosr-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
               <span>Export User Data</span>
@@ -241,7 +220,48 @@ const initials = fullName
           </div>
         )}
       </div>
+{totalPages > 1 && (
+  <div className="flex items-center justify-center gap-2 mt-6">
+    
+    <button
+      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+      disabled={currentPage === 1}
+            className={`px-3 py-1 border rounded transition ${
+    currentPage === 1
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
+    >
+      Prev
+    </button>
 
+    {Array.from({ length: totalPages }, (_, i) => (
+      <button
+        key={i}
+        onClick={() => setCurrentPage(i + 1)}
+        className={`px-3 py-1 border rounded ${
+          currentPage === i + 1
+            ? "bg-primaryColor text-white"
+            : "bg-white text-black border border-primaryColor"
+        }`}
+      >
+        {i + 1}
+      </button>
+    ))}
+
+    <button
+      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+      disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded transition ${
+    currentPage === totalPages
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
+    >
+      Next
+    </button>
+  </div>
+)}
     
 {selectedUser && (
   <UserDetailsModal
