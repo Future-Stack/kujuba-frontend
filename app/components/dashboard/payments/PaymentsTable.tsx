@@ -182,6 +182,8 @@ function TableSkeleton() {
 export default function PaymentsTable() {
   const [activeFilter, setActiveFilter] = useState<"All" | UIStatus>("All");
   const [searchQuery, setSearchQuery]   = useState("");
+const { data: allPaymentsResponse } = useGetPaymentsQuery({});
+
 
   const backendStatus =
     activeFilter === "Paid" ? "paid"
@@ -202,15 +204,25 @@ export default function PaymentsTable() {
     ? rawData.data
     : [];
 
-  const totalCount: number = rawData?.data?.total ?? rawData?.total ?? payments.length;
+  // const totalCount: number = rawData?.data?.total ?? rawData?.total ?? payments.length;
+
+  const allPayments = useMemo<PaymentItem[]>(() => {
+    const rawAllPayments = allPaymentsResponse as any;
+    return Array.isArray(rawAllPayments?.data?.data)
+      ? rawAllPayments.data.data
+      : Array.isArray(rawAllPayments?.data)
+      ? rawAllPayments.data
+      : Array.isArray(rawAllPayments)
+      ? rawAllPayments
+      : [];
+  }, [allPaymentsResponse]);
 
   const counts = useMemo(() => ({
-    All:      totalCount,
-    Paid: payments.filter((p) => p.status === "paid").length,
-    Pending:  payments.filter((p) => p.status === "pending").length,
-    Canceled: payments.filter((p) => p.status === "failed").length,
-  }), [payments, totalCount]);
-
+    All: allPayments.length,
+    Paid: allPayments.filter((p) => p.status === "paid").length,
+    Pending: allPayments.filter((p) => p.status === "pending").length,
+    Canceled: allPayments.filter((p) => p.status === "failed").length,
+  }), [allPayments]);
 
   const [currentPage, setCurrentPage] = useState(1);
 const itemsPerPage = 10;
@@ -401,7 +413,11 @@ const totalPages = Math.ceil(payments.length / itemsPerPage);
     <button
       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
       disabled={currentPage === 1}
-      className="px-3 py-2  border rounded disabled:opacity-100"
+       className={`px-3 py-1 border rounded transition ${
+    currentPage === 1
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
     >
       Prev
     </button>
@@ -425,7 +441,11 @@ const totalPages = Math.ceil(payments.length / itemsPerPage);
         setCurrentPage((prev) => Math.min(prev + 1, totalPages))
       }
       disabled={currentPage === totalPages}
-      className="px-3 py-2 border cursor-pointer rounded disabled:opacity-50"
+       className={`px-3 py-1 border rounded transition ${
+    currentPage === totalPages
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
     >
       Next
     </button>

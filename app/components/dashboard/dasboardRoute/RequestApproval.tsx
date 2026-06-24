@@ -4,6 +4,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetOverviewQuery } from "@/app/redux/features/overviewApi";
+import { toast } from "react-toastify";
+import { useApproveInspectorMutation, useRejectInspectorMutation } from "@/app/redux/features/inspectorApi";
 
 type InspectorStatus = "Active" | "Rejected";
 
@@ -64,8 +66,29 @@ function RequestApprovalSkeleton() {
 // ── MAIN COMPONENT ───────────────────────────────
 
 export default function RequestApproval() {
-  const { data, isLoading, isError } = useGetOverviewQuery();
+  const { data, isLoading, isError,refetch } = useGetOverviewQuery();
+const [approveInspector, { isLoading: isApproving }] = useApproveInspectorMutation();
+const [rejectInspector, { isLoading: isRejecting }] = useRejectInspectorMutation();
 
+const handleApprove = async (id: number) => {
+  try {
+    await approveInspector(id).unwrap();
+    toast.success("Inspector approved successfully!");
+      refetch();
+  } catch (err: any) {
+    toast.error(err?.data?.message || "Failed to approve inspector.");
+  }
+};
+
+const handleReject = async (id: number) => {
+  try {
+    await rejectInspector(id).unwrap();
+    toast.success("Inspector rejected.");
+      refetch();
+  } catch (err: any) {
+    toast.error(err?.data?.message || "Failed to reject inspector.");
+  }
+};
   if (isLoading) return <RequestApprovalSkeleton />;
 
   if (isError || !data?.success) {
@@ -142,7 +165,10 @@ export default function RequestApproval() {
                 <div className="flex items-center gap-2 shrink-0">
 
                   {/* APPROVE */}
-                  <button className="w-9 h-9 rounded-full bg-green-50 hover:bg-green-100 flex items-center cursor-pointer justify-center transition">
+                  <button 
+                  onClick={() => handleApprove(req.id)}
+                   disabled={isApproving || isRejecting}
+                  className="w-9 h-9 rounded-full bg-green-50 hover:bg-green-100 flex items-center cursor-pointer justify-center transition">
                     <svg
                       width="16"
                       height="16"
@@ -160,7 +186,10 @@ export default function RequestApproval() {
                   </button>
 
                   {/* REJECT */}
-                  <button className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 flex items-center cursor-pointer justify-center transition">
+                  <button 
+                  onClick={() => handleReject(req.id)}
+                  disabled={isApproving || isRejecting}
+                  className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 flex items-center cursor-pointer justify-center transition">
                     <svg
                       width="16"
                       height="16"

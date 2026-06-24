@@ -56,12 +56,18 @@ function initials(name: string) {
 }
 
 
-function assignStatusToColumnKey(assignStatus: string, status: string): string {
+function assignStatusToColumnKey(assignStatus: string, status: string, assignedInspector?: string): string {
   const s = status.toLowerCase();
   const a = assignStatus.toLowerCase();
+  
   if (a === "completed" || s === "completed") return "completed";
   if (s === "cancelled" || s === "canceled" || a === "cancelled" || a === "canceled") return "canceled";
   if (a === "assigned") return "assigned";
+  
+  if (assignedInspector && assignedInspector.toLowerCase() !== "not assigned yet" && assignedInspector.trim() !== "") {
+    return "assigned";
+  }
+  
   return "pending";
 }
 
@@ -148,7 +154,7 @@ function downloadCSV(rows: ApiCard[]) {
   toast.success("Export successful!");
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 
 export default function InspectionBoardLayout() {
   const [searchQuery, setSearchQuery]                   = useState("");
@@ -162,7 +168,7 @@ export default function InspectionBoardLayout() {
 
   const statusParam = activeTab === "All" ? "" : TAB_TO_STATUS_PARAM[activeTab];
 
-  // ── Queries ──────────────────────────────────────────────────────────────
+
   const { data: boardApiData, isLoading: boardLoading, isFetching: boardFetching } =
     useGetInspectionManagementQuery(statusParam);
 
@@ -181,35 +187,35 @@ export default function InspectionBoardLayout() {
     [boardApiData]
   );
 
-  const boardColumns = useMemo(() => {
-    const buckets: Record<string, ApiCard[]> = {
-      pending: [], assigned: [], completed: [], canceled: [],
-    };
-    allCards.forEach((card) => {
-      const key = assignStatusToColumnKey(card.assign_status, card.status);
-      buckets[key].push(card);
-    });
-    return COLUMN_ORDER.map((key) => ({
-      key,
-      ...COLUMN_META[key],
-      cards: buckets[key],
-    }));
-  }, [allCards]);
+const boardColumns = useMemo(() => {
+  const buckets: Record<string, ApiCard[]> = {
+    pending: [], assigned: [], completed: [], canceled: [],
+  };
+  allCards.forEach((card) => {
+    const key = assignStatusToColumnKey(card.assign_status, card.status, card.assigned_inspector); // ← add করো
+    buckets[key].push(card);
+  });
+  return COLUMN_ORDER.map((key) => ({
+    key,
+    ...COLUMN_META[key],
+    cards: buckets[key],
+  }));
+}, [allCards]);
 
-  const tabCounts = useMemo(() => {
-    const counts: Record<TabType, number> = {
-      All: allCards.length,
-      Pending: 0, Assigned: 0, Completed: 0, Cancelled: 0,
-    };
-    allCards.forEach((c) => {
-      const key = assignStatusToColumnKey(c.assign_status, c.status);
-      if (key === "pending")   counts.Pending++;
-      if (key === "assigned")  counts.Assigned++;
-      if (key === "completed") counts.Completed++;
-      if (key === "canceled")  counts.Cancelled++;
-    });
-    return counts;
-  }, [allCards]);
+const tabCounts = useMemo(() => {
+  const counts: Record<TabType, number> = {
+    All: allCards.length,
+    Pending: 0, Assigned: 0, Completed: 0, Cancelled: 0,
+  };
+  allCards.forEach((c) => {
+    const key = assignStatusToColumnKey(c.assign_status, c.status, c.assigned_inspector); // ← assigned_inspector add করো
+    if (key === "pending")   counts.Pending++;
+    if (key === "assigned")  counts.Assigned++;
+    if (key === "completed") counts.Completed++;
+    if (key === "canceled")  counts.Cancelled++;
+  });
+  return counts;
+}, [allCards]);
 
   const filteredColumns = useMemo(() => {
     if (!searchQuery.trim()) return boardColumns;
@@ -225,7 +231,7 @@ export default function InspectionBoardLayout() {
     }));
   }, [boardColumns, searchQuery]);
 
-  // ── Pagination ────────────────────────────────────────────────────────────
+
   const pagedColumns = filteredColumns
     .filter((col) => {
       if (activeTab === "All") return true;
@@ -258,9 +264,9 @@ export default function InspectionBoardLayout() {
 
   const totalPages = Math.max(1, Math.ceil(relevantCardCount / CARDS_PER_PAGE));
 
-  // ── Frontend CSV export — uses allCards already in memory ────────────────
+ 
   const handleExportData = () => {
-    // active tab অনুযায়ী শুধু সেই cards export করব
+   
     let exportRows = allCards;
 
     if (activeTab !== "All") {
@@ -274,7 +280,6 @@ export default function InspectionBoardLayout() {
       );
     }
 
-    // search query থাকলে filtered cards export
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       exportRows = exportRows.filter(
@@ -288,7 +293,7 @@ export default function InspectionBoardLayout() {
     downloadCSV(exportRows);
   };
 
-  // ── Assign inspector ──────────────────────────────────────────────────────
+
   const handleAssignInspector = async (bookingId: number, inspectorId: number) => {
     try {
       await assignInspection({
@@ -304,7 +309,6 @@ export default function InspectionBoardLayout() {
     }
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="w-full bg-slate-50/40 min-h-screen my-6 md:my-12 font-roboto">
       <div className="border rounded-2xl border-gray-100 shadow-sm px-4 py-6 bg-white">
@@ -389,7 +393,7 @@ export default function InspectionBoardLayout() {
                   )}
 
                   {column.cards.map((card, idx) => {
-                    const colKey          = assignStatusToColumnKey(card.assign_status, card.status);
+                   const colKey = assignStatusToColumnKey(card.assign_status, card.status, card.assigned_inspector);
                     const isPending       = colKey === "pending";
                     const isCardCompleted = colKey === "completed";
                     const isCardCanceled  = colKey === "canceled";
@@ -572,9 +576,13 @@ export default function InspectionBoardLayout() {
             <button
               onClick={() => setCurrentPage((p) => p - 1)}
               disabled={currentPage <= 1}
-              className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-base"
+                    className={`px-3 py-1 border rounded transition ${
+    currentPage === 1
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
             >
-              ‹
+              Prev
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
@@ -583,7 +591,7 @@ export default function InspectionBoardLayout() {
                 className={`w-8 h-8 flex items-center justify-center rounded text-sm cursor-pointer font-medium transition-colors ${
                   page === currentPage
                     ? "bg-[#2563eb] text-white border border-[#2563eb]"
-                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    : "border border-gray-200 text-gray-600 border border-primaryColor hover:bg-gray-50"
                 }`}
               >
                 {page}
@@ -592,9 +600,13 @@ export default function InspectionBoardLayout() {
             <button
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={currentPage >= totalPages}
-              className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 cursor-pointer text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed text-base"
+              className={`px-3 py-1 border rounded transition ${
+    currentPage === totalPages
+      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+      : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+  }`}
             >
-              ›
+              Next
             </button>
           </div>
         )}
