@@ -2,20 +2,20 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-
-import { Search, Download, Eye, Star, Image as ImageIcon, } from "lucide-react";
+import { Search, Download, Eye, Star } from "lucide-react";
 import {
   useGetReportsQuery,
   useGetReportStatsQuery,
   useToggleReportFavoriteMutation,
-  // useArchiveReportMutation,
+  useArchiveReportMutation,
+  useRestoreReportMutation,
+  ReportQueryParams,
   Report,
-} from "@/app/redux/features/reportsApi"; // 👈 path adjust korun
+} from "@/app/redux/features/reportsApi";
 import ReportDetailsModal from "./ReportDetailsModal";
 import { toast } from "react-toastify";
 
-type StatusFilter = "All" | "Started" | "Completed" | "Pending" ;
-
+type StatusFilter = "All" | "Started" | "Completed" | "Archive";
 
 const statusStyle: Record<string, string> = {
   Complete: "bg-[#E6F9F0] text-[#10B981]",
@@ -26,37 +26,37 @@ const statusStyle: Record<string, string> = {
   Cancelled: "bg-red-50 text-red-400",
 };
 
-// const initialsOf = (name: string) =>
-//   name
-//     .trim()
-//     .split(/\s+/)
-//     .filter(Boolean)
-//     .slice(0, 2)
-//     .map((n) => n[0]?.toUpperCase())
-//     .join("") || "?";
-
-
-
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function ReportsTable() {
   const [activeFilter, setActiveFilter] = useState<StatusFilter>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
-  const { data, isLoading, isFetching } = useGetReportsQuery(page);
+  // ── Step 1: queryParams FIRST
+  const queryParams: ReportQueryParams = useMemo(() => {
+    if (activeFilter === "Archive") return { page, is_archived: 1 };
+    if (activeFilter === "Completed") return { page, is_archived: 0, status: "Completed" };
+    if (activeFilter === "Started") return { page, is_archived: 0, status: "Started" };
+    return { page, is_archived: 0 };
+  }, [activeFilter, page]);
+
+  // ── Step 2: queries
+  const { data, isLoading, isFetching } = useGetReportsQuery(queryParams);
   const { data: stats } = useGetReportStatsQuery();
 
-  const [toggleFavorite, { isLoading: isToggling }] = useToggleReportFavoriteMutation();
-  // const [, { isLoading: isArchiving }] = useArchiveReportMutation();
+  // ── Step 3: mutations
+  const [toggleFavorite] = useToggleReportFavoriteMutation();
+  const [archiveReport, { isLoading: isArchiving }] = useArchiveReportMutation();
+  const [restoreReport] = useRestoreReportMutation();
 
-  // data is already unwrapped by transformResponse in reportsApi.ts
+  // ── Step 4: extract data
   const reports = data?.reports ?? [];
   const pagination = data?.pagination;
 
   const filteredReports = useMemo(() => {
     let result = [...reports];
-    if (activeFilter !== "All") result = result.filter((r) => r.status === activeFilter);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -67,8 +67,25 @@ export default function ReportsTable() {
       );
     }
     return result;
-  }, [activeFilter, searchQuery, reports]);
+  }, [searchQuery, reports]);
 
+  const { data: allData } = useGetReportsQuery({ is_archived: 0 });
+  const { data: completedData } = useGetReportsQuery({ is_archived: 0, status: "Completed" });
+  const { data: startedData } = useGetReportsQuery({ is_archived: 0, status: "Started" });
+  const { data: archivedData } = useGetReportsQuery({ is_archived: 1 });
+
+  const counts = {
+    All: allData?.pagination?.total ?? 0,
+    Completed: completedData?.pagination?.total ?? 0,
+    Started: startedData?.pagination?.total ?? 0,
+    Archive: archivedData?.pagination?.total ?? 0,
+  };
+
+  const busy = isLoading || isFetching;
+  const ITEMS_PER_PAGE = 10;
+  const totalPages = Math.ceil(filteredReports.length / ITEMS_PER_PAGE);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleExportCSV = () => {
     if (!filteredReports.length) return;
     const headers = ["User Name", "Location", "Inspection ID", "Report ID", "Inspector Email", "Created Date", "Status", "Homeowner Feedback"];
@@ -93,117 +110,110 @@ export default function ReportsTable() {
     document.body.removeChild(link);
   };
 
-
-async function downloadPDF(url?: string, fileName?: string) {
-  if (!url) { 
-    toast.error("No report file available."); 
-    return; 
+  async function downloadPDF(url?: string, fileName?: string) {
+    if (!url) { toast.error("No report file available."); return; }
+    try {
+      toast.info("Downloading...");
+      const res = await fetch(url, { mode: "cors" });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName ?? "report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success("Downloaded successfully!");
+    } catch {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName ?? "report.pdf";
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Download started!");
+    }
   }
-  
-  try {
-    toast.info("Downloading...");
-    
-    const res = await fetch(url, { mode: "cors" });
-    
-    if (!res.ok) throw new Error();
-    
-    const blob = await res.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = fileName ?? "report.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl);
-    
-    toast.success("Downloaded successfully!");
-  } catch {
-    // CORS block হলে fallback — direct link দিয়ে download
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName ?? "report.pdf";
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("Download started!");
-  }
-}
 
- function viewPDF(url?: string) {
-  if (!url) { toast.error("No report file available."); return; }
-  window.open(url, "_blank", "noopener,noreferrer");
-}
-const [togglingId, setTogglingId] = useState<number | null>(null);
-const handleToggleFavorite = async (
-  id: number,
-  isFavorite: boolean
-) => {
-  try {
-    const res = await toggleFavorite(id).unwrap();
-
-    toast.success(res.message);
-  } catch (err: any) {
-    toast.error(err?.data?.message || "Something went wrong");
+  function viewPDF(url?: string) {
+    if (!url) { toast.error("No report file available."); return; }
+    window.open(url, "_blank", "noopener,noreferrer");
   }
-};
-  const counts = {
-    All: stats?.total_reports ?? reports.length,
-    Started: reports.filter((r) => r.status === "Started").length,
-    Completed: stats?.total_completed_reports ?? reports.filter((r) => r.status === "Completed").length,
-    // Pending: stats?.total_pending_reports ?? reports.filter((r) => r.status === "Pending").length,
-    Archived: stats?.total_archived_reports ?? reports.filter((r) => r.status === "Archived").length,
+
+  const handleToggleFavorite = async (id: number, isFavorite: boolean) => {
+    setTogglingId(id);
+    try {
+      const res = await toggleFavorite(id).unwrap();
+      toast.success(res.message);
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Something went wrong");
+    } finally {
+      setTogglingId(null);
+    }
   };
 
-  const busy = isLoading || isFetching;
+  const handleArchive = async (id: number) => {
+    try {
+      const res = await archiveReport(id).unwrap();
+      toast.success(res.message);
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Something went wrong");
+    }
+  };
 
-const ITEMS_PER_PAGE = 10;
+  const handleRestore = async (id: number) => {
+    try {
+      const res = await restoreReport(id).unwrap();
+      toast.success(res.message);
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Something went wrong");
+    }
+  };
 
-
-const totalPages = Math.ceil(filteredReports.length / ITEMS_PER_PAGE);
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="w-full bg-white min-h-screen my-6 md:my-12 font-roboto antialiased select-none">
 
- 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div className="flex flex-col lg:flex-row items-stretch sm:items-center gap-4 flex-1">
           <div className="relative w-full lg:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search Name and Email ..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
               className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/60 border border-gray-100 rounded-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400 leading-5 font-medium"
             />
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             <button
-                 onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-onClick={() => { setActiveFilter("All"); setPage(1); }}
-              className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
-                activeFilter === "All" ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
-              }`}
+              onClick={() => { setActiveFilter("All"); setPage(1); }}
+              className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${activeFilter === "All" ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
+                }`}
             >
               All
-              <span className="px-1.5 py-0.5 min-w-4 h-4 px-1.5 rounded-full  flex items-center justify-center  text-[10px] bg-slate-100 text-slate-600">{counts.All}</span>
+              <span className="px-1.5 py-0.5 min-w-4 h-4 rounded-full flex items-center justify-center text-[10px] bg-slate-100 text-slate-600">
+                {counts.All}
+              </span>
             </button>
-            {(["Completed", "Started",] as const).map((filter) => (
+
+            {(["Completed", "Started", "Archive"] as const).map((filter) => (
               <button
                 key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
-                  activeFilter === filter ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
-                }`}
+                onClick={() => { setActiveFilter(filter); setPage(1); }}
+                className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${activeFilter === filter ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
+                  }`}
               >
                 {filter}
-                <span className={`min-w-4 h-4 px-1.5 rounded-full  flex items-center justify-center  text-[10px] ${
-                  filter === "Completed" ? "bg-emerald-50 text-emerald-600" : "text-orange-500 bg-orange-50"
-                  // filter === "Pending" ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600"
-                }`}>
+                <span className={`min-w-4 h-4 px-1.5 rounded-full flex items-center justify-center text-[10px] ${filter === "Completed" ? "bg-emerald-50 text-emerald-600" :
+                    filter === "Archive" ? "bg-slate-100 text-slate-500" :
+                      "text-orange-500 bg-orange-50"
+                  }`}>
                   {counts[filter]}
                 </span>
               </button>
@@ -246,22 +256,19 @@ onClick={() => { setActiveFilter("All"); setPage(1); }}
               <tbody className="divide-y divide-gray-100">
                 {filteredReports.map((row) => (
                   <tr key={row.id} className="hover:bg-slate-50/40 transition-colors">
-                    {/* User — initials only, no avatar image */}
-                    <td className="py-4 px-5 flex items-center gap-3">
+                    <td className="py-3.5  flex items-center gap-3">
                       <div>
-                        <span className="font-medium text-sm leading-5 text-gray-900 block">{row.user_name?.trim() || "—"}</span>
+                        <span className="font-medium py-3.5 px-4 text-sm leading-5 text-gray-900 block">{row.user_name?.trim() || "—"}</span>
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.inspection_id}</td>
+                    <td className=" text-gray-900 text-sm font-normal leading-5">{row.inspection_id}</td>
                     <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.report_id}</td>
 
-                    {/* Inspector */}
                     <td className="py-3.5 px-4">
                       <span className="font-normal text-gray-900 text-[13px] leading-5">{row.inspector_email}</span>
                     </td>
 
-                    {/* Report Details — link opens modal */}
                     <td className="py-3.5 px-4">
                       <button
                         onClick={() => setSelectedReport(row)}
@@ -271,23 +278,20 @@ onClick={() => { setActiveFilter("All"); setPage(1); }}
                       </button>
                     </td>
 
-                    
-                 {/* Homeowner Feedback */}
-<td className="py-3.5 px-4 max-w-[220px]">
-  {row.report_details?.notes?.trim() ? (
-    <span className="text-gray-600 text-[13px] leading-5 line-clamp-2">
-      {row.report_details.notes}
-    </span>
-  ) : (
-    <span className="inline-block px-2.5 py-0.5 rounded-md text-[13px] font-bold  text-slate-400">
-      No Feedback
-    </span>
-  )}
-</td>
+                    <td className="py-3.5 px-4 max-w-[220px]">
+                      {row.report_details?.notes?.trim() ? (
+                        <span className="text-gray-600 text-[13px] leading-5 line-clamp-2">
+                          {row.report_details.notes}
+                        </span>
+                      ) : (
+                        <span className="inline-block px-2.5 py-0.5 rounded-md text-[13px] font-bold text-slate-400">
+                          No Feedback
+                        </span>
+                      )}
+                    </td>
 
                     <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.created_date}</td>
 
-                    {/* Status badge */}
                     <td className="py-4 px-4">
                       <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold ${statusStyle[row.status] ?? "bg-slate-100 text-slate-500"}`}>
                         {row.status}
@@ -295,24 +299,19 @@ onClick={() => { setActiveFilter("All"); setPage(1); }}
                     </td>
 
                     {/* ── Action Buttons ── */}
-                    <td className="py-4 px-5">
+                    <td className="py-4 5">
                       <div className="flex items-center justify-center gap-1">
 
                         {/* 1. Download PDF */}
                         <button
-                          onClick={() =>
-                            downloadPDF(
-                              row.report_details?.report_file,
-                              `Report_${row.report_id}.pdf`
-                            )
-                          }
+                          onClick={() => downloadPDF(row.report_details?.report_file, `Report_${row.report_id}.pdf`)}
                           title="Download PDF"
                           className="p-2 text-[#5C6470] hover:text-primaryColor bg-[#EFEFFF] hover:bg-blue-50 rounded-sm cursor-pointer transition-colors border border-gray-100"
                         >
                           <Download className="w-4 h-4" />
                         </button>
 
-                        {/* 2. View PDF in a new tab */}
+                        {/* 2. View PDF */}
                         <button
                           onClick={() => viewPDF(row.report_details?.report_file)}
                           title="View & Print PDF"
@@ -322,93 +321,106 @@ onClick={() => { setActiveFilter("All"); setPage(1); }}
                         </button>
 
                         {/* 3. Star / Favourite toggle */}
-   <button
- onClick={() => handleToggleFavorite(row.id, row.is_favorite)}
-  disabled={togglingId === row.id}
-  title={row.is_favorite ? "Unstar" : "Star"}
-  className={`p-2 rounded-sm cursor-pointer transition-colors border border-gray-100 disabled:opacity-50 ${
-    row.is_favorite
-      ? "bg-amber-50 text-amber-400 hover:bg-amber-100 border-amber-100"
-      : "text-[#5C6470] hover:text-amber-400 bg-[#EFEFFF] hover:bg-amber-50"
-  }`}
->
-  <Star
-    className={`w-4 h-4 ${
-      row.is_favorite ? "fill-amber-400" : ""
-    }`}
-  />
-</button>
-
-                        {/* 4. Archive row */}
-                        {/* <button
-                          onClick={() => handleArchive(row.id)}
-                          title="Archive"
-                          disabled={row.status === "Archived" || isArchiving}
-                          className="p-2 text-[#5C6470] hover:text-primaryColor bg-[#EFEFFF] hover:bg-blue-50 rounded-sm cursor-pointer transition-colors border border-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                        <button
+                          onClick={() => handleToggleFavorite(row.id, row.is_favorite)}
+                          disabled={togglingId === row.id}
+                          title={row.is_favorite ? "Unstar" : "Star"}
+                          className={`p-2 rounded-sm cursor-pointer transition-colors border border-gray-100 disabled:opacity-50 ${row.is_favorite
+                              ? "bg-amber-50 text-amber-400 hover:bg-amber-100 border-amber-100"
+                              : "text-[#5C6470] hover:text-amber-400 bg-[#EFEFFF] hover:bg-amber-50"
+                            }`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M14.0007 2H2.00065C1.63246 2 1.33398 2.29848 1.33398 2.66667V4.66667C1.33398 5.03486 1.63246 5.33333 2.00065 5.33333H14.0007C14.3688 5.33333 14.6673 5.03486 14.6673 4.66667V2.66667C14.6673 2.29848 14.3688 2 14.0007 2Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M2.66602 5.33337V12.6667C2.66602 13.0203 2.80649 13.3595 3.05654 13.6095C3.30659 13.8596 3.64573 14 3.99935 14H11.9993C12.353 14 12.6921 13.8596 12.9422 13.6095C13.1922 13.3595 13.3327 13.0203 13.3327 12.6667V5.33337" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M6.66602 8H9.33268" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button> */}
+                          <Star className={`w-4 h-4 ${row.is_favorite ? "fill-amber-400" : ""}`} />
+                        </button>
+
+                        {/* 4. Archive / Restore toggle */}
+                        {row.is_archived ? (
+                          <button
+                            onClick={() => handleRestore(row.id)}
+                            title="Restore"
+                            className="p-2 text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-sm cursor-pointer transition-colors border border-emerald-100"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                              <path d="M3 3v5h5" />
+                            </svg>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleArchive(row.id)}
+                            title="Archive"
+                            disabled={isArchiving}
+                            className="p-2 text-[#5C6470] hover:text-primaryColor bg-[#EFEFFF] hover:bg-blue-50 rounded-sm cursor-pointer transition-colors border border-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <path d="M14.0007 2H2.00065C1.63246 2 1.33398 2.29848 1.33398 2.66667V4.66667C1.33398 5.03486 1.63246 5.33333 2.00065 5.33333H14.0007C14.3688 5.33333 14.6673 5.03486 14.6673 4.66667V2.66667C14.6673 2.29848 14.3688 2 14.0007 2Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M2.66602 5.33337V12.6667C2.66602 13.0203 2.80649 13.3595 3.05654 13.6095C3.30659 13.8596 3.64573 14 3.99935 14H11.9993C12.353 14 12.6921 13.8596 12.9422 13.6095C13.1922 13.3595 13.3327 13.0203 13.3327 12.6667V5.33337" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M6.66602 8H9.33268" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
+                        )}
 
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
+
               {totalPages > 1 && (
-  <div className="flex items-center justify-between mt-4 px-1">
-    <span className="text-sm text-gray-500">
-      Page {page} of {totalPages} · {filteredReports.length} total
-    </span>
-    <div className="flex items-center gap-1.5">
-      <button
-        onClick={() => setPage((p) => Math.max(1, p - 1))}
-        disabled={page <= 1}
-        className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        Prev
-      </button>
-      {Array.from({ length: totalPages }, (_, i) => i + 1)
-        .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-        .reduce<(number | "...")[]>((acc, p, i, arr) => {
-          if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
-          acc.push(p);
-          return acc;
-        }, [])
-        .map((p, i) =>
-          p === "..." ? (
-            <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
-          ) : (
-            <button
-              key={p}
-              onClick={() => setPage(p as number)}
-              className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
-                p === page
-                  ? "bg-primaryColor text-white border border-primaryColor"
-                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {p}
-            </button>
-          )
-        )}
-      <button
-        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-        disabled={page >= totalPages}
-        className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        Next
-      </button>
-    </div>
-  </div>
-)}
+                <tfoot>
+                  <tr>
+                    <td colSpan={9}>
+                      <div className="flex items-center justify-between mt-4 px-1 pb-2">
+                        <span className="text-sm text-gray-500">
+                          Page {page} of {totalPages} · {filteredReports.length} total
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page <= 1}
+                            className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            Prev
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                            .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                              acc.push(p);
+                              return acc;
+                            }, [])
+                            .map((p, i) =>
+                              p === "..." ? (
+                                <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
+                              ) : (
+                                <button
+                                  key={p}
+                                  onClick={() => setPage(p as number)}
+                                  className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${p === page
+                                      ? "bg-primaryColor text-white border border-primaryColor"
+                                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                                    }`}
+                                >
+                                  {p}
+                                </button>
+                              )
+                            )}
+                          <button
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                            className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
 
-        
           {pagination && pagination.last_page > 1 && (
             <div className="flex items-center justify-between mt-4 px-1">
               <span className="text-sm text-gray-500">

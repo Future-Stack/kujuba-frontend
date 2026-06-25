@@ -1,26 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useGetOverviewQuery } from "@/app/redux/features/overviewApi";
+
 import { toast } from "react-toastify";
-import { useApproveInspectorMutation, useRejectInspectorMutation } from "@/app/redux/features/inspectorApi";
+import { useApproveInspectorMutation, useGetInspectorsQuery, useRejectInspectorMutation } from "@/app/redux/features/inspectorApi";
 
-type InspectorStatus = "Active" | "Rejected";
+// type InspectorStatus = "Active" | "Rejected";
 
-interface ApprovalRequest {
-  id: number;
-  name: string;
-  profile: {
-    phone: string | null;
-    address: string | null;
-    avatar: string | null;
-  };
-  total_earnings: number;
-}
+// interface ApprovalRequest {
+//   id: number;
+//   name: string;
+//   profile: {
+//     phone: string | null;
+//     address: string | null;
+//     avatar: string | null;
+//   };
+//   total_earnings: number;
+// }
 
-// ── INITIALS HELPER ───────────────────────────────
+
 
 const getInitials = (name: string) => {
   if (!name) return "U";
@@ -34,7 +35,7 @@ const getInitials = (name: string) => {
   return parts[0][0].toUpperCase();
 };
 
-// ── SKELETON ───────────────────────────────
+
 
 function RequestApprovalSkeleton() {
   return (
@@ -63,12 +64,15 @@ function RequestApprovalSkeleton() {
   );
 }
 
-// ── MAIN COMPONENT ───────────────────────────────
+
 
 export default function RequestApproval() {
-  const { data, isLoading, isError,refetch } = useGetOverviewQuery();
+  const { data, isLoading, isError,refetch } = useGetInspectorsQuery();
+  
 const [approveInspector, { isLoading: isApproving }] = useApproveInspectorMutation();
 const [rejectInspector, { isLoading: isRejecting }] = useRejectInspectorMutation();
+
+
 
 const handleApprove = async (id: number) => {
   try {
@@ -99,8 +103,13 @@ const handleReject = async (id: number) => {
     );
   }
 
-  const list: ApprovalRequest[] = data.data.top_inspectors || [];
-
+  const pendingInspectors =
+    data?.data?.inspectors?.filter(
+      (item: any) =>
+        item.status?.toLowerCase() === "pending" ||
+        item.status?.toLowerCase() === "pending_review"
+    ) || [];
+  const displayedInspectors = pendingInspectors.slice(0, 5);
   return (
     <div className="w-full h-full bg-white rounded-[20px] border flex flex-col justify-between font-roboto">
 
@@ -112,14 +121,14 @@ const handleReject = async (id: number) => {
           </h3>
 
           <span className="min-w-5 h-5 px-1.5 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">
-            {list.length}
+            {displayedInspectors.length}
           </span>
         </div>
 
         {/* LIST */}
         <div className="space-y-5 px-5 md:px-6 pt-5 pb-2">
 
-          {list.map((req) => {
+          {displayedInspectors.map((req:any) => {
             const hasAvatar = !!req.profile?.avatar;
 
             return (
