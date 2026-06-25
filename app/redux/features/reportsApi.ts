@@ -51,7 +51,7 @@ export interface ReportQueryParams {
   status?: string;
 }
 
-// ================= API =================
+
 
 export const reportsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -62,7 +62,7 @@ export const reportsApi = baseApi.injectEndpoints({
       query: (params = {}) => {
         const queryParams = new URLSearchParams();
         queryParams.set("page", String(params.page ?? 1));
-        if (params.is_archived !== undefined) queryParams.set("is_archived", String(params.is_archived));
+        // if (params.is_archived !== undefined) queryParams.set("is_archived", String(params.is_archived));
         if (params.status) queryParams.set("status", params.status);
         return `/admin/reports?${queryParams.toString()}`;
       },
