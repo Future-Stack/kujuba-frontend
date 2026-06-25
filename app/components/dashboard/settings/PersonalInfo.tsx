@@ -315,13 +315,13 @@ const handleSubmit = async (e: FormEvent) => {
               <label className="text-sm font-medium leading-5 font-roboto text-gray-900">Phone</label>
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
                   value={form.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
                   className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#111827]
                     focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition"
                 />
-                <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" />
+                {/* <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" /> */}
               </div>
             </div>
 
@@ -336,12 +336,12 @@ const handleSubmit = async (e: FormEvent) => {
                   className="w-full border border-[#E5E7EB] rounded-lg px-4 py-2.5 pr-10 text-sm text-[#111827]
                     focus:outline-none focus:ring-2 focus:ring-[#5B5EF4]/20 focus:border-[#5B5EF4] transition"
                 />
-                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" />
+                {/* <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" /> */}
               </div>
             </div>
 
             {/* License Number */}
-            <div className="flex flex-col gap-1.5">
+            {/* <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium leading-5 font-roboto text-gray-900">License Number</label>
               <div className="relative">
                 <input
@@ -353,11 +353,11 @@ const handleSubmit = async (e: FormEvent) => {
                 />
                 <IdCard className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F]" />
               </div>
-            </div>
+            </div> */}
 
             {/* License Expiry */}
         {/* License Expiry */}
-<div className="flex flex-col gap-1.5">
+{/* <div className="flex flex-col gap-1.5">
   <label className="text-sm font-medium leading-5 font-roboto text-gray-900">License Expiry</label>
   <div className="relative">
     <input
@@ -375,10 +375,10 @@ const handleSubmit = async (e: FormEvent) => {
     />
     <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F] pointer-events-none" />
   </div>
-</div>
+</div> */}
 
 {/* Insurance Expiry */}
-<div className="flex flex-col gap-1.5 md:col-span-2 md:w-1/2">
+{/* <div className="flex flex-col gap-1.5 md:col-span-2 md:w-1/2">
   <label className="text-sm font-medium leading-5 font-roboto text-gray-900">Insurance Expiry</label>
   <div className="relative">
     <input
@@ -396,13 +396,13 @@ const handleSubmit = async (e: FormEvent) => {
     />
     <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5F5F] pointer-events-none" />
   </div>
-</div>
+</div> */}
           </div>
 
           {/* Inspection Types — catalog items (id/title/price) the inspector
               offers. Read-only here until there's an endpoint to pick from
               the full catalog; this just reflects what's already assigned. */}
-          <div className="flex flex-col gap-1.5">
+          {/* <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium leading-5 font-roboto text-gray-900">Inspection Types</label>
             <div className="flex flex-wrap gap-2">
               {form.inspection_types.map((item) => (
@@ -418,10 +418,10 @@ const handleSubmit = async (e: FormEvent) => {
                 <span className="text-sm text-gray-400">No inspection types assigned yet</span>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Account & Payment (read-only) */}
-          <div className="mt-2 pt-6 border-t border-gray-100">
+          {/* <div className="mt-2 pt-6 border-t border-gray-100">
             <h2 className="text-sm font-semibold text-gray-900 font-roboto mb-3">Account & Payment</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <InfoRow label="Stripe Account" value={user?.profile?.stripe_account_id || "Not connected"} />
@@ -441,7 +441,7 @@ const handleSubmit = async (e: FormEvent) => {
                 }
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end pt-2">
             <button

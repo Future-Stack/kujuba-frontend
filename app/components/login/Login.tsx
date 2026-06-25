@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useGoogleLoginMutation, useLoginMutation } from "@/app/redux/api/authApi";
 import { toast } from "react-toastify";
 
-// Extend Window to include the google GSI object
+
 declare global {
   interface Window {
     google: any;
