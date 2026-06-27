@@ -15,15 +15,15 @@ import {
 } from "recharts";
 import { useGetOverviewQuery } from "@/app/redux/features/overviewApi";
 
-const chartData = [
-  { name: "SUN", receive: 10000, payout: 6000 },
-  { name: "MON", receive: 28000, payout: 12000 },
-  { name: "TUE", receive: 41345, payout: 15000 },
-  { name: "WED", receive: 72000, payout: 28000 },
-  { name: "THU", receive: 20000, payout: 8000 },
-  { name: "FRI", receive: 50000, payout: 23000 },
-  { name: "SAT", receive: 45000, payout: 21000 },
-];
+// const chartData = [
+//   { name: "SUN", receive: 10000, payout: 6000 },
+//   { name: "MON", receive: 28000, payout: 12000 },
+//   { name: "TUE", receive: 41345, payout: 15000 },
+//   { name: "WED", receive: 72000, payout: 28000 },
+//   { name: "THU", receive: 20000, payout: 8000 },
+//   { name: "FRI", receive: 50000, payout: 23000 },
+//   { name: "SAT", receive: 45000, payout: 21000 },
+// ];
 
 // ── Custom X-axis tick ──
 const CustomXTick = ({ x, y, payload, activeDay }: any) => {
@@ -55,21 +55,56 @@ const CustomXTick = ({ x, y, payload, activeDay }: any) => {
 };
 
 // ── Custom tooltip ──
+// const CustomTooltip = ({ active, payload }: any) => {
+//   if (active && payload && payload.length) {
+//     return (
+//       <div className="bg-white px-4 py-2.5 rounded-2xl shadow-xl shadow-slate-200/80 border border-gray-100/50 flex flex-col items-center relative -top-14">
+//         <span className="text-[17px] font-extrabold text-gray-800 tracking-tight">
+//           ${payload[0].value?.toLocaleString()}
+//         </span>
+//         <span className="text-sm text-gray-400 mt-0.5 font-normal">
+//           Nov 24th, 2020
+//         </span>
+//         <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-r border-b border-gray-100/50" />
+//       </div>
+//     );
+//   }
+//   return null;
+// };
+
 const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white px-4 py-2.5 rounded-2xl shadow-xl shadow-slate-200/80 border border-gray-100/50 flex flex-col items-center relative -top-14">
-        <span className="text-[17px] font-extrabold text-gray-800 tracking-tight">
-          ${payload[0].value?.toLocaleString()}
-        </span>
-        <span className="text-sm text-gray-400 mt-0.5 font-normal">
-          Nov 24th, 2020
-        </span>
-        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-r border-b border-gray-100/50" />
-      </div>
-    );
-  }
-  return null;
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="bg-white px-4 py-3 rounded-2xl shadow-xl border border-gray-100">
+      {payload.map((entry: any) => (
+        <div
+          key={entry.dataKey}
+          className="flex items-center justify-between gap-8 mb-1 last:mb-0"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+
+            <span className="text-sm text-gray-700">
+              {entry.dataKey === "receive"
+                ? "Receive Payment"
+                : "Payout"}
+            </span>
+          </div>
+
+          <span
+            className="font-semibold"
+            style={{ color: entry.color }}
+          >
+            ${Number(entry.value).toLocaleString()}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 const getIcon = (active: boolean) => {
@@ -134,7 +169,7 @@ function FinanceInsightsSkeleton() {
     </div>
   );
 }
-// Helper function add করুন component এর বাইরে
+
 const getDateRange = (type: "monthly" | "weekly") => {
   const now = new Date();
   
@@ -142,8 +177,8 @@ const getDateRange = (type: "monthly" | "weekly") => {
     const from = new Date(now.getFullYear(), now.getMonth(), 1);
     const to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     return {
-      from_date: from.toISOString().split("T")[0], // "2026-06-01"
-      to_date: to.toISOString().split("T")[0],     // "2026-06-30"
+      from_date: from.toISOString().split("T")[0], 
+      to_date: to.toISOString().split("T")[0],   
     };
   } else {
     // Weekly: last 7 days
@@ -195,7 +230,7 @@ const formattedChartData = chartData.map((item: any) => {
     ...item,
     label: isValidDate
       ? date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      : item.label, // "Monday" as-is রাখুন
+      : item.label, 
   };
 });
 if (isLoading) {

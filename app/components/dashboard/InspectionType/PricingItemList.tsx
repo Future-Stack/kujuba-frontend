@@ -23,7 +23,7 @@ export default function PricingItemsList({
   const handleEditClick = (item: PricingItem) => {
     setEditingId(item.id);
     setEditValue(String(item.price));
-    // ✅ current price ke original hisebe set koro
+   
     setItems((prev) =>
       prev.map((i) =>
         i.id === item.id ? { ...i, originalPrice: item.price } : i

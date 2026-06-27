@@ -159,7 +159,12 @@ const initials = fullName
     {initials}
   </div>
 )}
-                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#09BD3C] border-2 border-white shadow-sm" />
+                        <span
+                          className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${user.status === "active"
+                              ? "bg-[#09BD3C]"
+                              : "bg-gray-400"
+                            }`}
+                        />
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-blue-600 transition-colors">  {user.first_name} {user.last_name}</h4>

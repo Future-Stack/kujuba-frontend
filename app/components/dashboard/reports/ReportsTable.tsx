@@ -87,9 +87,9 @@ export default function ReportsTable() {
     if (activeFilter === "Archive") {
       result = result.filter((r) => r.is_archived);
     } else if (activeFilter === "Completed") {
-      result = result.filter((r) => r.status === "Completed"); // ← !r.is_archived সরানো
+      result = result.filter((r) => r.status === "Completed"); 
     } else if (activeFilter === "Started") {
-      result = result.filter((r) => r.status === "Started"); // ← !r.is_archived সরানো
+      result = result.filter((r) => r.status === "Started"); 
     }
 
     if (searchQuery.trim()) {
@@ -241,9 +241,9 @@ export default function ReportsTable() {
                   }`}
               >
                 {filter}
-                <span className={`min-w-4 h-4 px-1.5 rounded-full flex items-center justify-center text-[10px] ${filter === "Completed" ? "bg-emerald-50 text-emerald-600" :
-                    filter === "Archive" ? "bg-slate-100 text-slate-500" :
-                      "text-orange-500 bg-orange-50"
+                <span className={`min-w-4 h-4 px-1.5 rounded-full flex items-center justify-center text-[10px] ${filter === "Completed" ? "bg-[#10B981] text-white" :
+                    filter === "Archive" ? "bg-primaryColor text-white" :
+                      "text-white bg-[#FBBF24]"
                   }`}>
                   {counts[filter]}
                 </span>
@@ -287,20 +287,20 @@ export default function ReportsTable() {
               <tbody className="divide-y divide-gray-100">
                 {filteredReports.map((row) => (
                   <tr key={row.id} className="hover:bg-slate-50/40 transition-colors">
-                    <td className="py-4 px-5 flex items-center gap-3">
-                      <span className="font-medium text-sm leading-5 text-gray-900 block">
+                    <td className="py-3 px-5 flex items-center gap-3">
+                      <span className="font-medium text-sm py-3 leading-5 text-gray-900 block">
                         {row.user_name?.trim() || "—"}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.inspection_id}</td>
-                    <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.report_id}</td>
+                    <td className="py- px-4 text-gray-900 text-sm font-normal leading-5">{row.inspection_id}</td>
+                    <td className="py- px-4 text-gray-900 text-sm font-normal leading-5">{row.report_id}</td>
 
-                    <td className="py-3.5 px-4">
+                    <td className=" px-4">
                       <span className="font-normal text-gray-900 text-[13px] leading-5">{row.inspector_email}</span>
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py- px-4">
                       <button
                         onClick={() => setSelectedReport(row)}
                         className="text-primaryColor font-medium text-sm leading-5 hover:underline cursor-pointer"
@@ -309,28 +309,28 @@ export default function ReportsTable() {
                       </button>
                     </td>
 
-                    <td className="py-3.5 px-4 max-w-[220px]">
+                    <td className="py-0 px-4 max-w-[220px]">
                       {row.report_details?.notes?.trim() ? (
                         <span className="text-gray-600 text-[13px] leading-5 line-clamp-2">
                           {row.report_details.notes}
                         </span>
                       ) : (
-                        <span className="inline-block px-2.5 py-0.5 rounded-md text-[13px] font-bold text-slate-400">
+                        <span className="inline-block px-2.5  rounded-md text-[13px] font-bold text-slate-400">
                           No Feedback
                         </span>
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4 text-gray-900 text-sm font-normal leading-5">{row.created_date}</td>
+                    <td className="py-0 px-4 text-gray-900 text-sm font-normal leading-5">{row.created_date}</td>
 
-                    <td className="py-4 px-4">
+                    <td className="py-0 px-4">
                       <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold ${statusStyle[row.status] ?? "bg-slate-100 text-slate-500"}`}>
                         {row.status}
                       </span>
                     </td>
 
                     {/* ── Action Buttons ── */}
-                    <td className="py-4 px-5">
+                    <td className="py-3 px-5">
                       <div className="flex items-center justify-center gap-1">
 
                         {/* 1. Download PDF */}

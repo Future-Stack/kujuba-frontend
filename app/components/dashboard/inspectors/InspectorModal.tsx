@@ -275,7 +275,7 @@ export default function InspectorDetailModal({
               )}
 
               {/* Documents */}
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <p className="text-xs font-semibold text-[#6B7280] uppercase font-roboto leading-4 mb-2">Documents</p>
                 <div className="flex gap-2">
                   <button className="border border-[#E5E7EB] text-gray-700 hover:bg-gray-50 text-sm font-normal leading-4 font-roboto px-4 py-2 rounded-md transition-colors">
@@ -285,7 +285,7 @@ export default function InspectorDetailModal({
                     View Insurance
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* Footer Buttons */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
@@ -309,13 +309,13 @@ export default function InspectorDetailModal({
 
                   {inspector.status === "Suspended" && (
                     <>
-                      <button
+                      {/* <button
                         onClick={handleSuspend}
                         disabled={anyLoading}
                         className="border border-[#FECACA] text-[#DC2626] hover:bg-red-50 text-sm font-semibold cursor-pointer px-5 py-2.5 rounded-md transition-colors disabled:opacity-60"
                       >
                         {suspending ? "Suspending..." : "Suspend"}
-                      </button>
+                      </button> */}
                       <button
                         onClick={handleReActivate}
                         disabled={anyLoading}

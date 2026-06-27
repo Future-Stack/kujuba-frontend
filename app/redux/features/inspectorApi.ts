@@ -41,12 +41,14 @@ export interface InspectorDetails {
 }
 
 export interface InspectorStats {
-  total_inspectors: number;
-  total_inspectors_growth: number;
-  active_inspections: number;
-  active_inspections_growth: number;
-  pending_approval: number;
-  pending_approval_growth: number;
+  total_users: number;
+  user_growth_percentage: number;
+  active_users: number;
+  active_growth_percentage: number;
+  pending_users: number;
+  pending_growth_percentage: number;
+  suspended_users:number;
+  suspended_growth_percentage: number;
 }
 
 export const inspectorApi = baseApi.injectEndpoints({
@@ -81,14 +83,16 @@ export const inspectorApi = baseApi.injectEndpoints({
       providesTags: ["Inspector"],
     }),
 
-    // STATS
-    getInspectorStats: builder.query<
-      { success: boolean; data: InspectorStats },
-      void
-    >({
-      query: () => "/admin/inspectors/stats",
-      providesTags: ["Inspector"],
-    }),
+    
+// STATS
+getInspectorStats: builder.query<{ success: boolean; data: InspectorStats }, string | undefined>({
+  query: (user_type) => ({
+    url: "/admin/users/dashboard-stats",
+    method: "GET",
+    params: user_type ? { user_type } : undefined,
+  }),
+  providesTags: ["Inspector"],
+}),
 
     // APPROVE
     approveInspector: builder.mutation({

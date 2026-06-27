@@ -253,7 +253,7 @@ const handleFlag = async (reviewId: number) => {
   }
 };
 
-  // Suspend — review id pathao (backend response-e review_id ache)
+ 
 const handleSuspend = async (reviewId: number) => {
   try {
     await suspendInspector(reviewId).unwrap();
@@ -271,9 +271,9 @@ const handleSuspend = async (reviewId: number) => {
     textColor: string;
   }[] = [
     { key: 'all',      label: 'All',                      badgeColor: 'bg-slate-200',  badgeTextColor: 'text-slate-700',  textColor: 'text-slate-600'  },
-    { key: 'positive', label: 'Positive Ratings (≥3.5★)', badgeColor: 'bg-green-100',  badgeTextColor: 'text-green-700',  textColor: 'text-[#10B981]'  },
-    { key: 'low',      label: 'Low Ratings (<3.5★)',       badgeColor: 'bg-red-100',    badgeTextColor: 'text-red-600',    textColor: 'text-red-500'    },
-    { key: 'flagged',  label: 'Flagged',                   badgeColor: 'bg-yellow-100', badgeTextColor: 'text-yellow-700', textColor: 'text-yellow-600' },
+    { key: 'positive', label: 'Positive Ratings (≥3.5★)', badgeColor: 'bg-lime-500',  badgeTextColor: 'text-white',  textColor: 'text-[#10B981]'  },
+    { key: 'low',      label: 'Low Ratings (<3.5★)',       badgeColor: 'bg-red-500',    badgeTextColor: 'text-white',    textColor: 'text-red-500'    },
+    { key: 'flagged',  label: 'Flagged',                   badgeColor: 'bg-amber-400', badgeTextColor: 'text-white', textColor: 'text-yellow-600' },
   ];
 
   const busy = isLoading || isFetching;

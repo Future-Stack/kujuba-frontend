@@ -43,10 +43,11 @@ export const usersApi = baseApi.injectEndpoints({
       invalidatesTags: ["Users"],
     }),
 
-        getUserDashboardStats: builder.query({
-      query: () => ({
+     getUserDashboardStats: builder.query({
+      query: (user_type?: string) => ({
         url: "/admin/users/dashboard-stats",
         method: "GET",
+        params: user_type ? { user_type } : undefined, 
       }),
       providesTags: ["Users"],
     }),
