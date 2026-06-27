@@ -85,58 +85,60 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-const handleSave = async () => {
-  const title = formTitle.trim();
-  const price = parseFloat(formPrice);
+  const handleSave = async () => {
+    console.log("Save clicked");
 
-  if (!title || isNaN(price)) return;
+    const title = formTitle.trim();
+    const price = parseFloat(formPrice);
 
-  const fd = new FormData();
+    console.log({ title, price });
 
-  fd.append("title", title);
-  fd.append("short_desc", formShortDesc.trim());
-  fd.append("price", String(price));
-  fd.append("status", String(formStatus));
-
-  if (formImgFile) {
-    fd.append("img", formImgFile);
-  }
-
-  try {
-    if (editingId) {
-      // EDIT
-      await updateInspection({
-        id: editingId,
-        formData: fd,
-      }).unwrap();
-
-      toast.success("Inspection updated successfully");
-      refetch();
-    } else {
-      // CREATE
-      await addInspection(fd).unwrap();
-
-      toast.success("Inspection added successfully");
-      refetch();
+    if (!title || isNaN(price)) {
+      console.log("Validation failed");
+      toast.error("Title and Price are required");
+      return;
     }
 
-    setIsModalOpen(false);
+    const fd = new FormData();
 
-    setFormTitle("");
-    setFormShortDesc("");
-    setFormPrice("");
-    setFormImg(null);
-    setFormImgFile(null);
-    setFormStatus(1);
-    setEditingId(null);
+    fd.append("title", title);
+    fd.append("short_desc", formShortDesc.trim());
+    fd.append("price", String(price));
+    fd.append("status", String(formStatus));
 
-  } catch (error: any) {
-    toast.error(
-      error?.data?.message ||
-      "Something went wrong"
-    );
-  }
-};
+    if (formImgFile) {
+      fd.append("img", formImgFile);
+    }
+
+    console.log("Before API");
+
+    try {
+      if (editingId) {
+        console.log("Updating...");
+
+        const res = await updateInspection({
+          id: editingId,
+          formData: fd,
+        }).unwrap();
+
+        console.log(res);
+      } else {
+        console.log("Creating...");
+
+        const res = await addInspection(fd).unwrap();
+
+        console.log(res);
+      }
+
+      console.log("Success");
+
+      toast.success("Success");
+    } catch (err) {
+      console.log("Catch", err);
+    }
+
+    console.log("After API");
+  };
 
 const confirmDelete = async () => {
   if (!deleteTarget) return;
