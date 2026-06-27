@@ -164,7 +164,7 @@ const handleReject = async (id: number) => {
                     </h4>
 
                     <p className="text-xs text-gray-500 truncate">
-                      {req.profile?.address || "No address available"}
+                      {req.inspection_type ?? "No inspection type"}
                     </p>
                   </div>
 
