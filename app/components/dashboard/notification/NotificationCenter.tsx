@@ -85,7 +85,7 @@ const notifications =
 
 const [openRecipient, setOpenRecipient] = useState(false);
 const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 3;
+const itemsPerPage = 5;
 
   function validate() {
     const e: { title?: string; message?: string } = {};

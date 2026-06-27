@@ -117,6 +117,7 @@ const handleSave = async () => {
       await addInspection(fd).unwrap();
 
       toast.success("Inspection added successfully");
+      refetch();
     }
 
     setIsModalOpen(false);
@@ -144,6 +145,7 @@ const confirmDelete = async () => {
     await deleteInspection(deleteTarget.id).unwrap();
 
     toast.success("Deleted successfully");
+    refetch();
     setDeleteTarget(null);
   } catch (error: any) {
     toast.error(error?.data?.message || "Delete failed");
