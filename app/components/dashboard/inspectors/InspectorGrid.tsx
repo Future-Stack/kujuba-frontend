@@ -288,11 +288,11 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
                 <div>
                   <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
                     <div className="relative w-11 h-11 shrink-0">
-                      <div className="w-full h-full rounded-full overflow-hidden relative border border-gray-100 bg-purple-50 flex items-center justify-center">
+                      <div className="w-full h-full rounded-full overflow-hidden relative border border-purple-100 bg-purple-50 flex items-center justify-center">
                         {inspector.avatarUrl ? (
                           <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
                         ) : (
-                          <span className="text-purple-600 font-bold text-xs">
+                          <span className="text-purple-600 font-bold text-xs ">
                             {inspector.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                           </span>
                         )}
@@ -301,7 +301,7 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
                     </div>
                     <div className="min-w-0">
                       <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-primaryColor transition-colors">{inspector.name}</h4>
-                      <p className="text-[13px] text-gray-600 font-normal leading-4 mt-0.5">{inspector.role}</p>
+                      {/* <p className="text-[13px] text-gray-600 font-normal leading-4 mt-0.5">{inspector.role}</p> */}
                     </div>
                   </div>
 
