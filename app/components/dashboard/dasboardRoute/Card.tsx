@@ -90,10 +90,10 @@ console.log(serverStats)
       ),
     },
     {
-      value: String(serverStats.pending_approvals).padStart(2, ''), // Formats short numbers to '06'
-      label: 'Pending Approvals',
-      change: formatGrowth(serverStats.pending_approval_growth),
-      isPositive: serverStats.pending_approval_growth >= 0,
+      value: String(serverStats?.pending_inspectors ?? 0),
+      label: 'Pending Inspectors',
+      change: formatGrowth(serverStats?.pending_approval_growth ?? 0),
+      isPositive: (serverStats?.pending_approval_growth ?? 0) >= 0,
       valueColor: 'text-primaryColor',
       icon: (
        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -111,7 +111,7 @@ console.log(serverStats)
     },
     {
       value: formatValue(serverStats.active_inspections),
-      label: 'Active Inspections',
+      label: 'Started Inspections',
       change: formatGrowth(serverStats.active_growth),
       isPositive: serverStats.active_growth >= 0,
       valueColor: 'text-secondaryColor',
@@ -161,8 +161,8 @@ console.log(serverStats)
     {
       value: formatValue(serverStats.pending_inspections),
       label: 'Pending Inspections',
-      change: formatGrowth(serverStats.pending_growth),
-      isPositive: serverStats.pending_growth >= 0,
+      change: formatGrowth(serverStats?.pending_growth ?? 0),
+      isPositive: (serverStats?.pending_growth ?? 0) >= 0,
       valueColor: 'text-[#F59E0B]',
       labelColor: 'text-[#F59E0B]',
       icon: (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "../api/baseApi";
 
 
@@ -55,24 +56,13 @@ export const inspectorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
     // GET ALL INSPECTORS
-    getInspectors: builder.query<
-      {
-        success: boolean;
-        data: {
-          inspectors: Inspector[];
-          pagination: {
-            current_page: number;
-            next_page: boolean;
-            per_page: number;
-            total: number;
-          };
-        };
-      },
-      void
-    >({
-      query: () => "/admin/inspectors",
-      providesTags: ["Inspector"],
-    }),
+getInspectors: builder.query<any, { page?: number } | void>({
+  query: (params) => ({
+    url: "/admin/inspectors",
+    params: { page: params?.page ?? 1 },
+  }),
+  providesTags: ["Inspector"],
+}),
 
     // GET SINGLE INSPECTOR
     getInspectorById: builder.query<

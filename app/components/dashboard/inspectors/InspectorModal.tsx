@@ -226,10 +226,10 @@ export default function InspectorDetailModal({
               <div className="grid grid-cols-2 gap-3 mb-5">
                 {[
                   { label: "PHONE",            value: detail?.phone ?? inspector.phone },
-                  { label: "LOCATION",         value: detail?.location ?? "—" },
-                  { label: "LICENSE NUMBER",   value: detail?.license_number ?? "—" },
-                  { label: "LICENSE EXPIRY",   value: detail?.license_expiry ?? "—" },
-                  { label: "INSURANCE EXPIRY", value: detail?.insurance_expiry ?? "—" },
+                    { label: "LOCATION", value: detail?.location ?? "location not avaivle" },
+                    { label: "LICENSE NUMBER", value: detail?.license_number ?? "license number not avaivle" },
+                    { label: "LICENSE EXPIRY", value: detail?.license_expiry ?? "license expriry not avaivle" },
+                    { label: "INSURANCE EXPIRY", value: detail?.insurance_expiry ?? "insurence expiry not avaivle" },
                   { label: "MEMBER SINCE",     value: detail?.member_since ? new Date(detail.member_since).toLocaleDateString() : "—" },
                 ].map(({ label, value }) => (
                   <div key={label} className="bg-[#F9FAFB] rounded-lg px-3 py-2.5">

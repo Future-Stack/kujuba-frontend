@@ -341,7 +341,31 @@ const handleSuspend = async () => {
   rescheduleHistory={d.reschedule_history}
   payment={d.payment}
 />
-              <InspectionReportMedia report={d.report} />
+              <InspectionReportMedia
+                report={
+                  d.report
+                    ? {
+                      images: (d.report.media?.photos ?? []).map(
+                        (path: string, idx: number) => ({
+                          id: idx,
+                          url: path.startsWith("http")
+                            ? path
+                            : `https://api.connecttoinspect.com/storage/${path}`,
+                          alt: `Inspection photo ${idx + 1}`,
+                        })
+                      ),
+                      pdf_url: d.report.report_file
+                        ? d.report.report_file.startsWith("http")
+                          ? d.report.report_file
+                          : `https://api.connecttoinspect.com/storage/${d.report.report_file}`
+                        : null,
+                      file_name: d.report.report_file?.split("/").pop() ?? null,
+                      uploaded_at: d.report.uploaded_on ?? null,
+                      status: d.report.status ?? null,
+                    }
+                    : null
+                }
+              />
               <ActivityTimeline timeline={d.timeline} />
             </div>
 

@@ -56,16 +56,32 @@ export default function InspectionReportMedia({ report }: Props) {
     if (pdfUrl) window.open(pdfUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = async () => {
     if (!pdfUrl) return;
     setIsDownloading(true);
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.download = fileName || "inspection_report.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setIsDownloading(false);
+    try {
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName || "inspection_report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // fallback
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.target = "_blank";
+      link.download = fileName || "inspection_report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (

@@ -86,18 +86,10 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   const handleSave = async () => {
-    console.log("Save clicked");
-
     const title = formTitle.trim();
     const price = parseFloat(formPrice);
 
-    console.log({ title, price });
-
-    if (!title || isNaN(price)) {
-      console.log("Validation failed");
-      toast.error("Title and Price are required");
-      return;
-    }
+    if (!title || isNaN(price)) return;
 
     const fd = new FormData();
 
@@ -110,35 +102,42 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       fd.append("img", formImgFile);
     }
 
-    console.log("Before API");
-
     try {
       if (editingId) {
-        console.log("Updating...");
-
-        const res = await updateInspection({
+        // EDIT
+        await updateInspection({
           id: editingId,
           formData: fd,
         }).unwrap();
 
-        console.log(res);
+        toast.success("Inspection updated successfully");
+        refetch();
       } else {
-        console.log("Creating...");
+        // CREATE
+        await addInspection(fd).unwrap();
 
-        const res = await addInspection(fd).unwrap();
-
-        console.log(res);
+        toast.success("Inspection added successfully");
+        refetch();
       }
 
-      console.log("Success");
+      setIsModalOpen(false);
 
-      toast.success("Success");
-    } catch (err) {
-      console.log("Catch", err);
+      setFormTitle("");
+      setFormShortDesc("");
+      setFormPrice("");
+      setFormImg(null);
+      setFormImgFile(null);
+      setFormStatus(1);
+      setEditingId(null);
+
+    } catch (error: any) {
+      toast.error(
+        error?.data?.message ||
+        "Something went wrong"
+      );
     }
-
-    console.log("After API");
   };
+
 
 const confirmDelete = async () => {
   if (!deleteTarget) return;

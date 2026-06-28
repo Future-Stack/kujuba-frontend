@@ -24,6 +24,7 @@ export interface Stats {
   cancelled_growth: number;
 
   pending_inspections: number;
+  pending_inspectors:number;
   pending_growth: number;
 }
 
