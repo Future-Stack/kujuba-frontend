@@ -140,6 +140,30 @@ export const inspectionApi = baseApi.injectEndpoints({
       invalidatesTags: ["Inspection"],
     }),
 
+    acceptInspectorCancelRequest: builder.mutation<
+      any,
+      { inspection_assign_id: number; inspector_id: number }
+    >({
+      query: (body) => ({
+        url: "/admin/accept-inspector-cancel-request",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Inspection"],
+    }),
+
+    declineInspectorCancelRequest: builder.mutation<
+      any,
+      { inspection_assign_id: number }
+    >({
+      query: (body) => ({
+        url: "/admin/decline-inspector-cancel-request",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Inspection"],
+    }),
+
   }),
 });
 
@@ -155,4 +179,6 @@ export const {
   useGetBookingDetailsQuery,
   useSuspendInspectorMutation,
   useMarkInspectionCompleteMutation,
+  useAcceptInspectorCancelRequestMutation,
+  useDeclineInspectorCancelRequestMutation
 } = inspectionApi;

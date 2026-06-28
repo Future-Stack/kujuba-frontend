@@ -80,8 +80,8 @@ export interface PaymentExportRow {
 
 export interface PaymentMetrics {
   total_revenue: string;
-  completed_payouts: number;
-  pending_payouts: number;
+  total_platformFee : number;
+  total_paid_homeowner: number;
   total_refunded: number;
   growth_rate: number;
 }

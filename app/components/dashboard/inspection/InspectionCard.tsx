@@ -17,7 +17,7 @@ export default function InspectionCard() {
 
   {
   value: metrics?.active_inspections?.count,
-      label: "Active Inspections",
+      label: "Started Inspections",
       change: `${metrics?.active_inspections?.change}% than last month`,
       isPositive: metrics?.active_inspections?.change >= 0,
     valueColor: 'text-secondaryColor',

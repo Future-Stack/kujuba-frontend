@@ -52,9 +52,9 @@ export default function PaymentsCard() {
   },
  
   {
-    value:  formatMoney(metrics?.completed_payouts ?? 0),
-    label: 'Completd Payouts',
-    change: `${metrics?.completed_payouts ?? 0}% than last month`,
+    value: `$${formatMoney(metrics?.total_platformFee ?? 0)}`,
+    label: "Platform Fee",
+    change: `${metrics?.growth_rate ?? 0}% than last month`,
     isPositive: (metrics?.growth_rate ?? 0) >= 0,
     valueColor: 'text-primaryColor',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
@@ -75,10 +75,10 @@ export default function PaymentsCard() {
  
 
   {
-    value: `${metrics?.pending_payouts ?? 0}`,
-    label: 'Pending Payouts',
-    // change: '-2%',
-    // isPositive: false,
+    value: metrics?.total_paid_homeowner ?? 0,
+    label: "Paid Homeowners",
+    change: `${metrics?.growth_rate ?? 0}% than last month`,
+    isPositive: (metrics?.growth_rate ?? 0) >= 0,
     valueColor: 'text-[#F59E0B]',
     labelColor: 'text-[#F59E0B]',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">

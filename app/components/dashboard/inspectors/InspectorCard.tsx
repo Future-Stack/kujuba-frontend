@@ -89,14 +89,14 @@ export default function InspectorsCard() {
     },
     {
       value: String(stats?.active_users ?? 0),
-      label: "Active Inspections",
+      label: "Active Inspector",
       ...formatGrowth(stats?.active_growth_percentage ?? 0),
       valueColor: "text-secondaryColor",
       icon: ActiveInspectionsIcon,
     },
     {
       value: String(stats?.pending_users ?? 0),
-      label: "Pending Approval",
+      label: "Pending Inspector",
       ...formatGrowth(stats?.pending_growth_percentage ?? 0),
       valueColor: "text-[#F59E0B]",
       labelColor: "text-[#F59E0B]",
@@ -105,7 +105,7 @@ export default function InspectorsCard() {
 
     {
       value: String(stats?.suspended_users ?? 0), 
-      label: "Suspended Users",
+      label: "Suspended Inspector",
       ...formatGrowth(stats?.suspended_growth_percentage ?? 0),
       valueColor: "text-[#EF4444]",
       labelColor: "text-[#EF4444]",

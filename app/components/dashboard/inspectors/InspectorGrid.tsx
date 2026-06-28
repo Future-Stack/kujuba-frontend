@@ -103,13 +103,13 @@ export default function InspectorGrid() {
   const [sortOrder, setSortOrder]           = useState<"newest" | "oldest">("newest");
  
   const [selectedInspector, setSelectedInspector] = useState<InspectorCard | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-
-  const { data, isLoading, isError } = useGetInspectorsQuery();
+  const { data, isLoading, isError } = useGetInspectorsQuery({ page: currentPage });
   const [approveInspector, { isLoading: approvingId }] = useApproveInspectorMutation();
 
-  const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 10;
+
+
 
   // Map raw API data → InspectorCard[]
   const inspectors: InspectorCard[] = useMemo(
@@ -138,14 +138,17 @@ const itemsPerPage = 10;
   }), [inspectors]);
 
   const tabs: TabItem[] = [
-    { name: "All",            count: null },
-    { name: "Active",         count: counts.Active,            badge: "bg-emerald-500 text-white" },
+    {
+      name: "All",
+      count: data?.data?.pagination?.total ?? 0,
+    },
+    { name: "Active", count: inspectors.filter(i => i.status === "Active").length,           badge: "bg-emerald-500 text-white" },
     { name: "Pending Review", count: counts["Pending Review"], badge: "bg-amber-400 text-white" },
     { name: "Suspended",      count: counts.Suspended,         badge: "bg-rose-400 text-white" },
     { name: "Rejected",       count: counts.Rejected,          badge: "bg-red-400 text-white" },
   ];
 
-  // ── filter + sort ──────────────────────────────────────────────────────────
+
   const filteredAndSortedInspectors = useMemo(() => {
     let result = [...inspectors];
     if (activeTab !== "All") result = result.filter((i) => i.status === activeTab);
@@ -164,16 +167,12 @@ const itemsPerPage = 10;
     return result;
   }, [inspectors, activeTab, searchQuery, sortOrder]);
 
-  const paginatedInspectors = useMemo(() => {
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const paginatedInspectors = filteredAndSortedInspectors;
+  const totalPages = data?.data?.pagination?.next_page
+    ? currentPage + 1  
+    : currentPage;
 
-  return filteredAndSortedInspectors.slice(startIndex, endIndex);
-}, [filteredAndSortedInspectors, currentPage]);
 
-const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
-
-  // ── modal handlers ─────────────────────────────────────────────────────────
   const handleOpenModal  = useCallback((inspector: InspectorCard) => setSelectedInspector(inspector), []);
   const handleCloseModal = useCallback(() => setSelectedInspector(null), []);
 
@@ -210,8 +209,11 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
 
   return (
     <div className="w-full bg-[#f8fafc]/40 min-h-screen font-roboto my-6 md:my-12 antialiased">
-      <div className="border rounded-sm border-gray-100 px-4 py-6">
-
+      <div className="min-h-screen">
+      <div className="border rounded-sm border-gray-100 px-4 py-6 ">
+        
+        
+  
         {/* ── Toolbar ── */}
         <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between mb-8 bg-white">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center flex-1">
@@ -247,24 +249,7 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
 
           {/* Sort + Export */}
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            {/* <div className="relative">
-              <button
-                onClick={() => setSortOpen(!sortOpen)}
-                className="flex items-center gap-2 bg-gray-50/60 border border-gray-100 rounded-sm px-3 py-2 text-sm text-gray-900 font-normal cursor-pointer leading-5"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M11.667 8.75002L9.91699 10.5L8.16699 8.75002M9.91699 10.5V3.50002M2.91699 3.20835C2.91699 3.131 2.94772 3.05681 3.00242 3.00211C3.05712 2.94742 3.1313 2.91669 3.20866 2.91669H5.54199C5.61935 2.91669 5.69353 2.94742 5.74823 3.00211C5.80293 3.05681 5.83366 3.131 5.83366 3.20835V5.54169C5.83366 5.61904 5.80293 5.69323 5.74823 5.74793C5.69353 5.80263 5.61935 5.83335 5.54199 5.83335H3.20866C3.1313 5.83335 3.05712 5.80263 3.00242 5.74793C2.94772 5.69323 2.91699 5.61904 2.91699 5.54169V3.20835ZM2.91699 8.45835C2.91699 8.381 2.94772 8.30681 3.00242 8.25211C3.05712 8.19742 3.1313 8.16669 3.20866 8.16669H5.54199C5.61935 8.16669 5.69353 8.19742 5.74823 8.25211C5.80293 8.30681 5.83366 8.381 5.83366 8.45835V10.7917C5.83366 10.869 5.80293 10.9432 5.74823 10.9979C5.69353 11.0526 5.61935 11.0834 5.54199 11.0834H3.20866C3.1313 11.0834 3.05712 11.0526 3.00242 10.9979C2.94772 10.9432 2.91699 10.869 2.91699 10.7917V8.45835Z" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span>Sort By : {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </button>
-              {sortOpen && (
-                <div className="absolute right-0 mt-2 w-44 rounded-xl border border-gray-100 bg-white text-gray-600 shadow-lg z-50 overflow-hidden">
-                  <button onClick={() => { setSortOrder("newest"); setSortOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Newest</button>
-                  <button onClick={() => { setSortOrder("oldest"); setSortOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer">Oldest</button>
-                </div>
-              )}
-            </div> */}
+        
             <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-sm shadow-md shadow-blue-100 transition-all cursor-pointer active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
               <span>Export Inspector Data</span>
@@ -274,7 +259,7 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
 
         {/* ── Grid ── */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5   gap-5">
             {Array.from({ length: 10 }).map((_, i) => <CardSkeleton key={i} />)}
           </div>
         ) : isError ? (
@@ -282,10 +267,10 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
             <p className="text-red-400 font-medium text-sm">Failed to load inspectors. Please refresh.</p>
           </div>
         ) : filteredAndSortedInspectors.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5  gap-5">
             {paginatedInspectors.map((inspector) => (
-              <div key={inspector.id} className="bg-white rounded-sm border border-gray-200 p-5 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
-                <div>
+              <div key={inspector.id} className="bg-white rounded-sm border border-gray-200  p-5 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+                <div className="">
                   <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
                     <div className="relative w-11 h-11 shrink-0">
                       <div className="w-full h-full rounded-full overflow-hidden relative border border-purple-100 bg-purple-50 flex items-center justify-center">
@@ -368,7 +353,7 @@ const totalPages = Math.ceil(filteredAndSortedInspectors.length / itemsPerPage);
           </div>
         )}
       </div>
-
+      </div>
 
 {totalPages > 1 && (
   <div className="flex items-center justify-center gap-2 mt-6">
