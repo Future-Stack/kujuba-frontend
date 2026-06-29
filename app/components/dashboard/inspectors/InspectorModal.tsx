@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
-export type InspectorStatus = "Active" | "Pending Review" | "Suspended" | "Rejected";
+export type InspectorStatus = "Active" | "Pending" | "Suspended" | "Rejected";
 
 export interface InspectorCard {
   id: string;
@@ -39,7 +39,7 @@ interface InspectorDetailModalProps {
 
 const statusStyles: Record<InspectorStatus, string> = {
   Active:           "bg-green-100 text-green-700",
-  "Pending Review": "bg-amber-100 text-amber-700",
+  "Pending": "bg-amber-100 text-amber-700",
   Suspended:        "bg-red-200 text-red-500",
   Rejected:         "bg-gray-100 text-gray-600",
 };
@@ -326,7 +326,7 @@ export default function InspectorDetailModal({
                     </>
                   )}
 
-                  {inspector.status === "Pending Review" && (
+                  {inspector.status === "Pending" && (
                     <>
                       <button
                         onClick={handleReject}
