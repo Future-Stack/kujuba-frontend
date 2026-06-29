@@ -221,14 +221,14 @@ export default function InspectionReportMedia({ report }: Props) {
                     View Report
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={handleDownloadReport}
                     disabled={isDownloading}
                     className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-70 transition duration-150 cursor-pointer"
                   >
                     <Download className={`w-4 h-4 ${isDownloading ? "animate-bounce" : ""}`} />
                     {isDownloading ? "Downloading..." : "Download"}
-                  </button>
+                  </button> */}
                 </div>
 
               </div>
