@@ -19,8 +19,8 @@ import { toast } from "react-toastify";
 function toStatus(raw: string): InspectorStatus {
   const map: Record<string, InspectorStatus> = {
     active:         "Active",
-    pending:        "Pending Review",
-    pending_review: "Pending Review",
+    pending:        "Pending",
+    pending_review: "Pending",
     suspended:      "Suspended",
     rejected:       "Rejected",
   };
@@ -53,11 +53,11 @@ interface TabItem {
 }
 
 const paramToTab: Record<string, TabType> = {
-  active: "Active", pending: "Pending Review",
+  active: "Active", pending: "Pending",
   suspended: "Suspended", rejected: "Rejected",
 };
 const tabToParam: Record<TabType, string> = {
-  All: "", Active: "active", "Pending Review": "pending",
+  All: "", Active: "active", "Pending": "pending",
   Suspended: "suspended", Rejected: "rejected",
 };
 
@@ -132,7 +132,7 @@ export default function InspectorGrid() {
   const counts = useMemo(() => ({
     All:              inspectors.length,
     Active:           inspectors.filter((i) => i.status === "Active").length,
-    "Pending Review": inspectors.filter((i) => i.status === "Pending Review").length,
+    "Pending Review": inspectors.filter((i) => i.status === "Pending").length,
     Suspended:        inspectors.filter((i) => i.status === "Suspended").length,
     Rejected:         inspectors.filter((i) => i.status === "Rejected").length,
   }), [inspectors]);
@@ -143,7 +143,7 @@ export default function InspectorGrid() {
       count: data?.data?.pagination?.total ?? 0,
     },
     { name: "Active", count: inspectors.filter(i => i.status === "Active").length,           badge: "bg-emerald-500 text-white" },
-    { name: "Pending Review", count: counts["Pending Review"], badge: "bg-amber-400 text-white" },
+    { name: "Pending", count: counts["Pending Review"], badge: "bg-amber-400 text-white" },
     { name: "Suspended",      count: counts.Suspended,         badge: "bg-rose-400 text-white" },
     { name: "Rejected",       count: counts.Rejected,          badge: "bg-red-400 text-white" },
   ];
@@ -313,7 +313,7 @@ export default function InspectorGrid() {
                 </div>
 
                 <div className="pt-2">
-                  {inspector.status === "Pending Review" ? (
+                  {inspector.status === "Pending" ? (
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => handleOpenModal(inspector)}

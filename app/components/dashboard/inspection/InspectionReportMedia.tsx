@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { Download, Eye, EyeIcon, FileText, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 
 
@@ -12,6 +13,7 @@ interface ReportImage {
 
 interface ReportData {
   images?: ReportImage[];
+  videos?: string[];  
   pdf_url?: string | null;
   report_url?: string | null;
   file_url?: string | null;
@@ -43,6 +45,7 @@ export default function InspectionReportMedia({ report }: Props) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const images = report?.images ?? [];
+  const videos = report?.videos ?? [];    
   const pdfUrl = report?.pdf_url ?? report?.report_url ?? report?.file_url ?? null;
   const fileName =
     report?.file_name ?? report?.fileName ?? (pdfUrl ? pdfUrl.split("/").pop() : null);
@@ -50,7 +53,7 @@ export default function InspectionReportMedia({ report }: Props) {
   const status = report?.status ?? null;
 
 
-  const hasReport = !!report && (images.length > 0 || !!pdfUrl);
+  const hasReport = !!report && (images.length > 0 || videos.length > 0 || !!pdfUrl);
 
   const handleViewReport = () => {
     if (pdfUrl) window.open(pdfUrl, "_blank", "noopener,noreferrer");
@@ -58,32 +61,35 @@ export default function InspectionReportMedia({ report }: Props) {
 
   const handleDownloadReport = async () => {
     if (!pdfUrl) return;
-    setIsDownloading(true);
+
     try {
+      setIsDownloading(true);
+
       const response = await fetch(pdfUrl);
+
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+
+      const url = window.URL.createObjectURL(blob);
+
       const link = document.createElement("a");
       link.href = url;
       link.download = fileName || "inspection_report.pdf";
+
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch {
-      // fallback
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.target = "_blank";
-      link.download = fileName || "inspection_report.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error("Failed to download report.");
     } finally {
       setIsDownloading(false);
     }
   };
-
   return (
     <div className="bg-white border border-slate-100 rounded-xl p-5 md:p-6 antialiased">
 
@@ -142,6 +148,32 @@ export default function InspectionReportMedia({ report }: Props) {
             </div>
           )}
 
+            {/* --- VIDEOS --- */}
+            {videos.length > 0 && (
+              <div className={`space-y-3 lg:col-span-12`}>
+                <div className="flex items-center gap-1.5 text-[#364153] font-medium leading-4 text-sm font-roboto">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 4.66667C2 3.93029 2.59695 3.33333 3.33333 3.33333H9.33333C10.0697 3.33333 10.6667 3.93029 10.6667 4.66667V11.3333C10.6667 12.0697 10.0697 12.6667 9.33333 12.6667H3.33333C2.59695 12.6667 2 12.0697 2 11.3333V4.66667Z" stroke="#364153" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M10.6667 6.33333L14 4.66667V11.3333L10.6667 9.66667V6.33333Z" stroke="#364153" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>Uploaded Videos ({videos.length})</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {videos.map((url, idx) => (
+                    <div key={idx} className="rounded-xl overflow-hidden border border-slate-100 bg-slate-900 aspect-video">
+                      <video
+                        src={url}
+                        controls
+                        className="w-full h-full object-contain"
+                        preload="metadata"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           {/* --- RIGHT SIDE: PDF REPORT VIEWER (only if a pdf exists) --- */}
           {pdfUrl && (
             <div className={`space-y-3 ${images.length > 0 ? "lg:col-span-6" : "lg:col-span-12"}`}>
@@ -165,6 +197,7 @@ export default function InspectionReportMedia({ report }: Props) {
                     <div className="min-w-0">
                       <h4 className="text-sm font-normal text-[#101828] leading-5 font-sora truncate pr-2 max-w-[240px] sm:max-w-xs md:max-w-md lg:max-w-[200px] xl:max-w-xs">
                         {fileName ?? "Inspection_Report.pdf"}
+                        
                       </h4>
                       <p className="text-xs text-[#4A5565] font-normal leading-4 mt-0.5">
                         Uploaded: {formatDate(uploadedOn)}

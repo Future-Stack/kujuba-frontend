@@ -359,7 +359,7 @@ const handleSuspend = async () => {
                           ? d.report.report_file
                           : `https://api.connecttoinspect.com/storage/${d.report.report_file}`
                         : null,
-                      file_name: d.report.report_file?.split("/").pop() ?? null,
+                      file_name: `Inspection_Report_${d.booking_id}.${d.report.report_file?.split(".").pop() ?? "pdf"}`,
                       uploaded_at: d.report.uploaded_on ?? null,
                       status: d.report.status ?? null,
                     }
@@ -373,16 +373,19 @@ const handleSuspend = async () => {
             <div className="px-6 py-4 border-t border-gray-100 flex items-center gap-2 flex-wrap">
 
               {/* Download Report */}
-              <button
-                onClick={handleDownloadReport}
-                className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Download Report
-              </button>
+              {/* Download Report — only when completed */}
+              {assignStatus === "completed" && (
+                <button
+                  onClick={handleDownloadReport}
+                  className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-base font-medium leading-5 px-3.5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download Report
+                </button>
+              )}
 
               {/* Mark as Completed — only when not already completed/canceled */}
-              {!isCompleted && !isCanceled && (
+              {/* {!isCompleted && !isCanceled && (
                 <button
                   onClick={handleMarkComplete}
                   disabled={completing}
@@ -398,10 +401,10 @@ const handleSuspend = async () => {
                   }
                   {confirmComplete ? "Confirm Complete?" : "Mark as Completed"}
                 </button>
-              )}
+              )} */}
 
               {/* Suspend Inspector — only when inspector is assigned */}
-              {d.inspector?.name && !isCanceled && (
+              {/* {d.inspector?.name && !isCanceled && (
                 <button
                   onClick={handleSuspend}
                   disabled={suspending}
@@ -417,7 +420,7 @@ const handleSuspend = async () => {
                   }
                   {confirmSuspend ? "Confirm Suspend?" : "Suspend Inspector"}
                 </button>
-              )}
+              )} */}
 
               <button
                 onClick={onClose}

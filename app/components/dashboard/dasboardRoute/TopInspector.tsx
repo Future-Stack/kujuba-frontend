@@ -118,7 +118,7 @@ export default function TopInspector() {
       </div>
 
       <div className="px-4 md:px-6 pb-4">
-        <Link href="/dashboard/users">
+        <Link href="/dashboard/inspectors">
           <button className="w-full mt-6 border border-primaryColor text-primaryColor text-sm py-2 rounded-xl hover:bg-blue-50 cursor-pointer transition">
             View All
           </button>
