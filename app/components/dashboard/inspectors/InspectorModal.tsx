@@ -226,7 +226,7 @@ export default function InspectorDetailModal({
               <div className="grid grid-cols-2 gap-3 mb-5">
                 {[
                   { label: "PHONE",            value: detail?.phone ?? inspector.phone },
-                    { label: "LOCATION", value: detail?.location ?? "location not avaivle" },
+                    { label: "LOCATION", value: detail?.location ?? "location not available" },
                     { label: "LICENSE NUMBER", value: detail?.license_number ?? "license number not avaivle" },
                     { label: "LICENSE EXPIRY", value: detail?.license_expiry ?? "license expriry not avaivle" },
                     { label: "INSURANCE EXPIRY", value: detail?.insurance_expiry ?? "insurence expiry not avaivle" },

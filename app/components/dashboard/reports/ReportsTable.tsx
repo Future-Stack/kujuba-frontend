@@ -144,7 +144,8 @@ export default function ReportsTable() {
   async function downloadPDF(url?: string, fileName?: string) {
     if (!url) { toast.error("No report file available."); return; }
     try {
-      toast.info("Downloading...");
+      // toast.info("Downloading...");
+      toast.success("Download started!");
       const res = await fetch(url, { mode: "cors" });
       if (!res.ok) throw new Error();
       const blob = await res.blob();
@@ -165,7 +166,7 @@ export default function ReportsTable() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Download started!");
+      
     }
   }
 
