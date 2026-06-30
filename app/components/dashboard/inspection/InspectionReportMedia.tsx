@@ -59,36 +59,16 @@ export default function InspectionReportMedia({ report }: Props) {
     if (pdfUrl) window.open(pdfUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleDownloadReport = async () => {
+  const handleDownloadReport = () => {
     if (!pdfUrl) return;
 
-    try {
-      setIsDownloading(true);
-
-      const response = await fetch(pdfUrl);
-
-      if (!response.ok) {
-        throw new Error("Download failed");
-      }
-
-      const blob = await response.blob();
-
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName || "inspection_report.pdf";
-
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      toast.error("Failed to download report.");
-    } finally {
-      setIsDownloading(false);
-    }
+    const link = document.createElement("a");
+    link.href = pdfUrl;
+    link.download = fileName || "inspection_report.pdf";
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
   return (
     <div className="bg-white border border-slate-100 rounded-xl p-5 md:p-6 antialiased">
@@ -221,14 +201,14 @@ export default function InspectionReportMedia({ report }: Props) {
                     View Report
                   </button>
 
-                  {/* <button
+                  <button
                     onClick={handleDownloadReport}
                     disabled={isDownloading}
                     className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-70 transition duration-150 cursor-pointer"
                   >
                     <Download className={`w-4 h-4 ${isDownloading ? "animate-bounce" : ""}`} />
                     {isDownloading ? "Downloading..." : "Download"}
-                  </button> */}
+                  </button>
                 </div>
 
               </div>
