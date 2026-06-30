@@ -234,7 +234,7 @@ export default function ReportsTable() {
               </span>
             </button>
 
-            {(["Completed", "Started", "Archive"] as const).map((filter) => (
+            {(["Started","Completed", "Archive"] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => { setActiveFilter(filter); setPage(1); }}
