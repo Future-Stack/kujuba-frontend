@@ -469,7 +469,7 @@ export default function ReportsTable() {
         </div>
       ) : (
         <div className="w-full text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold text-sm">No inspection reports matches your current query or filters.</p>
+              <p className="text-gray-400 font-bold text-sm">  No inspection reports have been archived yet.</p>
         </div>
       )}
 

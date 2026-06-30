@@ -34,11 +34,11 @@ export default function InspectionStatistics() {
       <div className="flex flex-wrap items-center justify-center gap-4 mb-8 text-sm font-medium text-gray-600">
         <div className="flex items-center gap-2.5">
           <span className="w-3.5 h-3.5 rounded-full bg-primaryColor" />
-          <span>Active</span>
+          <span>Assigned</span>
         </div>
         <div className="flex items-center gap-2.5">
           <span className="w-3.5 h-3.5 rounded-full bg-[#FE9738]" />
-          <span>Inprogress</span>
+          <span>Started</span>
         </div>
         <div className="flex items-center gap-2.5">
           <span className="w-3.5 h-3.5 rounded-full bg-[#01B664]" />
@@ -106,7 +106,7 @@ export default function InspectionStatistics() {
               {/* Active Bar Series (Royal Blue) */}
               <Bar 
                 dataKey="active" 
-                name="Active"
+                name="Assigned"
                 fill="#3550DC" 
                 maxBarSize={12}
                 radius={[10, 10, 0, 0]}
@@ -115,7 +115,7 @@ export default function InspectionStatistics() {
               {/* In-Progress Bar Series (Warm Orange) */}
               <Bar 
                 dataKey="inprogress" 
-                name="Inprogress"
+                name="Started"
                 fill="#FE9738" 
                 maxBarSize={12}
                 radius={[10, 10, 0, 0]}

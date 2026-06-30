@@ -81,10 +81,10 @@ export const inspectionApi = baseApi.injectEndpoints({
       providesTags: ["InspectionType"],
     }),
 
-    getInspectionManagement: builder.query<any, string>({
-      query: (filter) => `/admin/inspection-management?status=${filter}`,
-      providesTags: ["InspectionType"],
-    }),
+getInspectionManagement: builder.query<any, string>({
+  query: (filter) => `/admin/inspection-management?filter=${filter}`,
+  providesTags: ["InspectionType"],
+}),
 
     assignInspection: builder.mutation<any, any>({
       query: (body) => ({
@@ -164,6 +164,14 @@ export const inspectionApi = baseApi.injectEndpoints({
       invalidatesTags: ["Inspection"],
     }),
 
+downloadReport: builder.mutation<Blob, number>({
+  query: (id) => ({
+    url: `/admin/reports/${id}/download`,
+    method: "GET",
+    responseHandler: async (response) => response.blob(),
+  }),
+}),
+      
   }),
 });
 
@@ -180,5 +188,6 @@ export const {
   useSuspendInspectorMutation,
   useMarkInspectionCompleteMutation,
   useAcceptInspectorCancelRequestMutation,
-  useDeclineInspectorCancelRequestMutation
+  useDeclineInspectorCancelRequestMutation,
+  useDownloadReportMutation
 } = inspectionApi;
