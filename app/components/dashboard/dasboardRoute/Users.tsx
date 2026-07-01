@@ -160,11 +160,14 @@ export default function UserTable() {
 
                   {/* Column: Status Label Pill */}
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-medium uppercase tracking-wider ${
-                      isActive 
-                        ? "bg-[#e8fbf0] text-[#09BD3C]" 
-                        : "bg-[#fde8e8] text-[#dc2626]"
-                    }`}>
+                    <span
+                      className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-medium uppercase tracking-wider ${user.status === "active"
+                          ? "bg-[#e8fbf0] text-[#09BD3C]"
+                          : user.status === "pending"
+                            ? "bg-[#FFF7E6] text-[#F59E0B]"
+                            : "bg-[#fde8e8] text-[#dc2626]"
+                        }`}
+                    >
                       {user.status}
                     </span>
                   </td>
