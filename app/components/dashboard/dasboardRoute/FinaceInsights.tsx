@@ -259,7 +259,7 @@ if (isError || !data?.success) {
           >
             {getIcon(viewType === "monthly")}
             <span className={viewType === "monthly" ? "text-[#717579]" : "text-gray-400"}>
-              Monthly
+              Current Monthly
             </span>
           </button>
 
@@ -269,7 +269,7 @@ if (isError || !data?.success) {
           >
             {getIcon(viewType === "weekly")}
             <span className={viewType === "weekly" ? "text-[#717579]" : "text-gray-400"}>
-              Weekly
+              Current Weekly
             </span>
           </button>
 
