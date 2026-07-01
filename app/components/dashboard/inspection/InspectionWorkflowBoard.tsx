@@ -348,7 +348,7 @@ export default function InspectionBoardLayout() {
 
           <div className="flex items-center gap-2 text-sm text-gray-600 font-normal leading-6 mb-4">
             <span>Assigned Inspector:</span>
-            <InspectorDisplay name={card.assigned_inspector} idx={idx} />
+            <InspectorDisplay name={card.assigned_inspector} idx={card.id} />
           </div>
 
           <div className="flex gap-2">

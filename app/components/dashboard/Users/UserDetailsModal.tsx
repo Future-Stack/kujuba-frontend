@@ -15,7 +15,7 @@ export interface UserCard {
   user_type: string;
   image?: string | null;
   total_inspections: number;
-  cancelled_inspections?: number;
+  cancelled_inspections: number;
   status: "active" | "suspended";
   created_at: string;
 }

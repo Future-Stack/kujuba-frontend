@@ -268,12 +268,15 @@ const initials = fullName
   </div>
 )}
     
-{selectedUser && (
-  <UserDetailsModal
-    user={selectedUser}
-    onClose={() => setSelectedUser(null)}
-  />
-)}
+      {selectedId && (singleUserData?.data || selectedUser) && (
+        <UserDetailsModal
+          user={(singleUserData?.data || selectedUser) as UserCard}
+          onClose={() => {
+            setSelectedUser(null);
+            setSelectedId(null);
+          }}
+        />
+      )}
     </div>
   );
 }
