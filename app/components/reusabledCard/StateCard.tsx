@@ -1,77 +1,5 @@
 
 
-// // components/StatCard.tsx
-// import React from 'react';
-// import profileImg from "../../../public/image.png"
-
-// interface StatCardProps {
-//   value: React.ReactNode;
-//   label: string;
-//   change?: string;
-//   isPositive?: boolean;
-//   icon: React.ReactNode;
-//   valueColor?: string;
-//   labelColor?: string;
-//   changeColor?: string;
-// }
-
-// const BlobBackground = () => (
-//   <img
-//     src="/image.png"
-//     alt=""
-//     className="absolute right-0 top-1/2 -translate-y-1/2 h-3/4 w-auto z-0 pointer-events-none select-none opacity-100"
-//   />
-// );
-
-// const StatCard: React.FC<StatCardProps> = ({
-//   value,
-//   label,
-//   change,
-//   isPositive,
-//   icon,
-//   valueColor = 'text-secondaryColor',
-//   labelColor = 'text-primaryColor',
-//   changeColor,
-// }) => {
-//   const resolvedChangeColor =
-//     changeColor ?? (isPositive ? 'text-green-500' : 'text-red-500');
-
-//   return (
-//     <div className="relative overflow-hidden bg-white rounded-[20px] py-6  px-[30px] flex-1 min-w-[200px] hover:shadow-md py-8 border border-[#F4F4F4]">
-
-//       {/* Background */}
-//       <BlobBackground />
-
-//       {/* Content */}
-//       <div className="relative z-10 flex items-start justify-between">
-        
-//         <div className="flex flex-col gap-1">
-//           <span className={`text-2xl md:text-3xl font-extrabold font-sora mb-4 ${valueColor}`}>
-//             {value}
-//           </span>
-
-//           <span className={`text-lg md:text-xl font-bold font-roboto ${labelColor}`}>
-//             {label}
-//           </span>
-
-//           {change && (
-//             <span className={`text-sm md:text-base font-semibold mt-1 ${resolvedChangeColor}`}>
-//               {change}
-//             </span>
-//           )}
-//         </div>
-
-//         <div className="mt-1 shrink-0">
-//           {icon}
-//         </div>
-
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default StatCard;
-
 
 import React from 'react';
 
@@ -158,20 +86,24 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const resolvedChangeColor = changeColor ?? (isPositive ? 'text-green-500' : 'text-red-500');
   return (
-     <div className="relative overflow-hidden bg-white rounded-[20px] py-6  px-[30px] flex-1 min-w-[200px] hover:shadow-md py-8 border border-gray-200">
+     <div className="relative overflow-hidden bg-white rounded-[20px] py-6  px-[20px] flex-1 min-w-[200px] hover:shadow-md py-8 border border-gray-200">
 
       {/* Layered blob background */}
       <BlobBackground />
 
       {/* Content */}
-      <div className="relative z-10 flex items-start justify-between ">
-        <div className="flex flex-col gap-1">
-          <span className={`text-2xl md:text-3xl font-extrabold font-sora mb-4  ${valueColor}`}>
+      <div className="relative z-10 flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          <span className={`text-2xl md:text-3xl font-extrabold font-sora mb-4 ${valueColor}`}>
             {value}
           </span>
-          <span className={`text-lg md:text-xl font-bold  font-roboto ${labelColor}`}>{label}</span>
-          <span className={`text-sm md:text-base font-semibold mt-1 ${resolvedChangeColor} `}>
-            {change} 
+
+          <span className={`text-lg md:text-xl font-bold font-roboto whitespace-nowrap ${labelColor}`}>
+            {label}
+          </span>
+
+          <span className={`text-sm md:text-base font-semibold mt-1 ${resolvedChangeColor}`}>
+            {change}
           </span>
         </div>
 

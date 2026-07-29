@@ -1,32 +1,3 @@
-// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-
-// export const baseApi = createApi({
-//   reducerPath: "api",
-//   baseQuery: fetchBaseQuery({
-//     baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.connecttoinspect.com/api/v1",
-
-//     prepareHeaders: (headers, { endpoint }) => {
-      
-//       const token = typeof window !== "undefined"
-//         ? localStorage.getItem("access_token")
-//         : null;
-
-//       const publicEndpoints = ["getInspectionTypes", "getInspectionTypeById"];
-
-//       if (token && !publicEndpoints.includes(endpoint)) {
-//         headers.set("authorization", `Bearer ${token}`);
-//       }
-
-//       return headers;
-//     },
-//   }),
-
-  
-
-//   tagTypes: ["User", "Inspection", "Support", "Faq", "Settings", "InspectionType", "Pages", "Reviews","Reports","Notifications", "UserProfile", "Users","Inspector", "Overview", "Payments","notifications"],
-//   endpoints: () => ({}),
-// });
 
 import {
   createApi,
@@ -102,19 +73,19 @@ const baseQueryWithReauth: BaseQueryFn<
           // refresh failed → force logout
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
-          window.location.href = "/login";
+          window.location.href = "/";
         }
       } catch {
         // network error on refresh → force logout
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "/login";
+        window.location.href = "/";
       }
     } else {
       // no refresh token → force logout
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      window.location.href = "/login";
+      window.location.href = "/";
     }
   }
 
