@@ -13,6 +13,15 @@ export const usersApi = baseApi.injectEndpoints({
       providesTags: ["Users"],
     }),
 
+    createUser: builder.mutation({
+      query: (formData: FormData) => ({
+        url: "/admin/users",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Users", "Inspector"],
+    }),
+
 
     getUserById: builder.query({
       query: ({ id, user_type }: { id: number; user_type?: string }) => ({
@@ -34,6 +43,13 @@ export const usersApi = baseApi.injectEndpoints({
       invalidatesTags: ["Users"],
     }),
 
+    deleteUser: builder.mutation({
+      query: (id: number) => ({
+        url: `/admin/users/${id}/delete`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users", "Inspector"],
+    }),
 
     unsuspendUser: builder.mutation({
       query: (id: number) => ({
@@ -58,7 +74,9 @@ export const usersApi = baseApi.injectEndpoints({
 export const {
   useGetUsersQuery,
   useGetUserByIdQuery,
+  useCreateUserMutation,
   useSuspendUserMutation,
+  useDeleteUserMutation,
   useUnsuspendUserMutation,
   useGetUserDashboardStatsQuery
 } = usersApi;

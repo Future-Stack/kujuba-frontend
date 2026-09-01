@@ -3,7 +3,8 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   useGetReviewsQuery,
   useToggleReviewStatusMutation,
@@ -211,7 +212,16 @@ const FilterTab: React.FC<FilterTabProps> = ({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const ReviewList: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = searchParams.get("tab") as FilterType;
+  const activeFilter: FilterType = (["all", "positive", "low", "flagged"].includes(tabParam) ? tabParam : "all");
+
+  const setActiveFilter = (filter: FilterType) => {
+    router.replace(filter === "all" ? pathname : `${pathname}?tab=${filter}`);
+  };
 
   const { data, isLoading, isFetching } = useGetReviewsQuery('all');
 

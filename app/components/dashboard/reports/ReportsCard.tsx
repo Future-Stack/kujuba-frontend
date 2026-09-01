@@ -62,27 +62,31 @@ console.log("REPORT STATS:", reportStats);
 
   const stats = [
     {
-      value:String(reportStats?.total_reports ?? 0),
+      value: String(reportStats?.total_reports ?? 0),
       label: 'Total Reports',
       valueColor: 'text-primaryColor',
+      iconPath: '/dashboard/reports',
       icon: TotalReportsIcon,
     },
     {
-      value:  String(reportStats?.total_started_reports ?? 0),
+      value: String(reportStats?.total_started_reports ?? 0),
       label: 'Started Reports',
       valueColor: 'text-[#F5A623]',
+      iconPath: '/dashboard/reports?tab=started',
       icon: StartedReportsIcon,
     },
     {
       value: String(reportStats?.total_completed_reports ?? 0),
       label: 'Completed Reports',
       valueColor: 'text-[#22C55E]',
+      iconPath: '/dashboard/reports?tab=completed',
       icon: CompletedReportsIcon,
     },
     {
       value: String(reportStats?.total_archived_reports ?? 0),
       label: 'Archived Reports',
       valueColor: 'text-[#94A3B8]',
+      iconPath: '/dashboard/reports?tab=archive',
       icon: ArchivedReportsIcon,
     },
   ];

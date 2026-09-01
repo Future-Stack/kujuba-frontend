@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Download, Eye, Search, Loader2 } from "lucide-react";
 import InspectionDetailsModal from "./InspectionDetailsModal";
 import {
@@ -14,6 +14,7 @@ import {
 import { toast } from "react-toastify";
 import CancelRequestModal from "./CancelRequestModal";
 import AssignInspectorModal from "./RequestAssignModal";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
 type TabType = "All" | "Pending" | "Assigned" | "Completed" | "Cancelled";
 
@@ -58,6 +59,14 @@ const avatarColors = [
   "bg-amber-100 text-amber-700",
   "bg-rose-100 text-rose-700",
 ];
+
+// map URL param -> TabType (note: your param values are lowercase, e.g. "completed", "pending")
+const PARAM_TO_TAB: Record<string, TabType> = {
+  pending: "Pending",
+  assigned: "Assigned",
+  completed: "Completed",
+  canceled: "Cancelled", // careful: your param uses "canceled", your TabType uses "Cancelled"
+};
 
 function colorFor(idx: number) {
   return avatarColors[idx % avatarColors.length];
@@ -164,8 +173,15 @@ function InspectorDisplay({ name, idx }: { name: string; idx: number }) {
 }
 
 export default function InspectionBoardLayout() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = searchParams.get("tab");
+  const initialTab = (tabParam && PARAM_TO_TAB[tabParam]) || "All";
+
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<TabType>("All");
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [selectedColumnTitle, setSelectedColumnTitle] = useState("");
@@ -231,6 +247,12 @@ export default function InspectionBoardLayout() {
     }));
   }, [boardColumns, searchQuery]);
 
+
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    setActiveTab((t && PARAM_TO_TAB[t]) || "All");
+    setCurrentPage(1);
+  }, [searchParams]);
 
   const allTabColumns = filteredColumns.map((col) => ({
     ...col,
@@ -500,7 +522,13 @@ export default function InspectionBoardLayout() {
               {STATUS_TABS.map((tab) => (
                 <button
                   key={tab.name}
-                  onClick={() => { setActiveTab(tab.name); setCurrentPage(1); }}
+                  // onClick={() => { setActiveTab(tab.name); setCurrentPage(1); }}
+                  onClick={() => {
+                    setActiveTab(tab.name);
+                    setCurrentPage(1);
+                    const param = tab.name === "All" ? null : TAB_TO_STATUS_PARAM[tab.name];
+                    router.replace(param ? `${pathname}?tab=${param}` : pathname);
+                  }}
                   className={`px-3 py-2 rounded-sm text-sm font-normal leading-5 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${activeTab === tab.name ? "bg-black text-white" : "bg-white text-gray-900 hover:bg-slate-100 border border-gray-100"
                     }`}
                 >

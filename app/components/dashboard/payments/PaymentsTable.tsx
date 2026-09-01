@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Search, Download, Eye } from "lucide-react";
 import {
   useGetPaymentsQuery,
@@ -194,7 +195,20 @@ function TableSkeleton() {
 const ITEMS_PER_PAGE = 20;
 
 export default function PaymentsTable() {
-  const [activeFilter, setActiveFilter] = useState<"All" | UIStatus>("All");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = searchParams.get("tab")?.toLowerCase();
+  const activeFilter: "All" | UIStatus =
+    tabParam === "paid"
+      ? "Paid"
+      : tabParam === "pending"
+      ? "Pending"
+      : tabParam === "canceled" || tabParam === "failed"
+      ? "Canceled"
+      : "All";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -234,7 +248,8 @@ export default function PaymentsTable() {
 
   // Reset to page 1 whenever filter or search changes
   const handleFilterChange = (f: "All" | UIStatus) => {
-    setActiveFilter(f);
+    const tab = f === "Paid" ? "paid" : f === "Pending" ? "pending" : f === "Canceled" ? "canceled" : "";
+    router.replace(tab ? `${pathname}?tab=${tab}` : pathname);
     setCurrentPage(1);
   };
 

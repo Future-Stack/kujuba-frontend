@@ -12,6 +12,7 @@ import { ReportsIcon } from '../icon/ReportsIcon';
 import { ReviewsIcon } from '../icon/ReviewsIcon';
 import { NotificationsIcon } from '../icon/NotificationIcons';
 import { SupportIcon } from '../icon/SupportIcon';
+import { FAQIcon } from '../icon/FAQIcon';
 import { SettingsIcon } from '../icon/SettingsIcon';
 
 import { FaFolder } from 'react-icons/fa';
@@ -40,7 +41,8 @@ const Sidebar: React.FC = () => {
     { name: 'Reports',       icon: (isActive) => <ReportsIcon isActive={isActive} />,       path: '/dashboard/reports' },
     { name: 'Reviews',       icon: (isActive) => <ReviewsIcon isActive={isActive} />,       path: '/dashboard/reviews' },
     { name: 'Notifications', icon: (isActive) => <NotificationsIcon isActive={isActive} />, path: '/dashboard/notifications' },
-    { name: 'FAQ & Support', icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/dashboard/support' },
+    { name: 'FAQ',           icon: (isActive) => <FAQIcon isActive={isActive} />,           path: '/dashboard/faq' },
+    { name: 'Support',       icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/dashboard/support' },
     { name: 'Settings',      icon: (isActive) => <SettingsIcon isActive={isActive} />,      path: '/dashboard/settings' },
   ];
 

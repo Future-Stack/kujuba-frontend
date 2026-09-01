@@ -121,13 +121,9 @@ export default function PersonalInfoPage() {
   }, [data, isLoading, isError, error]);
 
 const raw = data as any;
-// আগে console করে দেখো কী আসছে
-console.log("raw data:", raw);
-
-// এভাবে দুটো case handle করো
 const user: UserProfile | undefined =
-  raw?.data?.id ? raw.data :       // { success, data: { id, ... } }
-  raw?.id ? raw :                   // already unwrapped { id, ... }
+  raw?.data?.id ? raw.data :       
+  raw?.id ? raw :                   
   undefined;
 
   const [form, setForm] = useState(emptyForm);
