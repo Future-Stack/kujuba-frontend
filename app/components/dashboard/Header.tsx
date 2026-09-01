@@ -82,10 +82,16 @@ const { data: notificationData } = useGetNotificationsQuery();
       keywords: ["notifications", "alerts", "messages", "notification"],
     },
     {
-      label: "FAQ & Support",
-      description: "FAQ management and user support requests",
+      label: "FAQ",
+      description: "FAQ management",
+      path: "/dashboard/faq",
+      keywords: ["faq", "help", "faq management"],
+    },
+    {
+      label: "Support",
+      description: "User support requests",
       path: "/dashboard/support",
-      keywords: ["support", "faq", "help", "support requests", "faq management"],
+      keywords: ["support", "help", "support requests"],
     },
     {
       label: "Settings & Pricing",

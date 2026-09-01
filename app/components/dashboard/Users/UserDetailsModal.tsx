@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { X } from "lucide-react";
-import { useSuspendUserMutation, useUnsuspendUserMutation } from "@/app/redux/features/usersApi";
+import { X, Trash2 } from "lucide-react";
+import { useSuspendUserMutation, useUnsuspendUserMutation, useDeleteUserMutation } from "@/app/redux/features/usersApi";
 import { toast } from "react-toastify";
 
 export interface UserCard {
@@ -28,6 +28,7 @@ interface UserDetailsModalProps {
 const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
   const [suspendUser, { isLoading: suspending }] = useSuspendUserMutation();
   const [unsuspendUser, { isLoading: unsuspending }] = useUnsuspendUserMutation();
+  const [deleteUser, { isLoading: deleting }] = useDeleteUserMutation();
 
   const isSuspended = user.status === "suspended";
   const isLoading = suspending || unsuspending;
@@ -46,6 +47,7 @@ const UserDetailsModal = ({ user, onClose }: UserDetailsModalProps) => {
     year: "numeric",
   });
 
+/* Commented out suspend handler
 const handleToggleSuspend = async () => {
   try {
     if (isSuspended) {
@@ -65,6 +67,19 @@ const handleToggleSuspend = async () => {
     toast.error("Failed to update user status");
   }
 };
+*/
+
+  const handleDeleteUser = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${fullName}?`)) return;
+    try {
+      await deleteUser(user.id).unwrap();
+      toast.success("User deleted successfully");
+      onClose();
+    } catch (err: any) {
+      console.error("Failed to delete user:", err);
+      toast.error(err?.data?.message || "Failed to delete user");
+    }
+  };
 
   return (
     <div
@@ -161,8 +176,8 @@ const handleToggleSuspend = async () => {
           </div>
         </div>
 
-        {/* Suspend / Unsuspend */}
-        <button
+        {/* Suspend / Unsuspend (Commented Out) */}
+        {/* <button
           onClick={handleToggleSuspend}
           disabled={isLoading}
           className={`w-full py-2.5 rounded-sm text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60 ${
@@ -183,6 +198,22 @@ const handleToggleSuspend = async () => {
                 <path d="M6.23438 6.00183L9.76631 9.99807" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Suspend
+            </>
+          )}
+        </button> */}
+
+        {/* Delete Button */}
+        <button
+          onClick={handleDeleteUser}
+          disabled={deleting}
+          className="w-full py-2.5 rounded-sm text-sm font-semibold flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer disabled:opacity-60"
+        >
+          {deleting ? (
+            <span>Deleting...</span>
+          ) : (
+            <>
+              <Trash2 className="w-4 h-4" />
+              Delete User
             </>
           )}
         </button>

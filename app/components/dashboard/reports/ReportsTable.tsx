@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Search, Download, Eye, Star } from "lucide-react";
 import {
   useGetReportsQuery,
@@ -62,7 +63,32 @@ function TableSkeleton() {
 }
 
 export default function ReportsTable() {
-  const [activeFilter, setActiveFilter] = useState<StatusFilter>("All");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = searchParams.get("tab")?.toLowerCase();
+  const activeFilter: StatusFilter =
+    tabParam === "started"
+      ? "Started"
+      : tabParam === "completed"
+      ? "Completed"
+      : tabParam === "archive" || tabParam === "archived"
+      ? "Archive"
+      : "All";
+
+  const setActiveFilter = (f: StatusFilter) => {
+    const param =
+      f === "Started"
+        ? "started"
+        : f === "Completed"
+        ? "completed"
+        : f === "Archive"
+        ? "archive"
+        : "";
+    router.replace(param ? `${pathname}?tab=${param}` : pathname);
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);

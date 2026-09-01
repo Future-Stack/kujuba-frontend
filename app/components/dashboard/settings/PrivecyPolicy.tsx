@@ -148,7 +148,7 @@ const confirmDelete = async () => {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h2 className="text-[#000000] text-xl md:text-2xl font-semibold font-sora">Pages</h2>
+          <h2 className="text-[#000000] text-xl md:text-2xl font-semibold font-sora">Legal</h2>
           <p className="text-[#B5BCC8] text-sm md:text-base font-roboto mt-1">
             Manage dynamic pages like Privacy Policy, Terms &amp; Conditions, About, etc.
           </p>

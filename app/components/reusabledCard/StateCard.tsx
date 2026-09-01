@@ -1,6 +1,7 @@
 
 
 
+import Link from 'next/link';
 import React from 'react';
 
 interface StatCardProps {
@@ -12,6 +13,7 @@ interface StatCardProps {
   valueColor?: string;
    labelColor?: string;   
   changeColor?: string;
+  iconPath?: string;
 }
 
 const BlobBackground = () => (
@@ -83,6 +85,7 @@ const StatCard: React.FC<StatCardProps> = ({
   valueColor = 'text-secondaryColor',
   labelColor = 'text-primaryColor',
   changeColor,
+  iconPath,
 }) => {
   const resolvedChangeColor = changeColor ?? (isPositive ? 'text-green-500' : 'text-red-500');
   return (
@@ -107,8 +110,18 @@ const StatCard: React.FC<StatCardProps> = ({
           </span>
         </div>
 
-        <div className="mt-1 shrink-0">
-          {icon}
+          <div className="mt-1 shrink-0">
+          {iconPath ? (
+            <Link
+              href={iconPath}
+              className="inline-flex cursor-pointer"
+              aria-label={`Go to ${label}`}
+            >
+              {icon}
+            </Link>
+          ) : (
+            icon
+          )}
         </div>
       </div>
     </div>
