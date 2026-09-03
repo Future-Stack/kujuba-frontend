@@ -153,13 +153,13 @@ const confirmDelete = async () => {
             Manage dynamic pages like Privacy Policy, Terms &amp; Conditions, About, etc.
           </p>
         </div>
-        <button
+        {/* <button
           onClick={openCreateModal}
           className="flex items-center gap-2 bg-primaryColor text-white font-sora font-semibold text-sm px-5 py-3 rounded-[12px] hover:opacity-90 transition-opacity cursor-pointer"
         >
           <Plus size={18} />
           Create New Page
-        </button>
+        </button> */}
       </div>
 
       {/* Table */}
