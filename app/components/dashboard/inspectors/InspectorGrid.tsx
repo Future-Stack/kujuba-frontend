@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { Search, Download, ChevronDown } from "lucide-react";
+import { Search, Download, ChevronDown, LayoutGrid, List } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import InspectorDetailModal, { InspectorCard, InspectorStatus } from "./InspectorModal";
@@ -104,6 +104,7 @@ export default function InspectorGrid() {
  
   const [selectedInspector, setSelectedInspector] = useState<InspectorCard | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const { data, isLoading, isError } = useGetInspectorsQuery({ page: currentPage });
   const [approveInspector, { isLoading: approvingId }] = useApproveInspectorMutation();
@@ -168,9 +169,25 @@ export default function InspectorGrid() {
   }, [inspectors, activeTab, searchQuery, sortOrder]);
 
   const paginatedInspectors = filteredAndSortedInspectors;
-  const totalPages = data?.data?.pagination?.next_page
-    ? currentPage + 1  
-    : currentPage;
+  const totalPages =
+    data?.data?.pagination?.last_page ??
+    (data?.data?.pagination?.total
+      ? Math.ceil(data.data.pagination.total / 10)
+      : data?.data?.pagination?.next_page
+      ? currentPage + 1
+      : Math.max(1, Math.ceil(filteredAndSortedInspectors.length / 10)));
+
+  const getPageNumbers = (current: number, total: number, maxVisible = 10) => {
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+    if (end > total) {
+      end = total;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
 
 
   const handleOpenModal  = useCallback((inspector: InspectorCard) => setSelectedInspector(inspector), []);
@@ -249,6 +266,33 @@ export default function InspectorGrid() {
 
           {/* Sort + Export */}
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            {/* View Mode Toggle Buttons */}
+            <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-blue-600 shadow-xs"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white text-blue-600 shadow-xs"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
         
             <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-sm shadow-md shadow-blue-100 transition-all cursor-pointer active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
@@ -257,7 +301,7 @@ export default function InspectorGrid() {
           </div>
         </div>
 
-        {/* ── Grid ── */}
+        {/* ── Content Display: Grid or List ── */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5   gap-5">
             {Array.from({ length: 10 }).map((_, i) => <CardSkeleton key={i} />)}
@@ -267,86 +311,148 @@ export default function InspectorGrid() {
             <p className="text-red-400 font-medium text-sm">Failed to load inspectors. Please refresh.</p>
           </div>
         ) : filteredAndSortedInspectors.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5  gap-5">
-            {paginatedInspectors.map((inspector) => (
-              <div key={inspector.id} className="bg-white rounded-sm border border-gray-200  p-5 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
-                <div className="">
-                  <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
-                    <div className="relative w-11 h-11 shrink-0">
-                      <div className="w-full h-full rounded-full overflow-hidden relative border border-purple-100 bg-purple-50 flex items-center justify-center">
-                        {inspector.avatarUrl ? (
-                          <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
-                        ) : (
-                          <span className="text-purple-600 font-bold text-xs ">
-                            {inspector.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
-                          </span>
-                        )}
+          viewMode === "grid" ? (
+            /* Grid View */
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              {paginatedInspectors.map((inspector) => (
+                <div key={inspector.id} className="bg-white rounded-sm border border-gray-200 p-5 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+                  <div>
+                    <div className="flex bg-[#F5F6FA] p-3 rounded-sm items-center gap-3 mb-5">
+                      <div className="relative w-11 h-11 shrink-0">
+                        <div className="w-full h-full rounded-full overflow-hidden relative border border-purple-100 bg-purple-50 flex items-center justify-center">
+                          {inspector.avatarUrl ? (
+                            <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
+                          ) : (
+                            <span className="text-purple-600 font-bold text-xs ">
+                              {inspector.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                            </span>
+                          )}
+                        </div>
+                        <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${inspector.status === "Active" ? "bg-[#09BD3C]" : "bg-gray-300"}`} />
                       </div>
-                      <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${inspector.status === "Active" ? "bg-[#09BD3C]" : "bg-gray-300"}`} />
+                      <div className="min-w-0">
+                        <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-primaryColor transition-colors">{inspector.name}</h4>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <h4 className="font-medium text-gray-900 text-sm leading-5 truncate group-hover:text-primaryColor transition-colors">{inspector.name}</h4>
-                      {/* <p className="text-[13px] text-gray-600 font-normal leading-4 mt-0.5">{inspector.role}</p> */}
+
+                    <div className="space-y-4 mb-5">
+                      <div>
+                        <span className="text-sm text-gray-900 font-normal leading-5 block">Inspection Type</span>
+                        <span className="text-sm text-gray-600 font-normal leading-5 mt-1 block">{inspector.inspectionType}</span>
+                      </div>
+                      <div className="pt-4 border-t border-gray-100 space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 4.66671C2 4.31309 2.14048 3.97395 2.39052 3.7239C2.64057 3.47385 2.97971 3.33337 3.33333 3.33337H12.6667C13.0203 3.33337 13.3594 3.47385 13.6095 3.7239C13.8595 3.97395 14 4.31309 14 4.66671M2 4.66671V11.3334C2 11.687 2.14048 12.0261 2.39052 12.2762C2.64057 12.5262 2.97971 12.6667 3.33333 12.6667H12.6667C13.0203 12.6667 13.3594 12.5262 13.6095 12.2762C13.8595 12.0261 14 11.687 14 11.3334V4.66671M2 4.66671L8 8.66671L14 4.66671" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <span className="truncate">{inspector.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M7.33333 2.66667H8.66667M8 11.3333V11.34M4 3.33333C4 2.97971 4.14048 2.64057 4.39052 2.39052C4.64057 2.14048 4.97971 2 5.33333 2H10.6667C11.0203 2 11.3594 2.14048 11.6095 2.39052C11.8595 2.64057 12 2.97971 12 3.33333V12.6667C12 13.0203 11.8595 13.3594 11.6095 13.6095C11.3594 13.8595 11.0203 14 10.6667 14H5.33333C4.97971 14 4.64057 13.8595 4.39052 13.6095C4.14048 13.3594 4 13.0203 4 12.6667V3.33333Z" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <span className="truncate">{inspector.phone}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4 mb-5">
-                    <div>
-                      <span className="text-sm text-gray-900 font-normal leading-5 block">Inspection Type</span>
-                      <span className="text-sm text-gray-600 font-normal leading-5 mt-1 block">{inspector.inspectionType}</span>
-                    </div>
-                    <div className="pt-4 border-t border-gray-100 space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path d="M2 4.66671C2 4.31309 2.14048 3.97395 2.39052 3.7239C2.64057 3.47385 2.97971 3.33337 3.33333 3.33337H12.6667C13.0203 3.33337 13.3594 3.47385 13.6095 3.7239C13.8595 3.97395 14 4.31309 14 4.66671M2 4.66671V11.3334C2 11.687 2.14048 12.0261 2.39052 12.2762C2.64057 12.5262 2.97971 12.6667 3.33333 12.6667H12.6667C13.0203 12.6667 13.3594 12.5262 13.6095 12.2762C13.8595 12.0261 14 11.687 14 11.3334V4.66671M2 4.66671L8 8.66671L14 4.66671" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        <span className="truncate">{inspector.email}</span>
+                  <div className="pt-2">
+                    {inspector.status === "Pending" ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => handleOpenModal(inspector)}
+                          className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-1 rounded-sm flex items-center justify-center gap-1 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+                        >
+                          <span className="transition-all duration-300 group-hover:translate-x-[-2px]">Details</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleGridApprove(e, inspector)}
+                          disabled={approvingId}
+                          className="bg-primaryColor text-white hover:bg-blue-600 font-medium text-xs py-2 rounded-sm transition-colors cursor-pointer text-center shadow-sm disabled:opacity-60"
+                        >
+                          {approvingId ? "..." : "Approve"}
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path d="M7.33333 2.66667H8.66667M8 11.3333V11.34M4 3.33333C4 2.97971 4.14048 2.64057 4.39052 2.39052C4.64057 2.14048 4.97971 2 5.33333 2H10.6667C11.0203 2 11.3594 2.14048 11.6095 2.39052C11.8595 2.64057 12 2.97971 12 3.33333V12.6667C12 13.0203 11.8595 13.3594 11.6095 13.6095C11.3594 13.8595 11.0203 14 10.6667 14H5.33333C4.97971 14 4.64057 13.8595 4.39052 13.6095C4.14048 13.3594 4 13.0203 4 12.6667V3.33333Z" stroke="#1A1A1A" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        <span className="truncate">{inspector.phone}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  {inspector.status === "Pending" ? (
-                    <div className="grid grid-cols-2 gap-2">
+                    ) : (
                       <button
                         onClick={() => handleOpenModal(inspector)}
-                        className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-1 rounded-sm flex items-center justify-center gap-1 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
+                        className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-1 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
                       >
                         <span className="transition-all duration-300 group-hover:translate-x-[-2px]">View Details</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]">
                           <path d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
-                      <button
-                        onClick={(e) => handleGridApprove(e, inspector)}
-                        disabled={approvingId}
-                        className="bg-primaryColor text-white hover:bg-blue-600 font-medium text-xs py-2 rounded-sm transition-colors cursor-pointer text-center shadow-sm disabled:opacity-60"
-                      >
-                        {approvingId ? "..." : "Approve"}
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleOpenModal(inspector)}
-                      className="group w-full border border-gray-200 text-gray-900 hover:bg-primaryColor hover:text-white cursor-pointer font-medium text-sm py-2.5 px-4 rounded-sm flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:shadow-md active:scale-[0.98]"
-                    >
-                      <span className="transition-all duration-300 group-hover:translate-x-[-2px]">View Details</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-gray-900 group-hover:text-white transition-all duration-300 group-hover:translate-x-[3px]">
-                        <path d="M5.19727 11.62L9.0006 7.81667C9.44977 7.3675 9.44977 6.6325 9.0006 6.18334L5.19727 2.38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            /* List / Table View */
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th className="py-3.5 px-4">Inspector Name</th>
+                    <th className="py-3.5 px-4">Inspection Type</th>
+                    <th className="py-3.5 px-4">Email</th>
+                    <th className="py-3.5 px-4">Phone</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 text-sm">
+                  {paginatedInspectors.map((inspector) => (
+                    <tr key={inspector.id} className="hover:bg-gray-50/60 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-9 h-9 shrink-0">
+                            <div className="w-full h-full rounded-full overflow-hidden relative border border-purple-100 bg-purple-50 flex items-center justify-center">
+                              {inspector.avatarUrl ? (
+                                <Image src={inspector.avatarUrl} alt={inspector.name} fill className="object-cover" unoptimized />
+                              ) : (
+                                <span className="text-purple-600 font-bold text-xs">
+                                  {inspector.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 text-sm">{inspector.name}</h4>
+                            <p className="text-xs text-gray-500">{inspector.role}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-gray-700 text-xs font-medium">{inspector.inspectionType}</td>
+                      <td className="py-3.5 px-4 text-gray-600 text-xs">{inspector.email}</td>
+                      <td className="py-3.5 px-4 text-gray-600 text-xs">{inspector.phone || "N/A"}</td>
+                      <td className="py-3.5 px-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold uppercase ${
+                          inspector.status === "Active"
+                            ? "bg-emerald-50 text-emerald-600"
+                            : inspector.status === "Pending"
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-rose-50 text-rose-600"
+                        }`}>
+                          {inspector.status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          onClick={() => handleOpenModal(inspector)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <span>View Details</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
           <div className="w-full text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
             <p className="text-gray-400 font-semibold text-sm">No inspectors found matching current criteria.</p>
@@ -370,17 +476,17 @@ export default function InspectorGrid() {
       Prev
     </button>
 
-    {Array.from({ length: totalPages }, (_, i) => (
+    {getPageNumbers(currentPage, totalPages, 10).map((p) => (
       <button
-        key={i}
-        onClick={() => setCurrentPage(i + 1)}
-        className={`px-3 py-1 border rounded ${
-          currentPage === i + 1
+        key={p}
+        onClick={() => setCurrentPage(p)}
+        className={`px-3 py-1 border rounded cursor-pointer ${
+          currentPage === p
             ? "bg-primaryColor text-white"
             : "bg-white text-black border border-primaryColor"
         }`}
       >
-        {i + 1}
+        {p}
       </button>
     ))}
 

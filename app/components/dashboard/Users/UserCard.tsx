@@ -1,32 +1,38 @@
 "use client"
 
-import { useGetUserDashboardStatsQuery } from '@/app/redux/features/usersApi';
+import { useGetUserDashboardStatsQuery, useGetUsersQuery } from '@/app/redux/features/usersApi';
 import StatCard from '../../reusabledCard/StateCard';
 
 
 
 export default function UserCard() {
   const { data } = useGetUserDashboardStatsQuery("homeowner");
+  const { data: usersData, isLoading } = useGetUsersQuery("homeowner");
+  const homeownersCount = usersData?.data?.data.length ?? 0;
+  const activeHomeownersCount = usersData?.data?.data.filter((user: any) => user.status === "active").length ?? 0;
+
   const statsData = data?.data;
   console.log(statsData);
   const stats = [
   {
-      value: statsData?.total_users ?? 0,
-    label: "Total Users",
+      // value: statsData?.total_users ?? 0,
+    value: homeownersCount,
+    label: "Total Homeowners",
     change: `${statsData?.user_growth_percentage ?? 0}% than last month`,
     isPositive: (statsData?.user_growth_percentage ?? 0) >= 0,
-    iconPath: "/dashboard/users",
+    iconPath: "/dashboard/homeowners",
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
   <path d="M57.5 47.5001C57.5 48.1631 57.2366 48.799 56.7678 49.2678C56.2989 49.7367 55.663 50.0001 55 50.0001H25C24.337 50.0001 23.7011 49.7367 23.2322 49.2678C22.7634 48.799 22.5 48.1631 22.5 47.5001C22.5 43.5218 24.0804 39.7065 26.8934 36.8935C29.7064 34.0804 33.5218 32.5001 37.5 32.5001H42.5C46.4783 32.5001 50.2936 34.0804 53.1066 36.8935C55.9197 39.7065 57.5 43.5218 57.5 47.5001ZM40 10.0001C38.0222 10.0001 36.0888 10.5866 34.4443 11.6854C32.7998 12.7842 31.5181 14.346 30.7612 16.1732C30.0043 18.0005 29.8063 20.0112 30.1921 21.951C30.578 23.8908 31.5304 25.6726 32.9289 27.0711C34.3275 28.4697 36.1093 29.4221 38.0491 29.8079C39.9889 30.1938 41.9996 29.9957 43.8268 29.2389C45.6541 28.482 47.2159 27.2003 48.3147 25.5558C49.4135 23.9113 50 21.9779 50 20.0001C50 17.3479 48.9464 14.8044 47.0711 12.929C45.1957 11.0536 42.6522 10.0001 40 10.0001ZM17.5 10.0001C15.5222 10.0001 13.5888 10.5866 11.9443 11.6854C10.2998 12.7842 9.01808 14.346 8.26121 16.1732C7.50433 18.0005 7.3063 20.0112 7.69215 21.951C8.078 23.8908 9.03041 25.6726 10.4289 27.0711C11.8275 28.4697 13.6093 29.4221 15.5491 29.8079C17.4889 30.1938 19.4996 29.9957 21.3268 29.2389C23.1541 28.482 24.7159 27.2003 25.8147 25.5558C26.9135 23.9113 27.5 21.9779 27.5 20.0001C27.5 17.3479 26.4464 14.8044 24.5711 12.929C22.6957 11.0536 20.1522 10.0001 17.5 10.0001ZM17.5 47.5001C17.4963 44.8741 18.0136 42.2735 19.0221 39.8489C20.0306 37.4242 21.5101 35.2238 23.375 33.3751C21.8488 32.7989 20.2313 32.5025 18.6 32.5001H16.4C12.7155 32.5067 9.18384 33.9733 6.57852 36.5786C3.97319 39.1839 2.50661 42.7156 2.5 46.4001V47.5001C2.5 48.1631 2.76339 48.799 3.23223 49.2678C3.70107 49.7367 4.33696 50.0001 5 50.0001H17.95C17.6589 49.1984 17.5068 48.3529 17.5 47.5001Z" fill="#5E65FF"/>
 </svg>
   },
   {
-    value: statsData?.active_users ?? 0,
-    label: "Active Users",
+    // value: statsData?.active_users ?? 0,
+    value: activeHomeownersCount,
+    label: "Active Homeowners",
     change: `${statsData?.active_growth_percentage ?? 0}% than last month`,
     isPositive: (statsData?.active_growth_percentage ?? 0) >= 0,
     valueColor: "text-secondaryColor",
-    iconPath: "/dashboard/users",
+    iconPath: "/dashboard/homeowners",
     icon: (
   <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
   <g clipPath="url(#clip0_487_971)">
@@ -56,7 +62,7 @@ export default function UserCard() {
 //   },
   {
     value: statsData?.suspended_users ?? 0,
-    label: "Suspended Users",
+    label: "Suspended Homeowners",
     change: `${statsData?.suspended_growth_percentage ?? 0}% than last month`,
     isPositive: (statsData?.suspended_growth_percentage ?? 0) >= 0,
     valueColor: "text-[#EF4444]",

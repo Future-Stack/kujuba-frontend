@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import LogoIcon from '../icon/LogoIcon';
 import DashboardIcon from '../icon/DashboardIcon';
 import { UsersIcon } from '../icon/UsersIcon';
+import { ClientsIcon } from '../icon/ClientsIcon';
 import { InspectorIcon } from '../icon/InspectorIcon';
 import { InspectionIcon } from '../icon/InspectionsIcon';
 import { PaymentsIcon } from '../icon/PaymentsIcon';
@@ -33,8 +34,10 @@ const Sidebar: React.FC = () => {
 
   const menuItems: MenuItem[] = [
     { name: 'Dashboard',     icon: (isActive) => <DashboardIcon isActive={isActive} />,     path: '/dashboard' },
-    { name: 'Users',         icon: (isActive) => <UsersIcon isActive={isActive} />,         path: '/dashboard/users' },
-   { name: 'Inspection Type', icon: (isActive) => <FolderIcon isActive={isActive} />, path: '/dashboard/inspection_type' },
+    { name: 'Homeowners',    icon: (isActive) => <UsersIcon isActive={isActive} />,        path: '/dashboard/homeowners' },
+    { name: 'Clients',       icon: (isActive) => <ClientsIcon isActive={isActive} />,       path: '/dashboard/clients' },
+    { name: 'Client Reports', icon: (isActive) => <ReportsIcon isActive={isActive} />,    path: '/dashboard/client-reports' },
+    { name: 'Inspection Type', icon: (isActive) => <FolderIcon isActive={isActive} />, path: '/dashboard/inspection_type' },
     { name: 'Inspectors',    icon: (isActive) => <InspectorIcon isActive={isActive} />,     path: '/dashboard/inspectors' },
     { name: 'Inspections',   icon: (isActive) => <InspectionIcon isActive={isActive} />,    path: '/dashboard/inspections' },
     { name: 'Payments',      icon: (isActive) => <PaymentsIcon isActive={isActive} />,      path: '/dashboard/payments' },
@@ -42,7 +45,7 @@ const Sidebar: React.FC = () => {
     { name: 'Reviews',       icon: (isActive) => <ReviewsIcon isActive={isActive} />,       path: '/dashboard/reviews' },
     { name: 'Notifications', icon: (isActive) => <NotificationsIcon isActive={isActive} />, path: '/dashboard/notifications' },
     { name: 'FAQ',           icon: (isActive) => <FAQIcon isActive={isActive} />,           path: '/dashboard/faq' },
-    { name: 'Support',       icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/dashboard/support' },
+    // { name: 'Support',       icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/dashboard/support' },
     { name: 'Settings',      icon: (isActive) => <SettingsIcon isActive={isActive} />,      path: '/dashboard/settings' },
   ];
 
