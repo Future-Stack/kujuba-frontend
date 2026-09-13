@@ -40,10 +40,10 @@ const { data: notificationData } = useGetNotificationsQuery();
       keywords: ["dashboard", "overview", "content", "title", "section", "button text", "settings name"],
     },
     {
-      label: "User Management",
-      description: "Manage users, statuses, inspections, and payments",
-      path: "/dashboard/users",
-      keywords: ["users", "user management", "manage users", "profile", "status", "payments", "inspections", "content"],
+      label: "Homeowners Management",
+      description: "Manage homeowners, statuses, inspections, and payments",
+      path: "/dashboard/homeowners",
+      keywords: ["homeowners", "homeowner management", "manage homeowners", "profile", "status", "payments", "inspections", "content"],
     },
     {
       label: "Inspector Management",
@@ -87,12 +87,12 @@ const { data: notificationData } = useGetNotificationsQuery();
       path: "/dashboard/faq",
       keywords: ["faq", "help", "faq management"],
     },
-    {
-      label: "Support",
-      description: "User support requests",
-      path: "/dashboard/support",
-      keywords: ["support", "help", "support requests"],
-    },
+    // {
+    //   label: "Support",
+    //   description: "User support requests",
+    //   path: "/dashboard/support",
+    //   keywords: ["support", "help", "support requests"],
+    // },
     {
       label: "Settings & Pricing",
       description: "Platform settings, pricing, and configuration",
@@ -261,8 +261,17 @@ const notificationCount = notificationData?.total || 0;
               onClick={() => setShowDropdown(!showDropdown)}
             >
               <div className="relative w-10 h-10 rounded-full bg-slate-200 overflow-hidden border border-slate-100 flex-shrink-0">
-                <img  src={user?.profile?.profile_img || "/placeholder.svg"} alt="" />
-                
+                {user?.profile?.profile_img || user?.image || user?.profile_img ? (
+                  <img
+                    src={user?.profile?.profile_img || user?.image || user?.profile_img}
+                    alt={`${user?.first_name || ""} ${user?.last_name || ""}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center text-xs">
+                    {user?.first_name ? user.first_name[0].toUpperCase() : "A"}
+                  </div>
+                )}
               </div>
 
               <div className="hidden lg:block text-left leading-tight">

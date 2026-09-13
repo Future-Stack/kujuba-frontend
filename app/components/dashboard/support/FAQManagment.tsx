@@ -87,6 +87,18 @@ const ITEMS_PER_PAGE = 10;
   };
 
   const totalPages = Math.ceil(faqs.length / ITEMS_PER_PAGE);
+
+  const getPageNumbers = (current: number, total: number, maxVisible = 10) => {
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+    if (end > total) {
+      end = total;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
 const paginatedFaqs = faqs.slice(
   (currentPage - 1) * ITEMS_PER_PAGE,
   currentPage * ITEMS_PER_PAGE
@@ -177,30 +189,19 @@ const paginatedFaqs = faqs.slice(
     >
      Prev
     </button>
-    {Array.from({ length: totalPages }, (_, i) => i + 1)
-      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-      .reduce<(number | "...")[]>((acc, p, i, arr) => {
-        if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
-        acc.push(p);
-        return acc;
-      }, [])
-      .map((p, i) =>
-        p === "..." ? (
-          <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">…</span>
-        ) : (
-          <button
-            key={p}
-            onClick={() => setCurrentPage(p as number)}
-            className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
-              p === currentPage
-                ? "bg-primaryColor text-white border border-primaryColor"
-                : "border border-primaryColor cursor-pointer text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {p}
-          </button>
-        )
-      )}
+    {getPageNumbers(currentPage, totalPages, 10).map((p) => (
+      <button
+        key={p}
+        onClick={() => setCurrentPage(p)}
+        className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+          p === currentPage
+            ? "bg-primaryColor text-white border border-primaryColor"
+            : "border border-primaryColor cursor-pointer text-gray-600 hover:bg-gray-50"
+        }`}
+      >
+        {p}
+      </button>
+    ))}
     <button
       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
       disabled={currentPage >= totalPages}

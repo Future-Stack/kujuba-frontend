@@ -94,7 +94,7 @@ export default function UserTable() {
       {/* Table Header Section */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Recent Users</h2>
-        <Link href="/dashboard/users">
+        <Link href="/dashboard/homeowners">
           <button className="bg-black hover:bg-gray-800 text-white text-sm font-semibold py-2 px-5 rounded-sm transition-all cursor-pointer duration-200">
             View All
           </button>

@@ -128,7 +128,7 @@ export default function CreateUserModal({ open, onClose, variant }: CreateUserMo
 
     try {
       await createUser(fd).unwrap();
-      toast.success(isInspector ? "Inspector added successfully" : "User added successfully");
+      toast.success(isInspector ? "Inspector added successfully" : "Homeowner added successfully");
       onClose();
     } catch (error: any) {
       const validationError = error?.data?.errors
@@ -155,7 +155,7 @@ export default function CreateUserModal({ open, onClose, variant }: CreateUserMo
       >
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-xl font-sora font-bold text-[#000000]">
-            {isInspector ? "Add New Inspector" : "Add New User"}
+            {isInspector ? "Add New Inspector" : "Add New Homeowner"}
           </h3>
           <button
             type="button"

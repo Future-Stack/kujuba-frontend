@@ -231,6 +231,18 @@ export default function PaymentsTable() {
   const totalPages = pageData?.last_page ?? 1;
   const totalCount = pageData?.total ?? 0;
 
+  const getPageNumbers = (current: number, total: number, maxVisible = 10) => {
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+    if (end > total) {
+      end = total;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
+
   // ── Per-status counts: one lightweight query per status ──────────────────
   // We only need the `total` field — fetch page 1 with per_page=1 so the
   // payload is tiny but the backend still returns the correct `total`.
@@ -473,16 +485,16 @@ export default function PaymentsTable() {
             Prev
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => (
+          {getPageNumbers(currentPage, totalPages, 10).map((p) => (
             <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 border border-primaryColor cursor-pointer rounded ${currentPage === i + 1
+              key={p}
+              onClick={() => setCurrentPage(p)}
+              className={`px-3 py-1 border border-primaryColor cursor-pointer rounded ${currentPage === p
                   ? "bg-primaryColor text-white"
                   : "bg-white text-black"
                 }`}
             >
-              {i + 1}
+              {p}
             </button>
           ))}
 
