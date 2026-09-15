@@ -36,7 +36,10 @@ export default function LoginPage() {
 
       if (res.success) {
         localStorage.setItem("access_token", res.access_token);
-        if (res.user.user_type === "admin") {
+        if (res.user) {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        }
+        if (res.user.user_type === "admin" || res.user.user_type === "inhouse_admin") {
           toast.success("Login successful");
           router.push("/dashboard");
         } else {

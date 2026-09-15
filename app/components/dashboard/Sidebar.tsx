@@ -17,6 +17,8 @@ import { FAQIcon } from '../icon/FAQIcon';
 import { SettingsIcon } from '../icon/SettingsIcon';
 
 import { FaFolder } from 'react-icons/fa';
+import { ShieldCheck } from 'lucide-react';
+import { useGetUserProfileQuery } from '@/app/redux/features/personalInfo';
 
 interface MenuItem {
   name: string;
@@ -29,14 +31,18 @@ const FolderIcon = ({ isActive }: { isActive: boolean }) => {
     <FaFolder color={isActive ? "#4F46E5" : "#9CA3AF"} />
   );
 };
+
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const { data: profileData } = useGetUserProfileQuery();
+  const user = profileData?.data;
 
   const menuItems: MenuItem[] = [
     { name: 'Dashboard',     icon: (isActive) => <DashboardIcon isActive={isActive} />,     path: '/dashboard' },
     { name: 'Homeowners',    icon: (isActive) => <UsersIcon isActive={isActive} />,        path: '/dashboard/homeowners' },
     { name: 'Clients',       icon: (isActive) => <ClientsIcon isActive={isActive} />,       path: '/dashboard/clients' },
     { name: 'Client Reports', icon: (isActive) => <ReportsIcon isActive={isActive} />,    path: '/dashboard/client-reports' },
+    { name: 'In-House Admins', icon: (isActive) => <ShieldCheck className={isActive ? "text-indigo-600" : "text-[#9CA3AF]"} size={22} />, path: '/dashboard/inhouse-admins' },
     { name: 'Inspection Type', icon: (isActive) => <FolderIcon isActive={isActive} />, path: '/dashboard/inspection_type' },
     { name: 'Inspectors',    icon: (isActive) => <InspectorIcon isActive={isActive} />,     path: '/dashboard/inspectors' },
     { name: 'Inspections',   icon: (isActive) => <InspectionIcon isActive={isActive} />,    path: '/dashboard/inspections' },
@@ -48,6 +54,47 @@ const Sidebar: React.FC = () => {
     // { name: 'Support',       icon: (isActive) => <SupportIcon isActive={isActive} />,       path: '/dashboard/support' },
     { name: 'Settings',      icon: (isActive) => <SettingsIcon isActive={isActive} />,      path: '/dashboard/settings' },
   ];
+
+  const isMenuAllowed = (itemPath: string) => {
+    // Super admins see all menu items
+    if (!user || user.user_type === "admin" || user.user_type === "super_admin") {
+      return true;
+    }
+    const permissions: string[] = user.permissions || [];
+
+    switch (itemPath) {
+      case "/dashboard":
+        return permissions.length === 0 || permissions.some(p => p.startsWith("dashboard"));
+      case "/dashboard/homeowners":
+        return permissions.some(p => p.startsWith("users"));
+      case "/dashboard/clients":
+        return permissions.some(p => p.startsWith("clients"));
+      case "/dashboard/client-reports":
+        return permissions.some(p => p.startsWith("client_reports"));
+      case "/dashboard/inhouse-admins":
+        return false;
+      case "/dashboard/inspection_type":
+      case "/dashboard/inspections":
+        return permissions.some(p => p.startsWith("inspections"));
+      case "/dashboard/inspectors":
+        return permissions.some(p => p.startsWith("inspectors"));
+      case "/dashboard/reports":
+        return permissions.some(p => p.startsWith("reports"));
+      case "/dashboard/reviews":
+        return permissions.some(p => p.startsWith("reviews"));
+      case "/dashboard/faq":
+        return permissions.some(p => p.startsWith("support"));
+      case "/dashboard/payments":
+        return false;
+      case "/dashboard/notifications":
+      case "/dashboard/settings":
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const filteredMenuItems = menuItems.filter(item => isMenuAllowed(item.path));
 
   return (
     <aside className="w-[288px] bg-white h-screen flex flex-col select-none">
@@ -63,7 +110,7 @@ const Sidebar: React.FC = () => {
           boxShadow: '82px 0 23px 0 rgba(224,224,224,0), 53px 0 21px 0 rgba(224,224,224,0.01), 30px 0 18px 0 rgba(224,224,224,0.05), 13px 0 13px 0 rgba(224,224,224,0.09), 3px 0 7px 0 rgba(224,224,224,0.10)'
         }}
       >
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const isActive = item.path === '/dashboard' 
             ? pathname === item.path 
             : pathname.startsWith(item.path);
