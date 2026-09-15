@@ -94,6 +94,12 @@ const { data: notificationData } = useGetNotificationsQuery();
     //   keywords: ["support", "help", "support requests"],
     // },
     {
+      label: "In-House Admin Management",
+      description: "Manage in-house admins, staff roles, and permissions",
+      path: "/dashboard/inhouse-admins",
+      keywords: ["inhouse", "admin", "staff", "permissions", "roles", "suspend"],
+    },
+    {
       label: "Settings & Pricing",
       description: "Platform settings, pricing, and configuration",
       path: "/dashboard/settings",
