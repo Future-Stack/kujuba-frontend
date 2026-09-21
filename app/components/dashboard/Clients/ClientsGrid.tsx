@@ -36,7 +36,7 @@ export default function ClientsGrid() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -237,33 +237,32 @@ export default function ClientsGrid() {
             <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
               <button
                 type="button"
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-white text-indigo-600 shadow-xs"
-                    : "text-gray-500 hover:text-gray-900"
-                }`}
-                title="Grid View"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  viewMode === "list"
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === "list"
                     ? "bg-white text-indigo-600 shadow-xs"
                     : "text-gray-500 hover:text-gray-900"
-                }`}
+                  }`}
                 title="List View"
               >
                 <List className="w-4 h-4" />
               </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === "grid"
+                    ? "bg-white text-indigo-600 shadow-xs"
+                    : "text-gray-500 hover:text-gray-900"
+                  }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+
             </div>
 
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-4 py-2 rounded-lg shadow-sm transition-all cursor-pointer"
+              className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 cursor-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
             >
               <Download className="w-4 h-4" />
               <span>Export Client Data</span>
@@ -324,13 +323,12 @@ export default function ClientsGrid() {
                               </div>
                             )}
                             <span
-                              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                                isActive
+                              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${isActive
                                   ? "bg-emerald-500"
                                   : isSuspended
-                                  ? "bg-rose-500"
-                                  : "bg-amber-500"
-                              }`}
+                                    ? "bg-rose-500"
+                                    : "bg-amber-500"
+                                }`}
                             />
                           </div>
 
@@ -345,13 +343,12 @@ export default function ClientsGrid() {
                         </div>
 
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                            isActive
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isActive
                               ? "bg-emerald-50 text-emerald-600"
                               : isSuspended
-                              ? "bg-rose-50 text-rose-600"
-                              : "bg-amber-50 text-amber-600"
-                          }`}
+                                ? "bg-rose-50 text-rose-600"
+                                : "bg-amber-50 text-amber-600"
+                            }`}
                         >
                           {client.status}
                         </span>
@@ -496,13 +493,12 @@ export default function ClientsGrid() {
                                 </div>
                               )}
                               <span
-                                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${
-                                  isActive
+                                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${isActive
                                     ? "bg-emerald-500"
                                     : isSuspended
-                                    ? "bg-rose-500"
-                                    : "bg-amber-500"
-                                }`}
+                                      ? "bg-rose-500"
+                                      : "bg-amber-500"
+                                  }`}
                               />
                             </div>
                             <div>
@@ -521,13 +517,12 @@ export default function ClientsGrid() {
                         <td className="py-3.5 px-4 text-center font-bold text-indigo-600">{client.total_inspections ?? 0}</td>
                         <td className="py-3.5 px-4">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                              isActive
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isActive
                                 ? "bg-emerald-50 text-emerald-600"
                                 : isSuspended
-                                ? "bg-rose-50 text-rose-600"
-                                : "bg-amber-50 text-amber-600"
-                            }`}
+                                  ? "bg-rose-50 text-rose-600"
+                                  : "bg-amber-50 text-amber-600"
+                              }`}
                           >
                             {client.status}
                           </span>
@@ -594,40 +589,40 @@ export default function ClientsGrid() {
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
+
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
-              currentPage === 1
-                ? "opacity-40 bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-gray-700 hover:bg-indigo-50 border-gray-200 cursor-pointer"
-            }`}
+            className={`px-3 py-1 border rounded transition ${currentPage === 1
+                ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+              }`}
           >
             Prev
           </button>
 
-          {getPageNumbers(currentPage, totalPages, 7).map((p) => (
+          {getPageNumbers(currentPage, totalPages, 10).map((p) => (
             <button
               key={p}
               onClick={() => setCurrentPage(p)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
-                currentPage === p
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white text-gray-700 border border-gray-200 hover:bg-indigo-50"
-              }`}
+              className={`px-3 py-1 border rounded cursor-pointer ${currentPage === p
+                  ? "bg-primaryColor text-white"
+                  : "bg-white text-black border border-primaryColor"
+                }`}
             >
               {p}
             </button>
           ))}
 
           <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
-              currentPage === totalPages
-                ? "opacity-40 bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-gray-700 hover:bg-indigo-50 border-gray-200 cursor-pointer"
-            }`}
+            className={`px-3 py-1 border rounded transition ${currentPage === totalPages
+                ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+              }`}
           >
             Next
           </button>

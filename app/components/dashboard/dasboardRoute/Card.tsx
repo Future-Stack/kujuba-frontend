@@ -39,7 +39,7 @@ const formatValue = (value: number, isCurrency = false) => {
 export default function Card() {
   const { data: response, isLoading, isError } = useGetOverviewQuery();
   const { data: usersData } = useGetUsersQuery("homeowner");
-  const homeownersCount = usersData?.data?.data?.length ?? 0;
+  const homeownersCount = usersData?.data?.total ?? 0;
   
  if (isLoading) {
   return (

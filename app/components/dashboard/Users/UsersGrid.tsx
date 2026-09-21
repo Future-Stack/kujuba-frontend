@@ -12,26 +12,26 @@ import { useGetUserByIdQuery, useGetUsersQuery } from "@/app/redux/features/user
 export default function UserGridDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null); 
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const { data: usersData, isLoading } = useGetUsersQuery("homeowner");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
+  const { data: usersData, isLoading } = useGetUsersQuery({ user_type: "homeowner", page: currentPage });
 
   const { data: singleUserData } = useGetUserByIdQuery(
     { id: selectedId as number, user_type: "homeowner" },
     { skip: !selectedId }
   );
     
-  const users = usersData?.data?.data || [];
+  const users = usersData?.data?.data ?? [];
+  const totalPages = usersData?.data?.last_page ?? 1;
 
+  // Client-side filter & sort within the current server page
   const filteredAndSortedUsers = useMemo(() => {
     let result = [...users];
-
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
-
       result = result.filter(
         (user) =>
           user.first_name?.toLowerCase().includes(query) ||
@@ -40,28 +40,13 @@ export default function UserGridDashboard() {
           user.address?.toLowerCase().includes(query)
       );
     }
-
     result.sort((a, b) =>
       sortOrder === "newest"
         ? new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
-
     return result;
   }, [users, searchQuery, sortOrder]);
-
-  const paginatedUsers = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-
-    return filteredAndSortedUsers.slice(startIndex, endIndex);
-  }, [filteredAndSortedUsers, currentPage]);
-
-  const totalPages =
-    usersData?.data?.pagination?.last_page ??
-    (usersData?.data?.pagination?.total
-      ? Math.ceil(usersData.data.pagination.total / itemsPerPage)
-      : Math.ceil(filteredAndSortedUsers.length / itemsPerPage));
 
   const getPageNumbers = (current: number, total: number, maxVisible = 10) => {
     if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
@@ -86,7 +71,7 @@ export default function UserGridDashboard() {
       "Joining Date",
     ];
 
-    const rows = paginatedUsers.map((user) => [
+    const rows = filteredAndSortedUsers.map((user: any) => [
       `${user.first_name || ""} ${user.last_name || ""}`,
       user.email,
       user.phone,
@@ -99,7 +84,7 @@ export default function UserGridDashboard() {
 
     const csvContent =
       [headers, ...rows]
-        .map((e) => e.map((v) => `"${v ?? ""}"`).join(","))
+        .map((e) => e.map((v: any) => `"${v ?? ""}"`).join(","))
         .join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -124,7 +109,7 @@ export default function UserGridDashboard() {
               type="text"
               placeholder="Search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/60 border border-gray-100 rounded-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400 font-medium"
             />
           </div>
@@ -132,6 +117,18 @@ export default function UserGridDashboard() {
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             {/* View Mode Toggle Buttons */}
             <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
+               <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white text-blue-600 shadow-xs"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
@@ -144,21 +141,11 @@ export default function UserGridDashboard() {
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  viewMode === "list"
-                    ? "bg-white text-blue-600 shadow-xs"
-                    : "text-gray-500 hover:text-gray-900"
-                }`}
-                title="List View"
-              >
-                <List className="w-4 h-4" />
-              </button>
+             
             </div>
 
-            <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 cursor-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
+            <button onClick={handleExport} 
+            className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 cursor-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]">
               <Download className="w-4 h-4 stroke-[2.5]" />
               <span>Export Homeowner Data</span>
             </button>
@@ -280,7 +267,13 @@ export default function UserGridDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-sm">
-                  {filteredAndSortedUsers.map((user) => {
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={7} className="py-14 text-center text-gray-400 text-sm">
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : filteredAndSortedUsers.map((user) => {
                     const fullName = `${user.first_name || ""} ${user.last_name || ""}`;
                     const initials = fullName
                       .trim()

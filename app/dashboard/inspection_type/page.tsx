@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useState } from "react";
-import { Plus, Pencil, Trash2, X, ImagePlus, ImageOff } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Plus, Pencil, Trash2, X, ImagePlus, ImageOff, Search } from "lucide-react";
 import { useAddInspectionTypeMutation, useDeleteInspectionTypeMutation, useGetInspectionTypesQuery, useUpdateInspectionTypeMutation } from "@/app/redux/features/inspectiontypeApi";
 import { toast } from "react-toastify";
 
@@ -35,6 +35,10 @@ export default function InspectionType() {
   const [formStatus, setFormStatus] = useState<number>(1);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading, error,refetch } = useGetInspectionTypesQuery();
 const [deleteInspection] = useDeleteInspectionTypeMutation();
@@ -153,9 +157,31 @@ const confirmDelete = async () => {
   }
 };
 
+  // Filtered + paginated data
+  const allItems: any[] = useMemo(() => {
+    const list: any[] = data?.data ?? [];
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(
+      (item: any) =>
+        (item.title || "").toLowerCase().includes(q) ||
+        (item.short_desc || "").toLowerCase().includes(q)
+    );
+  }, [data, searchQuery]);
 
+  const totalPages = Math.max(1, Math.ceil(allItems.length / ITEMS_PER_PAGE));
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return allItems.slice(start, start + ITEMS_PER_PAGE);
+  }, [allItems, currentPage]);
 
-
+  const getPageNumbers = (current: number, total: number, maxVisible = 7) => {
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+    if (end > total) { end = total; start = Math.max(1, end - maxVisible + 1); }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   return (
     <div>
@@ -169,13 +195,26 @@ const confirmDelete = async () => {
             Manage inspection types, pricing, and visibility
           </p>
         </div>
-        <button
-          onClick={openCreateModal}
-          className="flex items-center gap-2 bg-primaryColor text-white font-sora font-semibold text-sm px-5 py-3 rounded-[12px] hover:opacity-90 transition-opacity cursor-pointer"
-        >
-          <Plus size={18} />
-          Add Inspection Type
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search types..."
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+              className="pl-9 pr-4 py-2.5 text-sm border border-[#E7E8FF] rounded-[10px] outline-none focus:border-primaryColor transition-colors w-52"
+            />
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="flex items-center gap-2 bg-primaryColor text-white font-sora font-semibold text-sm px-5 py-3 rounded-[12px] hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            <Plus size={18} />
+            Add Inspection Type
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -191,17 +230,19 @@ const confirmDelete = async () => {
             </tr>
           </thead>
         <tbody>
-  {data?.data?.length === 0 ? (
+  {isLoading ? (
+    <tr><td colSpan={5} className="px-5 py-14 text-center text-[#B5BCC8] font-roboto">Loading...</td></tr>
+  ) : paginatedItems.length === 0 ? (
     <tr>
       <td colSpan={5} className="px-5 py-14 text-center">
         <ImageOff className="mx-auto mb-3 text-[#B5BCC8]" size={32} />
         <p className="text-[#B5BCC8] font-roboto">
-          No inspection types yet. Add your first one.
+          {searchQuery ? "No results match your search." : "No inspection types yet. Add your first one."}
         </p>
       </td>
     </tr>
   ) : (
-    data?.data?.map((item: any) => (
+    paginatedItems.map((item: any) => (
       <tr key={item.id} className="border-t border-[#E7E8FF]">
 
         {/* IMAGE */}
@@ -280,6 +321,47 @@ const confirmDelete = async () => {
 </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
+              currentPage === 1
+                ? "opacity-40 bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-blue-50 border-gray-200 cursor-pointer"
+            }`}
+          >
+            Prev
+          </button>
+          {getPageNumbers(currentPage, totalPages).map((p) => (
+            <button
+              key={p}
+              onClick={() => setCurrentPage(p)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                currentPage === p
+                  ? "bg-primaryColor text-white shadow-sm"
+                  : "bg-white text-gray-700 border border-gray-200 hover:bg-blue-50"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
+              currentPage === totalPages
+                ? "opacity-40 bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-blue-50 border-gray-200 cursor-pointer"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Add / Edit modal */}
       {isModalOpen && (

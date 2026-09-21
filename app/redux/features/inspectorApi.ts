@@ -52,14 +52,52 @@ export interface InspectorStats {
   suspended_growth_percentage: number;
 }
 
+export interface InspectorEarning {
+  id: number;
+  name: string;
+  email: string;
+  image: string | null;
+  status: string;
+  stripe_connected: boolean;
+  total_earnings?: number;
+  total_earnings_formatted?: string;
+  total_earned?: number;
+  total_earned_formatted?: string;
+  paid_amount?: number;
+  paid_amount_formatted?: string;
+  total_paid?: number;
+  total_paid_formatted?: string;
+  pending_balance?: number;
+  pending_balance_formatted?: string;
+  total_pending?: number;
+  total_pending_formatted?: string;
+  payout_status?: string; // e.g. "Paid", "Pending", "Partial"
+  latest_payout_status?: string;
+}
+
+export interface PayoutHistoryItem {
+  id: number;
+  booking_id: number;
+  property_address: string;
+  inspection_date: string;
+  amount: number;
+  amount_formatted: string;
+  status: string; // "paid" | "pending"
+  paid_at: string | null;
+  created_at: string;
+}
+
 export const inspectorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
     // GET ALL INSPECTORS
-getInspectors: builder.query<any, { page?: number } | void>({
+getInspectors: builder.query<any, { page?: number; status?: string } | void>({
   query: (params) => ({
     url: "/admin/inspectors",
-    params: { page: params?.page ?? 1 },
+    params: {
+      page: params?.page ?? 1,
+      ...(params?.status ? { status: params.status } : {}),
+    },
   }),
   providesTags: ["Inspector"],
 }),
@@ -119,6 +157,18 @@ getInspectorStats: builder.query<{ success: boolean; data: InspectorStats }, str
       }),
       invalidatesTags: ["Inspector"],
     }),
+
+    // EARNINGS LIST
+    getInspectorEarnings: builder.query<any, void>({
+      query: () => ({ url: "/admin/inspectors/earnings" }),
+      providesTags: ["Inspector"],
+    }),
+
+    // PAYOUT HISTORY (per inspector)
+    getInspectorPayoutHistory: builder.query<any, number>({
+      query: (id) => ({ url: `/admin/inspectors/${id}/payout-history` }),
+      providesTags: ["Inspector"],
+    }),
   }),
 });
 
@@ -130,4 +180,6 @@ export const {
   useRejectInspectorMutation,
   useSuspendInspectorMutation,
   useReactivateInspectorMutation,
+  useGetInspectorEarningsQuery,
+  useGetInspectorPayoutHistoryQuery,
 } = inspectorApi;

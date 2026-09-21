@@ -4,12 +4,19 @@ import { baseApi } from "../api/baseApi";
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
-    getUsers: builder.query({
-      query: (user_type?: string) => ({
-        url: "/admin/users",
-        method: "GET",
-        params: user_type ? { user_type } : undefined,
-      }),
+    getUsers: builder.query<any, { user_type?: string; page?: number } | string | void>({
+      query: (arg) => {
+        const user_type = typeof arg === "string" ? arg : arg?.user_type;
+        const page = typeof arg === "object" && arg !== null ? (arg as any).page : undefined;
+        return {
+          url: "/admin/users",
+          method: "GET",
+          params: {
+            ...(user_type ? { user_type } : {}),
+            ...(page ? { page } : {}),
+          },
+        };
+      },
       providesTags: ["Users"],
     }),
 

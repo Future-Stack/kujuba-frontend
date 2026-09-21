@@ -74,7 +74,12 @@ export default function SendEmailModal({
       toast.success(res?.message || "Client report email sent successfully!");
       onClose();
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to send report email");
+      if (error?.data?.errors && typeof error.data.errors === "object") {
+        const msg = Object.values(error.data.errors).flat().join(" ");
+        toast.error(msg || "Failed to send report email");
+      } else {
+        toast.error(error?.data?.message || error?.message || "Failed to send report email");
+      }
     }
   };
 

@@ -10,8 +10,6 @@ import {
   UserX,
   MoreVertical,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
   MapPin,
   Mail,
   Phone,
@@ -104,11 +102,10 @@ export default function InHouseAdminGrid() {
                     setStatusFilter(st);
                     setCurrentPage(1);
                   }}
-                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
-                    statusFilter === st
+                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${statusFilter === st
                       ? "bg-white text-indigo-600 shadow-xs"
                       : "text-gray-600 hover:text-gray-900"
-                  }`}
+                    }`}
                 >
                   {st}
                 </button>
@@ -119,7 +116,8 @@ export default function InHouseAdminGrid() {
           {/* Add Admin Action */}
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="w-full lg:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 cursor-pointer rounded-sm shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
+            // className="w-full lg:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             <Plus className="w-4 h-4" /> Add In-House Admin
           </button>
@@ -184,7 +182,7 @@ export default function InHouseAdminGrid() {
                             <div className="font-bold text-gray-900">
                               {admin.first_name} {admin.last_name}
                             </div>
-                            <div className="text-xs text-indigo-600 font-semibold mt-0.5">
+                            <div className="text-xs text-indigo-500 font-semibold mt-0.5">
                               {admin.user_type === "inhouse_admin" ? "In-House Admin" : admin.user_type}
                             </div>
                           </div>
@@ -222,16 +220,14 @@ export default function InHouseAdminGrid() {
                       {/* Status */}
                       <td className="py-4 px-4">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
-                            admin.status === "active"
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${admin.status === "active"
                               ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
                               : "bg-rose-50 text-rose-600 border border-rose-200"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              admin.status === "active" ? "bg-emerald-500" : "bg-rose-500"
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${admin.status === "active" ? "bg-emerald-500" : "bg-rose-500"
+                              }`}
                           />
                           <span className="capitalize">{admin.status}</span>
                         </span>
@@ -240,12 +236,14 @@ export default function InHouseAdminGrid() {
                       {/* Permissions */}
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg border border-indigo-100">
+                          <span className="px-2.5 py-1 bg-indigo-50 text-indigo-500 font-bold text-xs rounded-lg border border-indigo-100">
                             {permissionsCount} Assigned
                           </span>
                           <button
                             onClick={() => handleOpenPermissions(admin)}
-                            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+
+                            // className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
                           >
                             Edit
                           </button>
@@ -276,11 +274,10 @@ export default function InHouseAdminGrid() {
                               <button
                                 onClick={() => handleSuspendToggle(admin)}
                                 disabled={isSuspending || isUnsuspending}
-                                className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer ${
-                                  admin.status === "active"
+                                className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer ${admin.status === "active"
                                     ? "text-rose-600 hover:bg-rose-50"
                                     : "text-emerald-600 hover:bg-emerald-50"
-                                }`}
+                                  }`}
                               >
                                 {admin.status === "active" ? (
                                   <>
@@ -306,28 +303,59 @@ export default function InHouseAdminGrid() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100 text-xs font-semibold text-gray-500">
-            <div>
-              Showing page {currentPage} of {totalPages}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+          <div className="flex items-center justify-center gap-2 mt-6">
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 border rounded transition ${currentPage === 1
+                  ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                  : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+                }`}
+            >
+              Prev
+            </button>
+
+            {Array.from(
+              { length: Math.min(totalPages, 10) },
+              (_, i) => {
+                const maxVisible = 7;
+                let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                let end = start + maxVisible - 1;
+                if (end > totalPages) { end = totalPages; start = Math.max(1, end - maxVisible + 1); }
+                return start + i <= end ? start + i : null;
+              }
+            )
+              .filter(Boolean)
+              .map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setCurrentPage(p!)}
+                  className={`px-3 py-1 border rounded cursor-pointer ${currentPage === p
+                      ? "bg-primaryColor text-white"
+                      : "bg-white text-black border border-primaryColor"
+                    }`}
+                >
+                  {p}
+                </button>
+              ))}
+
+
+            <button
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 border rounded transition ${currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                  : "cursor-pointer hover:bg-blue-50 text-gray-500 border-primaryColor"
+                }`}
+            >
+              Next
+            </button>
           </div>
         )}
+
       </div>
 
       {/* Create Admin Modal */}
