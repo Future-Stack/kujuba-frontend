@@ -303,9 +303,7 @@ export default function ReportsTable() {
 
       {/* ── Table ── */}
       {busy ? (
-        <div className="w-full text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold text-sm"><TableSkeleton/></p>
-        </div>
+        <TableSkeleton />
       ) : filteredReports.length > 0 ? (
         <div className="w-full overflow-x-auto no-scrollbar">
           <div className="min-w-[1300px] border border-gray-100 rounded-2xl overflow-hidden">
@@ -342,7 +340,9 @@ export default function ReportsTable() {
                     <td className="py- px-4">
                       <button
                         onClick={() => setSelectedReport(row)}
-                        className="text-primaryColor font-medium text-sm leading-5 hover:underline cursor-pointer"
+                                                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+
+                        // className="text-primaryColor font-medium text-sm leading-5 hover:underline cursor-pointer"
                       >
                         View Details
                       </button>

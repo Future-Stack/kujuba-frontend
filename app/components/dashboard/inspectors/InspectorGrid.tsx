@@ -104,13 +104,23 @@ export default function InspectorGrid() {
  
   const [selectedInspector, setSelectedInspector] = useState<InspectorCard | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
-  const { data, isLoading, isError } = useGetInspectorsQuery({ page: currentPage });
+  // Derive active tab from URL
+  const activeTab = useMemo<TabType>(() => {
+    const tab = searchParams.get("tab") ?? "";
+    return paramToTab[tab] ?? "All";
+  }, [searchParams]);
+
+  // Build status param for API: undefined means "all"
+  const statusParam = activeTab === "All" ? undefined : tabToParam[activeTab];
+
+  // Pass BOTH page AND status to the API so server handles filtering
+  const { data, isLoading, isError } = useGetInspectorsQuery({
+    page: currentPage,
+    ...(statusParam ? { status: statusParam } : {}),
+  });
   const [approveInspector, { isLoading: approvingId }] = useApproveInspectorMutation();
-
-
-
 
   // Map raw API data → InspectorCard[]
   const inspectors: InspectorCard[] = useMemo(
@@ -118,41 +128,25 @@ export default function InspectorGrid() {
     [data]
   );
 
-
-  const activeTab = useMemo<TabType>(() => {
-    const tab = searchParams.get("tab") ?? "";
-    return paramToTab[tab] ?? "All";
-  }, [searchParams]);
-
   const handleTabChange = (tab: TabType) => {
     const param = tabToParam[tab];
+    setCurrentPage(1); // reset to page 1 on tab change
     router.push(param ? `?tab=${param}` : "?");
   };
 
-  // ── counts (derived from fetched data) ────────────────────────────────────
-  const counts = useMemo(() => ({
-    All:              inspectors.length,
-    Active:           inspectors.filter((i) => i.status === "Active").length,
-    "Pending Review": inspectors.filter((i) => i.status === "Pending").length,
-    Suspended:        inspectors.filter((i) => i.status === "Suspended").length,
-    Rejected:         inspectors.filter((i) => i.status === "Rejected").length,
-  }), [inspectors]);
-
+  // Tab counts come from the API's pagination totals per status
+  // For active tab we use pagination.total; others show null until visited
   const tabs: TabItem[] = [
-    {
-      name: "All",
-      count: data?.data?.pagination?.total ?? 0,
-    },
-    { name: "Active", count: inspectors.filter(i => i.status === "Active").length,           badge: "bg-emerald-500 text-white" },
-    { name: "Pending", count: counts["Pending Review"], badge: "bg-amber-400 text-white" },
-    { name: "Suspended",      count: counts.Suspended,         badge: "bg-rose-400 text-white" },
-    { name: "Rejected",       count: counts.Rejected,          badge: "bg-red-400 text-white" },
+    { name: "All",       count: activeTab === "All"       ? (data?.data?.pagination?.total ?? null) : null },
+    { name: "Active",    count: activeTab === "Active"    ? (data?.data?.pagination?.total ?? null) : null, badge: "bg-emerald-500 text-white" },
+    { name: "Pending",   count: activeTab === "Pending"   ? (data?.data?.pagination?.total ?? null) : null, badge: "bg-amber-400 text-white" },
+    { name: "Suspended", count: activeTab === "Suspended" ? (data?.data?.pagination?.total ?? null) : null, badge: "bg-rose-400 text-white" },
+    { name: "Rejected",  count: activeTab === "Rejected"  ? (data?.data?.pagination?.total ?? null) : null, badge: "bg-red-400 text-white" },
   ];
 
-
+  // Client-side search + sort (within current page)
   const filteredAndSortedInspectors = useMemo(() => {
     let result = [...inspectors];
-    if (activeTab !== "All") result = result.filter((i) => i.status === activeTab);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -166,16 +160,16 @@ export default function InspectorGrid() {
       sortOrder === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
     );
     return result;
-  }, [inspectors, activeTab, searchQuery, sortOrder]);
+  }, [inspectors, searchQuery, sortOrder]);
 
   const paginatedInspectors = filteredAndSortedInspectors;
+
+  // Use server-provided last_page for pagination
   const totalPages =
     data?.data?.pagination?.last_page ??
     (data?.data?.pagination?.total
-      ? Math.ceil(data.data.pagination.total / 10)
-      : data?.data?.pagination?.next_page
-      ? currentPage + 1
-      : Math.max(1, Math.ceil(filteredAndSortedInspectors.length / 10)));
+      ? Math.ceil(data.data.pagination.total / (data?.data?.pagination?.per_page ?? 10))
+      : 1);
 
   const getPageNumbers = (current: number, total: number, maxVisible = 10) => {
     if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
@@ -270,18 +264,6 @@ export default function InspectorGrid() {
             <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
               <button
                 type="button"
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-white text-blue-600 shadow-xs"
-                    : "text-gray-500 hover:text-gray-900"
-                }`}
-                title="Grid View"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
                 onClick={() => setViewMode("list")}
                 className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                   viewMode === "list"
@@ -292,6 +274,19 @@ export default function InspectorGrid() {
               >
                 <List className="w-4 h-4" />
               </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-blue-600 shadow-xs"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              
             </div>
         
             <button onClick={handleExport} className="flex items-center gap-2 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-sm shadow-md shadow-blue-100 transition-all cursor-pointer active:scale-[0.98]">

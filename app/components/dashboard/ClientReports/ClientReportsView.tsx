@@ -24,6 +24,9 @@ import {
   ClientReportItem,
 } from "@/app/redux/features/clientReportApi";
 import SendEmailModal from "./SendEmailModal";
+import ScheduleReportModal from "./ScheduleReportModal";
+import SavedSchedulesModal from "./SavedSchedulesModal";
+import { ClientReportScheduleItem } from "@/app/redux/features/clientReportApi";
 
 export default function ClientReportsView() {
   const [selectedClientId, setSelectedClientId] = useState<string>("all");
@@ -32,6 +35,9 @@ export default function ClientReportsView() {
   const [startDate, setStartDate] = useState<string>("2026-09-01");
   const [endDate, setEndDate] = useState<string>("2026-09-13");
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState<boolean>(false);
+  const [isSavedSchedulesModalOpen, setIsSavedSchedulesModalOpen] = useState<boolean>(false);
+  const [editingSchedule, setEditingSchedule] = useState<ClientReportScheduleItem | null>(null);
 
   // RTK Query: Clients list
   const { data: clientsListRes, isLoading: loadingClients } =
@@ -289,12 +295,31 @@ export default function ClientReportsView() {
         </div>
 
         {/* Action Buttons Bar */}
-        <div className="flex items-center justify-end gap-3 mt-5 pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-3 mt-5 pt-4 border-t border-gray-100 flex-wrap">
+          <button
+            onClick={() => setIsSavedSchedulesModalOpen(true)}
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-xs px-4 py-2.5 rounded-lg border border-gray-200 transition-all cursor-pointer"
+          >
+            <Clock className="w-4 h-4 text-indigo-600" />
+            <span>Saved Schedules</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setEditingSchedule(null);
+              setIsScheduleModalOpen(true);
+            }}
+            className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs px-4 py-2.5 rounded-lg border border-indigo-200 transition-all cursor-pointer"
+          >
+            <Calendar className="w-4 h-4 text-indigo-600" />
+            <span>Schedule Report</span>
+          </button>
+
           <button
             onClick={() => setIsEmailModalOpen(true)}
             className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs px-4 py-2.5 rounded-lg border border-indigo-200 transition-all cursor-pointer"
           >
-            <Mail className="w-4 h-4" />
+            <Mail className="w-4 h-4 text-indigo-600" />
             <span>Send Email Report</span>
           </button>
 
@@ -505,6 +530,30 @@ export default function ClientReportsView() {
         endDate={endDate}
         status={statusFilter}
         defaultEmail={currentClient?.email || ""}
+      />
+
+      {/* Schedule Report Modal */}
+      <ScheduleReportModal
+        open={isScheduleModalOpen}
+        onClose={() => {
+          setIsScheduleModalOpen(false);
+          setEditingSchedule(null);
+        }}
+        clientId={selectedClientId === "all" ? undefined : selectedClientId}
+        defaultFrequency={frequency}
+        defaultEmail={currentClient?.email || ""}
+        clientName={currentClient?.company_name || currentClient?.name || ""}
+        editingSchedule={editingSchedule}
+      />
+
+      {/* Saved Schedules Manager Modal */}
+      <SavedSchedulesModal
+        open={isSavedSchedulesModalOpen}
+        onClose={() => setIsSavedSchedulesModalOpen(false)}
+        onEditSchedule={(schedule) => {
+          setEditingSchedule(schedule);
+          setIsScheduleModalOpen(true);
+        }}
       />
     </div>
   );

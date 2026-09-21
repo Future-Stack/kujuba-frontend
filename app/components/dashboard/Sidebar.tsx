@@ -45,9 +45,10 @@ const Sidebar: React.FC = () => {
     { name: 'In-House Admins', icon: (isActive) => <ShieldCheck className={isActive ? "text-indigo-600" : "text-[#9CA3AF]"} size={22} />, path: '/dashboard/inhouse-admins' },
     { name: 'Inspection Type', icon: (isActive) => <FolderIcon isActive={isActive} />, path: '/dashboard/inspection_type' },
     { name: 'Inspectors',    icon: (isActive) => <InspectorIcon isActive={isActive} />,     path: '/dashboard/inspectors' },
+    { name: 'Inspector Earnings', icon: (isActive) => <PaymentsIcon isActive={isActive} />, path: '/dashboard/inspector-earnings' },
     { name: 'Inspections',   icon: (isActive) => <InspectionIcon isActive={isActive} />,    path: '/dashboard/inspections' },
-    { name: 'Payments',      icon: (isActive) => <PaymentsIcon isActive={isActive} />,      path: '/dashboard/payments' },
-    { name: 'Reports',       icon: (isActive) => <ReportsIcon isActive={isActive} />,       path: '/dashboard/reports' },
+    { name: 'Homeowner Payments',      icon: (isActive) => <PaymentsIcon isActive={isActive} />,      path: '/dashboard/payments' },
+    { name: 'Inspection Reports',       icon: (isActive) => <ReportsIcon isActive={isActive} />,       path: '/dashboard/reports' },
     { name: 'Reviews',       icon: (isActive) => <ReviewsIcon isActive={isActive} />,       path: '/dashboard/reviews' },
     { name: 'Notifications', icon: (isActive) => <NotificationsIcon isActive={isActive} />, path: '/dashboard/notifications' },
     { name: 'FAQ',           icon: (isActive) => <FAQIcon isActive={isActive} />,           path: '/dashboard/faq' },
@@ -77,6 +78,7 @@ const Sidebar: React.FC = () => {
       case "/dashboard/inspections":
         return permissions.some(p => p.startsWith("inspections"));
       case "/dashboard/inspectors":
+      case "/dashboard/inspector-earnings":
         return permissions.some(p => p.startsWith("inspectors"));
       case "/dashboard/reports":
         return permissions.some(p => p.startsWith("reports"));
