@@ -204,7 +204,7 @@ const confirmDelete = async () => {
               placeholder="Search types..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-              className="pl-9 pr-4 py-2.5 text-sm border border-[#E7E8FF] rounded-[10px] outline-none focus:border-primaryColor transition-colors w-52"
+              className="pl-9 pr-4 py-2.5 text-sm text-black border border-[#E7E8FF] rounded-[10px] outline-none focus:border-primaryColor transition-colors w-52"
             />
           </div>
           <button
