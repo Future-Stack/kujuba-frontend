@@ -161,7 +161,11 @@ const handleLogout = async () => {
 
 
 const notifications = notificationData?.data || [];
-const notificationCount = notificationData?.total || 0;
+const unreadCount =
+  typeof notificationData?.unread_count === "number"
+    ? notificationData.unread_count
+    : notifications.filter((n: any) => !n.is_read).length;
+
   return (
     <>
       <header className="h-20 -white flex items-center justify-between px-4 md:px-8 font-sans w-full sticky top-0 z-30">
@@ -251,8 +255,11 @@ const notificationCount = notificationData?.total || 0;
   <path d="M23.3333 19.8333H23.1187C23.2568 19.4597 23.3295 19.065 23.3333 18.6666V12.8333C23.3294 10.7663 22.6402 8.75902 21.3735 7.12565C20.1068 5.49228 18.3343 4.32508 16.3333 3.80679V3.49996C16.3333 2.88112 16.0875 2.28763 15.6499 1.85004C15.2123 1.41246 14.6188 1.16663 14 1.16663C13.3812 1.16663 12.7877 1.41246 12.3501 1.85004C11.9125 2.28763 11.6667 2.88112 11.6667 3.49996V3.80679C9.66574 4.32508 7.89317 5.49228 6.6265 7.12565C5.35983 8.75902 4.67058 10.7663 4.66667 12.8333V18.6666C4.67053 19.065 4.74316 19.4597 4.88133 19.8333H4.66667C4.35725 19.8333 4.0605 19.9562 3.84171 20.175C3.62292 20.3938 3.5 20.6905 3.5 21C3.5 21.3094 3.62292 21.6061 3.84171 21.8249C4.0605 22.0437 4.35725 22.1666 4.66667 22.1666H23.3333C23.6428 22.1666 23.9395 22.0437 24.1583 21.8249C24.3771 21.6061 24.5 21.3094 24.5 21C24.5 20.6905 24.3771 20.3938 24.1583 20.175C23.9395 19.9562 23.6428 19.8333 23.3333 19.8333Z" fill="#5C6470"/>
    <path d="M9.98242 24.5C10.3868 25.2088 10.9715 25.7981 11.6771 26.2079C12.3828 26.6178 13.1844 26.8337 14.0004 26.8337C14.8165 26.8337 15.618 26.6178 16.3237 26.2079C17.0294 25.7981 17.614 25.2088 18.0184 24.5H9.98242Z" fill="#5C6470"/>
  </svg>
-           <span className="absolute -top-2 -right-2 bg-primaryColor text-white font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center border-2 border-white">           {notificationCount}
-          </span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-primaryColor text-white font-bold text-[8px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+              {unreadCount}
+            </span>
+          )}
         </button>
 
           <div className="h-8 w-[1px] bg-slate-100 hidden sm:block" />
